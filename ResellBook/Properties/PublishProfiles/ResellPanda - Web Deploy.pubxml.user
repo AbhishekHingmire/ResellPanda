@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <History>False|2025-09-29T13:04:26.4261795Z||;False|2025-09-29T18:31:57.6651568+05:30||;False|2025-09-29T18:26:54.6816761+05:30||;False|2025-09-29T18:22:30.1789748+05:30||;False|2025-09-29T18:18:57.1969092+05:30||;False|2025-09-29T18:16:35.5999335+05:30||;False|2025-09-29T18:12:07.4208553+05:30||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Server=tcp:resellpandaserver.database.windows.net,1433%3bInitial Catalog=ResellPanda%3bPersist Security Info=False%3bUser ID=resellpanda%3bPassword=Panda%402001%3bMultipleActiveResultSets=False%3bEncrypt=True%3bTrustServerCertificate=False%3bConnection Timeout=30%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

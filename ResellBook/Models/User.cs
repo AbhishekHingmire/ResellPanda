@@ -7,13 +7,13 @@ namespace ResellBook.Models
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         [Required]
-        public string Email { get; set; }
+        public required string Email { get; set; }
         [Required]
-        public string PasswordHash { get; set; }
+        public required string PasswordHash { get; set; }
         public bool IsEmailVerified { get; set; } = false;
-        public string EmailVerificationCode { get; set; }
+        public required string EmailVerificationCode { get; set; }
         public DateTime? VerificationCodeExpiry { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace ResellBook.Services
             message.Body = new TextPart("plain") { Text = body };
 
             using var client = new SmtpClient(); // MailKit's SmtpClient
-            await client.ConnectAsync(_config["SMTP:Host"], int.Parse(_config["SMTP:Port"]), SecureSocketOptions.StartTls);
+            await client.ConnectAsync(_config["SMTP:Host"], int.Parse(_config["SMTP:Port"] ?? "587"), SecureSocketOptions.StartTls);
             await client.AuthenticateAsync(_config["SMTP:User"], _config["SMTP:Pass"]);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
