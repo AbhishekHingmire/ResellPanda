@@ -43,16 +43,16 @@ public class AuthController : ControllerBase
          $@"
 Hello {user.Name},
 
-Welcome to **ResellPanda**! To complete your registration, please verify your email address by using the OTP below:
+Welcome to ResellPanda. To complete your registration, please verify your email address by using the OTP below.
 
-**Your OTP:** {user.EmailVerificationCode}
+Your OTP: {user.EmailVerificationCode}
 
 This OTP is valid for 10 minutes. Please do not share it with anyone.
 
-If you did not request this, please ignore this email.
+If you did not request this, please ignore this email!
 
 Thank you,  
-The ResellPanda Team
+Team ResellPanda
 "
      );
 
