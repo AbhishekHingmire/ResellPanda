@@ -172,9 +172,9 @@ public class AuthController : ControllerBase
         string body = type == VerificationType.EmailVerification
             ? $@"Hello {user.Name},
 
-Welcome to **ResellPanda**! Please verify your email using the OTP below:
+Welcome to ResellPanda. Please verify your email using the OTP below.
 
-**Your OTP:** {otp}
+Your OTP: {otp}
 
 This OTP is valid for 10 minutes."
             : $@"Hello {user.Name},
@@ -182,7 +182,7 @@ This OTP is valid for 10 minutes."
 We received a request to reset your password.  
 Use the OTP below to reset your password:
 
-**Your OTP:** {otp}
+Your OTP: {otp}
 
 This OTP is valid for 10 minutes.";
 
