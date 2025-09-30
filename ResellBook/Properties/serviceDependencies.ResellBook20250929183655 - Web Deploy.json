@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection"
+    },
+    "apis1": {
+      "ignored": "true",
+      "type": "apis.azure"
+    },
+    "mssql2": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/ResellBook20250929183655/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsResellPandaCon_D43D31E950",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/resellbookdbserver2001/databases/ResellBook_db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:ResellPandaCon"
+    }
+  }
+}
