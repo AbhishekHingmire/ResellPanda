@@ -1,3 +1,8 @@
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\Migrations\20250930140824_InitialCreate.cs
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\Migrations\20250930140824_InitialCreate.Designer.cs
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\Migrations\20250930144032_my-migr2.cs
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\Migrations\20250930144032_my-migr2.Designer.cs
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\Migrations\AppDbContextModelSnapshot.cs
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\ResellBook.exe
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\appsettings.Development.json
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\appsettings.json
