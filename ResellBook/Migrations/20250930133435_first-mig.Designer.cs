@@ -12,8 +12,8 @@ using ResellBook.Data;
 namespace ResellBook.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250930061734_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250930133435_first-mig")]
+    partial class firstmig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
