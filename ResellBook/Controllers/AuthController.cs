@@ -30,8 +30,8 @@ public class AuthController : ControllerBase
             return BadRequest("Email is required.");
         if (string.IsNullOrWhiteSpace(request.Password))
             return BadRequest("Password is required.");
-        if (request.Password.Length < 6)
-            return BadRequest("Password must be at least 6 characters.");
+        if (request.Password.Length < 4)
+            return BadRequest("Password must be at least 4 characters.");
 
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             return BadRequest("Email already exists.");
