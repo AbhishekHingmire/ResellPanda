@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
-
+using ResellBook.Models;
 using System.ComponentModel.DataAnnotations;
 
 [ApiController]
@@ -160,9 +160,9 @@ public class BooksController : ControllerBase
 public class BookCreateDto
 {
     [Required] public Guid UserId { get; set; }
-    [Required] public string BookName { get; set; }
+    [Required] public required string BookName { get; set; }
     public string? AuthorOrPublication { get; set; }
-    [Required] public string Category { get; set; }
+    [Required] public required string Category { get; set; }
     public string? SubCategory { get; set; }
     [Required] public decimal SellingPrice { get; set; }
 

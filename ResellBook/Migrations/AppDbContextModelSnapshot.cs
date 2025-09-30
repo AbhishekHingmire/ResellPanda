@@ -22,7 +22,7 @@ namespace ResellBook.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Book", b =>
+            modelBuilder.Entity("ResellBook.Models.Book", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -141,7 +141,7 @@ namespace ResellBook.Migrations
                     b.ToTable("UserVerifications");
                 });
 
-            modelBuilder.Entity("Book", b =>
+            modelBuilder.Entity("ResellBook.Models.Book", b =>
                 {
                     b.HasOne("ResellBook.Models.User", "User")
                         .WithMany()

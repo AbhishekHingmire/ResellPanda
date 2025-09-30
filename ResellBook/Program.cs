@@ -23,22 +23,46 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Apply database migrations with error handling
+// Apply database migrations with enhanced error handling
 try 
 {
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        
+        logger.LogInformation("Starting database migration check...");
+        
         if (dbContext.Database.IsSqlServer())
         {
-            dbContext.Database.Migrate();
+            logger.LogInformation("SQL Server detected, checking database connection...");
+            
+            // Test connection first
+            var canConnect = dbContext.Database.CanConnect();
+            logger.LogInformation($"Database connection test: {canConnect}");
+            
+            if (canConnect)
+            {
+                logger.LogInformation("Connection successful, applying migrations...");
+                dbContext.Database.Migrate();
+                logger.LogInformation("Database migration completed successfully!");
+            }
+            else
+            {
+                logger.LogWarning("Could not connect to database. Migration skipped.");
+            }
+        }
+        else
+        {
+            logger.LogInformation("Not using SQL Server - migration skipped.");
         }
     }
 }
 catch (Exception ex)
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "An error occurred during database migration");
+    logger.LogError(ex, "Database migration failed: {ErrorMessage}", ex.Message);
+    logger.LogWarning("App will continue without migration - manual database setup may be required");
     // Don't throw - allow app to start even if migration fails
 }
 // Configure the HTTP request pipeline.

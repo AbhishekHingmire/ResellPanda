@@ -21,6 +21,6 @@ namespace ResellBook.Models
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow;
 
-        public virtual User User { get; set; }  // Navigation property
+        public virtual User User { get; set; } = null!;  // Navigation property
     }
 }
