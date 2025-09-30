@@ -295,7 +295,7 @@ In **PowerShell**:
 
 ```powershell
 # Create a zip file
-Compress-Archive -Path "bin\Release\net8.0\publish\*" -DestinationPath "myapp.zip" -Force
+Compress-Archive -Path "bin\Release\net8.0\publish\*" -DestinationPath ".\myapp.zip" -Force
 
 # Check it was created
 dir myapp.zip
@@ -306,11 +306,7 @@ Replace with your actual app name and resource group:
 
 ```bash
 # Upload your app to Azure
-az webapp deploy \
-    --resource-group [YOUR_RESOURCE_GROUP] \
-    --name [YOUR_APP_NAME] \
-    --src-path "myapp.zip" \
-    --type zip
+az webapp deploy --resource-group resell-panda-rg --name ResellBook20250929183655 --src-path ".\myapp.zip" --type zip
 ```
 > Wait for "Deployment has completed successfully"
 
