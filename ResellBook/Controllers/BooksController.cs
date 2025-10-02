@@ -116,7 +116,7 @@ public class BooksController : ControllerBase
     }
 
 [HttpGet("ViewAll/{userId}")]
-public async Task<IActionResult> ViewAll(int userId)
+public async Task<IActionResult> ViewAll(Guid userId)
 {
     // Get current user location
     var currentUserLocation = await _context.UserLocations

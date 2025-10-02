@@ -5,7 +5,7 @@
 namespace ResellBook.Migrations
 {
     /// <inheritdoc />
-    public partial class mymigr2 : Migration
+    public partial class first : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
