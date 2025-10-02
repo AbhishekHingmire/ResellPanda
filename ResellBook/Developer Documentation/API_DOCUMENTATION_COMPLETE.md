@@ -400,7 +400,7 @@ ExistingImages: string[] (Paths of existing images to keep)
 ---
 
 #### **3. View All Books**
-- **Endpoint:** `GET /api/Books/ViewAll`
+- **Endpoint:** `GET /api/Books/ViewAll/userId`
 - **Purpose:** Retrieve all book listings
 - **Authentication:** None required
 
@@ -418,7 +418,8 @@ ExistingImages: string[] (Paths of existing images to keep)
       "uploads/books/image1.jpg",
       "uploads/books/image2.jpg"
     ],
-    "CreatedAt": "2025-09-30T10:30:00Z"
+    "CreatedAt": "2025-09-30T10:30:00Z",
+    "distance" : "100m"
   }
 ]
 ```
@@ -433,7 +434,8 @@ data class Book(
     val SubCategory: String?,
     val SellingPrice: Double,
     val Images: List<String>,
-    val CreatedAt: String
+    val CreatedAt: String,
+    val Distance: Double
 )
 
 @GET("api/Books/ViewAll")
