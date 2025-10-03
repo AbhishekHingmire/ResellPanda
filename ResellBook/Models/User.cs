@@ -12,7 +12,7 @@ namespace ResellBook.Models
 
         [Required]
         public required string Email { get; set; }
-
+        public string? Phone { get; set; }
         [Required]
         public required string PasswordHash { get; set; }
 

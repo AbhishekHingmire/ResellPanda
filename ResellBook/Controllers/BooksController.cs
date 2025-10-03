@@ -172,8 +172,48 @@ public async Task<IActionResult> ViewAll(Guid userId)
 
     return Ok(books);
 }
+    [HttpGet("ViewMyListings/{userId}")]
+    public async Task<IActionResult> ViewMyListings(Guid userId)
+    {
+        var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+        if (!userExists)
+            return NotFound(new { Message = "User not found" });
 
-private string[] DeserializeImages(string? json)
+        var books = await _context.Books
+            .Where(b => b.UserId == userId)
+            .OrderByDescending(b => b.CreatedAt)
+            .Select(b => new
+            {
+                b.Id,
+                b.BookName,
+                b.AuthorOrPublication,
+                b.Category,
+                b.SubCategory,
+                b.SellingPrice,
+                Images = DeserializeImages(b.ImagePathsJson),
+                b.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(books);
+    }
+   
+    [HttpPatch("MarkAsSold/{bookId}")]
+    public async Task<IActionResult> MarkAsSold(Guid bookId)
+    {
+        var book = await _context.Books.FindAsync(bookId);
+        if (book == null)
+            return NotFound(new { Message = "Book not found" });
+
+        if (book.IsSold)
+            return BadRequest(new { Message = "This book is already marked as sold." });
+
+        book.IsSold = true;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Book marked as sold successfully." });
+    }
+    private string[] DeserializeImages(string? json)
 {
     if (string.IsNullOrEmpty(json))
         return Array.Empty<string>();
@@ -187,9 +227,40 @@ private string[] DeserializeImages(string? json)
         return Array.Empty<string>();
     }
 }
+    // DELETE: api/Books/Delete/{bookId}
+    [HttpDelete("Delete/{bookId}")]
+    public async Task<IActionResult> Delete(Guid bookId)
+    {
+        var book = await _context.Books.FindAsync(bookId);
+        if (book == null)
+            return NotFound(new { Message = "Book not found" });
 
-// Haversine formula to calculate distance (in km)
-private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        // Remove images from server if exist
+        if (!string.IsNullOrEmpty(book.ImagePathsJson))
+        {
+            var images = System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson);
+            if (images != null)
+            {
+                var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                foreach (var img in images)
+                {
+                    var filePath = Path.Combine(wwwRoot, img);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+            }
+        }
+
+        _context.Books.Remove(book);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Book deleted successfully" });
+    }
+
+    // Haversine formula to calculate distance (in km)
+    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
 {
     const double R = 6371; // Radius of Earth in km
     var dLat = ToRadians(lat2 - lat1);
