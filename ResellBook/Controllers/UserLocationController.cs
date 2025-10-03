@@ -28,11 +28,16 @@ using ResellBook.Models;
                 Longitude = request.Longitude,
                 CreateDate = DateTime.UtcNow
             };
-
+        if (!_context.UserLocations.Any(u => u.Id == request.UserId))
+        {
             _context.UserLocations.Add(location);
-            _context.SaveChanges();
-
-            return Ok(new { Message = "Location synced successfully" });
+        }
+        else
+        {
+            _context.UserLocations.Update(location);
+        }
+        _context.SaveChanges();
+        return Ok(new { Message = "Location synced successfully" });
         }
 
         // GET: api/UserLocation/GetLocations/{userId}
