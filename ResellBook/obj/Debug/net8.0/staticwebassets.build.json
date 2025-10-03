@@ -1,1 +1,434 @@
-{"Version":1,"Hash":"HZ975PIWASaKYtzjHwHaExjjRwN8FWYIMA5GKNzKKho=","Source":"ResellBook","BasePath":"_content/ResellBook","Mode":"Default","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[{"Name":"ResellBook\\wwwroot","Source":"ResellBook","ContentRoot":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\","BasePath":"_content/ResellBook","Pattern":"**"}],"Assets":[{"Identity":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg","SourceId":"ResellBook","SourceType":"Discovered","ContentRoot":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\","BasePath":"_content/ResellBook","RelativePath":"uploads/books/07839698-a055-4083-9827-5387c0628492#[.{fingerprint}]?.jpg","AssetKind":"All","AssetMode":"All","AssetRole":"Primary","AssetMergeBehavior":"","AssetMergeSource":"","RelatedAsset":"","AssetTraitName":"","AssetTraitValue":"","Fingerprint":"7ywc2w4091","Integrity":"zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY=","CopyToOutputDirectory":"Never","CopyToPublishDirectory":"PreserveNewest","OriginalItemSpec":"wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg","FileLength":40748,"LastWriteTime":"2025-10-03T12:36:43+00:00"},{"Identity":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg","SourceId":"ResellBook","SourceType":"Discovered","ContentRoot":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\","BasePath":"_content/ResellBook","RelativePath":"uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175#[.{fingerprint}]?.jpg","AssetKind":"All","AssetMode":"All","AssetRole":"Primary","AssetMergeBehavior":"","AssetMergeSource":"","RelatedAsset":"","AssetTraitName":"","AssetTraitValue":"","Fingerprint":"w3t3vbgzwo","Integrity":"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=","CopyToOutputDirectory":"Never","CopyToPublishDirectory":"PreserveNewest","OriginalItemSpec":"wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg","FileLength":43515,"LastWriteTime":"2025-10-03T12:36:43+00:00"},{"Identity":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg","SourceId":"ResellBook","SourceType":"Discovered","ContentRoot":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\","BasePath":"_content/ResellBook","RelativePath":"uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355#[.{fingerprint}]?.jpg","AssetKind":"All","AssetMode":"All","AssetRole":"Primary","AssetMergeBehavior":"","AssetMergeSource":"","RelatedAsset":"","AssetTraitName":"","AssetTraitValue":"","Fingerprint":"w3t3vbgzwo","Integrity":"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=","CopyToOutputDirectory":"Never","CopyToPublishDirectory":"PreserveNewest","OriginalItemSpec":"wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg","FileLength":43515,"LastWriteTime":"2025-10-03T12:36:43+00:00"},{"Identity":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg","SourceId":"ResellBook","SourceType":"Discovered","ContentRoot":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\","BasePath":"_content/ResellBook","RelativePath":"uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac#[.{fingerprint}]?.jpg","AssetKind":"All","AssetMode":"All","AssetRole":"Primary","AssetMergeBehavior":"","AssetMergeSource":"","RelatedAsset":"","AssetTraitName":"","AssetTraitValue":"","Fingerprint":"gli4oora4o","Integrity":"JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4=","CopyToOutputDirectory":"Never","CopyToPublishDirectory":"PreserveNewest","OriginalItemSpec":"wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg","FileLength":67126,"LastWriteTime":"2025-10-03T12:36:43+00:00"}],"Endpoints":[{"Route":"uploads/books/07839698-a055-4083-9827-5387c0628492.7ywc2w4091.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"40748"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"}],"EndpointProperties":[{"Name":"fingerprint","Value":"7ywc2w4091"},{"Name":"label","Value":"uploads/books/07839698-a055-4083-9827-5387c0628492.jpg"},{"Name":"integrity","Value":"sha256-zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY="}]},{"Route":"uploads/books/07839698-a055-4083-9827-5387c0628492.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"40748"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"no-cache"}],"EndpointProperties":[{"Name":"integrity","Value":"sha256-zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY="}]},{"Route":"uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"43515"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"no-cache"}],"EndpointProperties":[{"Name":"integrity","Value":"sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="}]},{"Route":"uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175.w3t3vbgzwo.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"43515"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"}],"EndpointProperties":[{"Name":"fingerprint","Value":"w3t3vbgzwo"},{"Name":"label","Value":"uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175.jpg"},{"Name":"integrity","Value":"sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="}]},{"Route":"uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"43515"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"no-cache"}],"EndpointProperties":[{"Name":"integrity","Value":"sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="}]},{"Route":"uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355.w3t3vbgzwo.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"43515"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"}],"EndpointProperties":[{"Name":"fingerprint","Value":"w3t3vbgzwo"},{"Name":"label","Value":"uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg"},{"Name":"integrity","Value":"sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="}]},{"Route":"uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac.gli4oora4o.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"67126"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"}],"EndpointProperties":[{"Name":"fingerprint","Value":"gli4oora4o"},{"Name":"label","Value":"uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac.jpg"},{"Name":"integrity","Value":"sha256-JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4="}]},{"Route":"uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac.jpg","AssetFile":"C:\\Users\\ranas\\Source\\Repos\\ResellPandaa\\ResellBook\\wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg","Selectors":[],"ResponseHeaders":[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Content-Length","Value":"67126"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\"JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4=\""},{"Name":"Last-Modified","Value":"Fri, 03 Oct 2025 12:36:43 GMT"},{"Name":"Cache-Control","Value":"no-cache"}],"EndpointProperties":[{"Name":"integrity","Value":"sha256-JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4="}]}]}
+{
+  "Version": 1,
+  "Hash": "KvqhdnlGky7fAv/dfkpyYBOBn4HHmvz7UVaXR0t04gI=",
+  "Source": "ResellBook",
+  "BasePath": "_content/ResellBook",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "ResellBook\\wwwroot",
+      "Source": "ResellBook",
+      "ContentRoot": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\",
+      "BasePath": "_content/ResellBook",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg",
+      "SourceId": "ResellBook",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\",
+      "BasePath": "_content/ResellBook",
+      "RelativePath": "uploads/books/07839698-a055-4083-9827-5387c0628492#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "7ywc2w4091",
+      "Integrity": "zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg"
+    },
+    {
+      "Identity": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg",
+      "SourceId": "ResellBook",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\",
+      "BasePath": "_content/ResellBook",
+      "RelativePath": "uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "w3t3vbgzwo",
+      "Integrity": "5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg"
+    },
+    {
+      "Identity": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg",
+      "SourceId": "ResellBook",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\",
+      "BasePath": "_content/ResellBook",
+      "RelativePath": "uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "w3t3vbgzwo",
+      "Integrity": "5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg"
+    },
+    {
+      "Identity": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg",
+      "SourceId": "ResellBook",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\",
+      "BasePath": "_content/ResellBook",
+      "RelativePath": "uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "gli4oora4o",
+      "Integrity": "JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "uploads/books/07839698-a055-4083-9827-5387c0628492.7ywc2w4091.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "40748"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "7ywc2w4091"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/books/07839698-a055-4083-9827-5387c0628492.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/books/07839698-a055-4083-9827-5387c0628492.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\07839698-a055-4083-9827-5387c0628492.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "40748"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-zzPakFw5oJszqZ10WYz0CjHvHyMR2n//c0Olv5HSyXY="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "43515"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175.w3t3vbgzwo.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\2dd6dbc0-ec40-4602-b531-885bd1608175.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "43515"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "w3t3vbgzwo"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/books/2dd6dbc0-ec40-4602-b531-885bd1608175.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "43515"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355.w3t3vbgzwo.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "43515"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "w3t3vbgzwo"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/books/83b61eca-6a27-47e0-b3f0-b1a90df02355.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-5P4ZldHVv+jx1WXH5Ub607mCgLGJYIYDko0Kq29tgvY="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac.gli4oora4o.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "67126"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "gli4oora4o"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/books/bc895c05-b6f3-4edb-b71d-6633592565ac.jpg",
+      "AssetFile": "C:\\Repos\\ResellPanda\\ResellBook\\wwwroot\\uploads\\books\\bc895c05-b6f3-4edb-b71d-6633592565ac.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "67126"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Oct 2025 03:24:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-JN9CK5fUjhZsYNgWh5m/8dzV3LJ/gGBgq18FZdlmYu4="
+        }
+      ]
+    }
+  ]
+}

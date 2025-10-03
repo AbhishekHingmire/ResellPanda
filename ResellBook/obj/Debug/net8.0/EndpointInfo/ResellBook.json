@@ -222,75 +222,6 @@
         }
       }
     },
-    "/api/Books/ViewMyListings/{userId}": {
-      "get": {
-        "tags": [
-          "Books"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Books/MarkAsSold/{bookId}": {
-      "patch": {
-        "tags": [
-          "Books"
-        ],
-        "parameters": [
-          {
-            "name": "bookId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Books/Delete/{bookId}": {
-      "delete": {
-        "tags": [
-          "Books"
-        ],
-        "parameters": [
-          {
-            "name": "bookId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Books/ListBook": {
       "post": {
         "tags": [
@@ -557,48 +488,6 @@
         }
       }
     },
-    "/api/UserLocation/EditUser/{id}": {
-      "put": {
-        "tags": [
-          "UserLocation"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EditUserDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EditUserDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/EditUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/WeatherForecast": {
       "get": {
         "tags": [
@@ -641,25 +530,6 @@
   },
   "components": {
     "schemas": {
-      "EditUserDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "nullable": true
-          },
-          "phone": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "LoginRequest": {
         "type": "object",
         "properties": {
@@ -729,10 +599,6 @@
           "passwordHash": {
             "minLength": 1,
             "type": "string"
-          },
-          "phone": {
-            "type": "string",
-            "nullable": true
           },
           "isEmailVerified": {
             "type": "boolean"
