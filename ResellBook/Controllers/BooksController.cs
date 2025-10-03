@@ -115,14 +115,44 @@ public class BooksController : ControllerBase
         return Ok(new { Message = "Book updated successfully" });
     }
 
-    [HttpGet("ViewAll")]
-    public async Task<IActionResult> ViewAll()
-    {
-        var booksData = await _context.Books
-            .OrderByDescending(b => b.CreatedAt)
-            .ToListAsync();
+[HttpGet("ViewAll/{userId}")]
+public async Task<IActionResult> ViewAll(Guid userId)
+{
+    // Get current user location
+    var currentUserLocation = await _context.UserLocations
+        .FirstOrDefaultAsync(u => u.UserId == userId);
 
-        var books = booksData.Select(b => new
+    if (currentUserLocation == null)
+        return BadRequest("User location not found.");
+
+    // Get all books
+    var booksData = await _context.Books
+        .OrderByDescending(b => b.CreatedAt)
+        .ToListAsync();
+
+    // Get unique userIds from books
+    var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
+
+    // Fetch all user locations for these userIds
+    var userLocations = await _context.UserLocations
+        .Where(u => userIds.Contains(u.UserId))
+        .ToDictionaryAsync(u => u.UserId, u => u);
+
+    var books = booksData.Select(b =>
+    {
+        double? distanceKm = null;
+        if (userLocations.ContainsKey(b.UserId))
+        {
+            var loc = userLocations[b.UserId];
+            distanceKm = CalculateDistance(
+                currentUserLocation.Latitude,
+                currentUserLocation.Longitude,
+                loc.Latitude,
+                loc.Longitude
+            );
+        }
+
+        return new
         {
             b.Id,
             b.BookName,
@@ -131,28 +161,49 @@ public class BooksController : ControllerBase
             b.SubCategory,
             b.SellingPrice,
             Images = DeserializeImages(b.ImagePathsJson),
-            b.CreatedAt
-        }).ToList();
+            b.CreatedAt,
+            Distance = distanceKm.HasValue
+                ? (distanceKm < 1
+                    ? $"{Math.Round(distanceKm.Value * 1000)} m"
+                    : $"{Math.Round(distanceKm.Value, 2)} km")
+                : "N/A"
+        };
+    }).ToList();
 
-        return Ok(books);
-    }
-    private string[] DeserializeImages(string? json)
+    return Ok(books);
+}
+
+private string[] DeserializeImages(string? json)
+{
+    if (string.IsNullOrEmpty(json))
+        return Array.Empty<string>();
+
+    try
     {
-        if (string.IsNullOrEmpty(json))
-            return Array.Empty<string>();
-
-        try
-        {
-            return System.Text.Json.JsonSerializer.Deserialize<string[]>(json) ?? Array.Empty<string>();
-        }
-        catch
-        {
-            return Array.Empty<string>();
-        }
+        return System.Text.Json.JsonSerializer.Deserialize<string[]>(json) ?? Array.Empty<string>();
     }
+    catch
+    {
+        return Array.Empty<string>();
+    }
+}
 
+// Haversine formula to calculate distance (in km)
+private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+{
+    const double R = 6371; // Radius of Earth in km
+    var dLat = ToRadians(lat2 - lat1);
+    var dLon = ToRadians(lon2 - lon1);
 
+    var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+            Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
 
+    var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+    return R * c; // distance in km
+}
+
+private double ToRadians(double angle) => Math.PI * angle / 180.0;
 }
 
 // DTOs
