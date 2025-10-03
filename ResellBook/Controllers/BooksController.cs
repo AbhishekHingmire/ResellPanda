@@ -16,7 +16,81 @@ public class BooksController : ControllerBase
         _context = context;
         _env = env;
     }
+    [HttpGet("ViewMyListings/{userId}")]
+    public async Task<IActionResult> ViewMyListings(Guid userId)
+    {
+        
+        var books = await _context.Books
+            .Where(b => b.UserId == userId)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
 
+       
+        var result = books.Select(b => new
+        {
+            b.Id,
+            b.BookName,
+            b.AuthorOrPublication,
+            b.Category,
+            b.SubCategory,
+            b.SellingPrice,
+            Images = string.IsNullOrEmpty(b.ImagePathsJson)
+                        ? Array.Empty<string>()
+                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
+            b.IsSold,
+            b.CreatedAt
+        });
+
+        return Ok(result);
+    }
+
+
+    [HttpPatch("MarkAsSold/{bookId}")]
+    public async Task<IActionResult> MarkAsSold(Guid bookId)
+    {
+        var book = await _context.Books.FindAsync(bookId);
+        if (book == null)
+            return NotFound(new { Message = "Book not found" });
+
+        if (book.IsSold)
+            return BadRequest(new { Message = "This book is already marked as sold." });
+
+        book.IsSold = true;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Book marked as sold successfully." });
+    }
+    // DELETE: api/Books/Delete/{bookId}
+    [HttpDelete("Delete/{bookId}")]
+    public async Task<IActionResult> Delete(Guid bookId)
+    {
+        var book = await _context.Books.FindAsync(bookId);
+        if (book == null)
+            return NotFound(new { Message = "Book not found" });
+
+        // Remove images from server if exist
+        if (!string.IsNullOrEmpty(book.ImagePathsJson))
+        {
+            var images = System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson);
+            if (images != null)
+            {
+                var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                foreach (var img in images)
+                {
+                    var filePath = Path.Combine(wwwRoot, img);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+            }
+        }
+
+        _context.Books.Remove(book);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Book deleted successfully" });
+    }
     // POST: List Book
     [HttpPost("ListBook")]
     public async Task<IActionResult> ListBook([FromForm] BookCreateDto dto)
@@ -103,12 +177,6 @@ public class BooksController : ControllerBase
             }
         }
 
-        // Validate final image count
-        if (currentImages.Count < 2)
-            return BadRequest(new { Message = "Each book must have at least 2 images." });
-        if (currentImages.Count > 4)
-            return BadRequest(new { Message = "Maximum 4 images allowed." });
-
         book.ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(currentImages);
 
         await _context.SaveChangesAsync();
@@ -160,6 +228,7 @@ public async Task<IActionResult> ViewAll(Guid userId)
             b.Category,
             b.SubCategory,
             b.SellingPrice,
+            b.IsSold,
             Images = DeserializeImages(b.ImagePathsJson),
             b.CreatedAt,
             Distance = distanceKm.HasValue

@@ -153,9 +153,6 @@ C:\Repos\ResellPanda\ResellBook\obj\Release\net8.0\ResellBook.pdb
 C:\Repos\ResellPanda\ResellBook\obj\Release\net8.0\ResellBook.genruntimeconfig.cache
 C:\Repos\ResellPanda\ResellBook\obj\Release\net8.0\ref\ResellBook.dll
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\ResellBook.staticwebassets.runtime.json
-C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\web.config
-C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\appsettings.Development.json
-C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\appsettings.json
-C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\ResellBook.deps.json
-C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\ResellBook.runtimeconfig.json
-C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\ResellBook.staticwebassets.endpoints.json
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\Migrations\20251003183739_CreateTables.cs
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\Migrations\20251003183739_CreateTables.Designer.cs
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\Migrations\AppDbContextModelSnapshot.cs

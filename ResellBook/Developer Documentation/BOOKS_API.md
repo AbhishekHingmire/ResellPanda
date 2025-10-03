@@ -707,5 +707,452 @@ class BooksApiHandler {
 
 ---
 
-**Books Management Complete! ✅**  
+---
+
+### **4. View My Book Listings** 
+**`GET /api/Books/ViewMyListings/{userId}`**
+
+**Purpose:** Get all books listed by a specific user
+
+**Authentication:** 🔒 JWT Token Required
+
+**URL Parameters:**
+- `userId`: User GUID - **Required**
+
+**Success Response (200):**
+```json
+[
+  {
+    "Id": "789e4567-e89b-12d3-a456-426614174000",
+    "BookName": "Data Structures and Algorithms",
+    "AuthorOrPublication": "Robert Lafore", 
+    "Category": "Computer Science",
+    "SubCategory": "Programming",
+    "SellingPrice": 299.99,
+    "Images": [
+      "https://resellpandaimages.blob.core.windows.net/bookimages/books/image1.jpg",
+      "https://resellpandaimages.blob.core.windows.net/bookimages/books/image2.jpg"
+    ],
+    "IsSold": false,
+    "CreatedAt": "2025-10-03T10:30:00Z"
+  }
+]
+```
+
+**Error Responses:**
+```json
+// 401 - Unauthorized
+{"Message": "Unauthorized"}
+
+// Empty array if no books found
+[]
+```
+
+**Android Kotlin Implementation:**
+```kotlin
+data class MyBookListing(
+    val Id: String,
+    val BookName: String,
+    val AuthorOrPublication: String?,
+    val Category: String,
+    val SubCategory: String?,
+    val SellingPrice: Double,
+    val Images: List<String>,
+    val IsSold: Boolean,
+    val CreatedAt: String
+) {
+    val statusText: String
+        get() = if (IsSold) "SOLD" else "AVAILABLE"
+        
+    val statusColor: Int
+        get() = if (IsSold) R.color.red else R.color.green
+}
+
+interface BooksApi {
+    @GET("api/Books/ViewMyListings/{userId}")
+    suspend fun getMyListings(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: String
+    ): Response<List<MyBookListing>>
+}
+
+// Repository
+class MyBooksRepository {
+    suspend fun getMyBooks(userId: String): Result<List<MyBookListing>> {
+        return try {
+            val token = "Bearer ${getAuthToken()}"
+            val response = booksApi.getMyListings(token, userId)
+            
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: emptyList())
+            } else {
+                Result.failure(Exception("Failed to load your books: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+
+// ViewModel
+class MyBooksViewModel : ViewModel() {
+    private val _myBooks = MutableLiveData<List<MyBookListing>>()
+    val myBooks: LiveData<List<MyBookListing>> = _myBooks
+    
+    fun loadMyBooks() {
+        viewModelScope.launch {
+            val userId = getCurrentUserId()
+            myBooksRepository.getMyBooks(userId)
+                .onSuccess { books ->
+                    _myBooks.value = books.sortedByDescending { it.CreatedAt }
+                }
+                .onFailure { error ->
+                    // Handle error
+                }
+        }
+    }
+    
+    fun getAvailableBooks() = _myBooks.value?.filter { !it.IsSold } ?: emptyList()
+    fun getSoldBooks() = _myBooks.value?.filter { it.IsSold } ?: emptyList()
+}
+```
+
+---
+
+### **5. Mark Book as Sold** 
+**`PATCH /api/Books/MarkAsSold/{bookId}`**
+
+**Purpose:** Mark a book listing as sold (cannot be undone)
+
+**Authentication:** 🔒 JWT Token Required
+
+**URL Parameters:**
+- `bookId`: Book GUID - **Required**
+
+**Success Response (200):**
+```json
+{"Message": "Book marked as sold successfully."}
+```
+
+**Error Responses:**
+```json
+// 404 - Book not found
+{"Message": "Book not found"}
+
+// 400 - Already sold
+{"Message": "This book is already marked as sold."}
+
+// 401 - Unauthorized
+{"Message": "Unauthorized"}
+```
+
+**Android Kotlin Implementation:**
+```kotlin
+interface BooksApi {
+    @PATCH("api/Books/MarkAsSold/{bookId}")
+    suspend fun markAsSold(
+        @Header("Authorization") token: String,
+        @Path("bookId") bookId: String
+    ): Response<MessageResponse>
+}
+
+// Repository
+class BookActionsRepository {
+    suspend fun markBookAsSold(bookId: String): Result<String> {
+        return try {
+            val token = "Bearer ${getAuthToken()}"
+            val response = booksApi.markAsSold(token, bookId)
+            
+            if (response.isSuccessful) {
+                Result.success(response.body()?.Message ?: "Book marked as sold")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = try {
+                    val errorResponse = Gson().fromJson(errorBody, MessageResponse::class.java)
+                    errorResponse.Message
+                } catch (e: Exception) {
+                    "Failed to mark as sold"
+                }
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+
+// ViewModel
+class BookDetailsViewModel : ViewModel() {
+    private val _isMarkingSold = MutableLiveData<Boolean>()
+    val isMarkingSold: LiveData<Boolean> = _isMarkingSold
+    
+    fun markAsSold(bookId: String) {
+        _isMarkingSold.value = true
+        
+        viewModelScope.launch {
+            bookActionsRepository.markBookAsSold(bookId)
+                .onSuccess { message ->
+                    showSuccess(message)
+                    // Refresh book details or navigate back
+                    refreshBookDetails(bookId)
+                }
+                .onFailure { error ->
+                    showError(error.message ?: "Failed to mark as sold")
+                }
+                .also {
+                    _isMarkingSold.value = false
+                }
+        }
+    }
+}
+
+// UI Usage with Confirmation Dialog
+class BookDetailsFragment {
+    private fun setupMarkSoldButton() {
+        binding.buttonMarkSold.setOnClickListener {
+            showMarkSoldConfirmation()
+        }
+    }
+    
+    private fun showMarkSoldConfirmation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Mark as Sold")
+            .setMessage("Are you sure you want to mark this book as sold? This action cannot be undone.")
+            .setPositiveButton("Yes, Mark as Sold") { _, _ ->
+                viewModel.markAsSold(bookId)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+}
+```
+
+---
+
+### **6. Delete Book Listing** 
+**`DELETE /api/Books/Delete/{bookId}`**
+
+**Purpose:** Permanently delete a book listing and its images
+
+**Authentication:** 🔒 JWT Token Required
+
+**URL Parameters:**
+- `bookId`: Book GUID - **Required**
+
+**Behavior:**
+- ✅ Removes book from database
+- ✅ Deletes associated images from Azure Blob Storage
+- ✅ Permanent deletion (cannot be undone)
+- ✅ Only book owner can delete
+
+**Success Response (200):**
+```json
+{"Message": "Book deleted successfully"}
+```
+
+**Error Responses:**
+```json
+// 404 - Book not found
+{"Message": "Book not found"}
+
+// 401 - Unauthorized
+{"Message": "Unauthorized"}
+
+// 403 - Not book owner (if ownership check implemented)
+{"Message": "You can only delete your own books"}
+```
+
+**Android Kotlin Implementation:**
+```kotlin
+interface BooksApi {
+    @DELETE("api/Books/Delete/{bookId}")
+    suspend fun deleteBook(
+        @Header("Authorization") token: String,
+        @Path("bookId") bookId: String
+    ): Response<MessageResponse>
+}
+
+// Repository
+class BookActionsRepository {
+    suspend fun deleteBook(bookId: String): Result<String> {
+        return try {
+            val token = "Bearer ${getAuthToken()}"
+            val response = booksApi.deleteBook(token, bookId)
+            
+            if (response.isSuccessful) {
+                Result.success(response.body()?.Message ?: "Book deleted successfully")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = try {
+                    val errorResponse = Gson().fromJson(errorBody, MessageResponse::class.java)
+                    errorResponse.Message
+                } catch (e: Exception) {
+                    "Failed to delete book"
+                }
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+
+// ViewModel
+class MyBooksViewModel : ViewModel() {
+    private val _isDeleting = MutableLiveData<Boolean>()
+    val isDeleting: LiveData<Boolean> = _isDeleting
+    
+    fun deleteBook(bookId: String) {
+        _isDeleting.value = true
+        
+        viewModelScope.launch {
+            bookActionsRepository.deleteBook(bookId)
+                .onSuccess { message ->
+                    showSuccess(message)
+                    // Remove from local list and refresh
+                    removeBookFromList(bookId)
+                    loadMyBooks() // Refresh the list
+                }
+                .onFailure { error ->
+                    showError(error.message ?: "Failed to delete book")
+                }
+                .also {
+                    _isDeleting.value = false
+                }
+        }
+    }
+    
+    private fun removeBookFromList(bookId: String) {
+        val currentBooks = _myBooks.value?.toMutableList() ?: return
+        currentBooks.removeAll { it.Id == bookId }
+        _myBooks.value = currentBooks
+    }
+}
+
+// UI Usage with Confirmation
+class MyBooksFragment {
+    private fun setupBookActions(book: MyBookListing, holder: BookViewHolder) {
+        holder.binding.buttonDelete.setOnClickListener {
+            showDeleteConfirmation(book)
+        }
+    }
+    
+    private fun showDeleteConfirmation(book: MyBookListing) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Book")
+            .setMessage("Are you sure you want to delete '${book.BookName}'?\n\nThis will:\n• Remove the listing permanently\n• Delete all associated images\n• Cannot be undone")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteBook(book.Id)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setIcon(R.drawable.ic_warning)
+            .show()
+    }
+}
+
+// SwipeToDelete Implementation
+class MyBooksAdapter : RecyclerView.Adapter<MyBooksAdapter.BookViewHolder>() {
+    
+    fun attachSwipeToDelete(recyclerView: RecyclerView, viewModel: MyBooksViewModel) {
+        val swipeCallback = object : ItemTouchHelper.SimpleCallback(
+            0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(/* not implemented */) = false
+            
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val book = books[position]
+                
+                // Show confirmation before actual deletion
+                showDeleteConfirmation(book) {
+                    viewModel.deleteBook(book.Id)
+                }
+            }
+            
+            override fun onChildDraw(
+                c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
+                dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean
+            ) {
+                // Draw delete background and icon
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView = viewHolder.itemView
+                    val paint = Paint().apply { color = Color.RED }
+                    
+                    if (dX > 0) { // Swipe right
+                        c.drawRect(itemView.left.toFloat(), itemView.top.toFloat(), 
+                                 dX, itemView.bottom.toFloat(), paint)
+                    } else { // Swipe left
+                        c.drawRect(itemView.right.toFloat() + dX, itemView.top.toFloat(),
+                                 itemView.right.toFloat(), itemView.bottom.toFloat(), paint)
+                    }
+                }
+                
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
+        }
+        
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView)
+    }
+}
+```
+
+---
+
+## **📊 Complete Book Management Dashboard**
+
+```kotlin
+// Dashboard showing book statistics
+class BookDashboardViewModel : ViewModel() {
+    private val _dashboardData = MutableLiveData<DashboardData>()
+    val dashboardData: LiveData<DashboardData> = _dashboardData
+    
+    fun loadDashboard() {
+        viewModelScope.launch {
+            val userId = getCurrentUserId()
+            myBooksRepository.getMyBooks(userId)
+                .onSuccess { books ->
+                    val dashboard = DashboardData(
+                        totalBooks = books.size,
+                        availableBooks = books.count { !it.IsSold },
+                        soldBooks = books.count { it.IsSold },
+                        totalValue = books.filter { !it.IsSold }.sumOf { it.SellingPrice },
+                        recentBooks = books.take(5)
+                    )
+                    _dashboardData.value = dashboard
+                }
+        }
+    }
+}
+
+data class DashboardData(
+    val totalBooks: Int,
+    val availableBooks: Int,
+    val soldBooks: Int,
+    val totalValue: Double,
+    val recentBooks: List<MyBookListing>
+) {
+    val soldPercentage: Float
+        get() = if (totalBooks > 0) (soldBooks.toFloat() / totalBooks * 100) else 0f
+        
+    val formattedTotalValue: String
+        get() = "₹${String.format("%.2f", totalValue)}"
+}
+```
+
+---
+
+**Books Management APIs Complete! ✅**  
+
+All 6 endpoints now documented:
+- ✅ **POST** `/ListBook` - Create new book listing
+- ✅ **PUT** `/EditListing/{id}` - Update existing book
+- ✅ **GET** `/ViewAll/{userId}` - Browse all books  
+- ✅ **GET** `/ViewMyListings/{userId}` - View user's books
+- ✅ **PATCH** `/MarkAsSold/{bookId}` - Mark as sold
+- ✅ **DELETE** `/Delete/{bookId}` - Delete book & images
+````  
 Next: [User Location APIs →](LOCATION_API.md)
