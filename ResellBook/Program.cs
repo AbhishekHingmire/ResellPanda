@@ -17,6 +17,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Register EmailService
 builder.Services.AddScoped<EmailService>();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVercel", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -78,6 +89,10 @@ else
 }
 
 app.UseHttpsRedirection();
+
+// Enable CORS
+app.UseCors("AllowVercel");
+
 app.UseRouting();
 app.UseStaticFiles();
 
