@@ -46,6 +46,13 @@
 - **Examples:** Complete activities, ViewModels, networking layer
 - **Production:** Security, ProGuard, background tasks
 
+### **7. 🗄️ [DATABASE_MIGRATION_GUIDE.md](DATABASE_MIGRATION_GUIDE.md)** ⭐ **CRITICAL**
+- **Purpose:** Prevent and fix 500 Internal Server Errors from model changes
+- **Contents:** Complete Entity Framework Core migration workflows
+- **Features:** Step-by-step model change process, emergency database reset
+- **Troubleshooting:** Common migration errors, connection issues, production deployment
+- **Production:** Backup procedures, staging environment testing, rollback strategies
+
 ---
 
 ## 🛠️ **Development & Deployment Documentation**
@@ -142,10 +149,11 @@
 
 ### **For Android Developers:**
 1. **Start Here:** [README.md](README.md) for overview
-2. **Setup Project:** [ANDROID_INTEGRATION_GUIDE.md](ANDROID_INTEGRATION_GUIDE.md)
-3. **Implement Auth:** [AUTHENTICATION_API.md](AUTHENTICATION_API.md)  
-4. **Add Features:** [BOOKS_API.md](BOOKS_API.md) + [LOCATION_AND_PROFILE_API.md](LOCATION_AND_PROFILE_API.md)
-5. **Deploy:** [DEPLOYMENT_GUIDE_COMPLETE.md](DEPLOYMENT_GUIDE_COMPLETE.md)
+2. **CRITICAL:** [DATABASE_MIGRATION_GUIDE.md](DATABASE_MIGRATION_GUIDE.md) - Read before making model changes
+3. **Setup Project:** [ANDROID_INTEGRATION_GUIDE.md](ANDROID_INTEGRATION_GUIDE.md)
+4. **Implement Auth:** [AUTHENTICATION_API.md](AUTHENTICATION_API.md)  
+5. **Add Features:** [BOOKS_API.md](BOOKS_API.md) + [LOCATION_AND_PROFILE_API.md](LOCATION_AND_PROFILE_API.md)
+6. **Deploy:** [DEPLOYMENT_GUIDE_COMPLETE.md](DEPLOYMENT_GUIDE_COMPLETE.md)
 
 ### **For API Integration:**
 - **Complete Reference:** [API_DOCUMENTATION_COMPLETE.md](API_DOCUMENTATION_COMPLETE.md)

@@ -42,12 +42,20 @@ Welcome to the comprehensive developer documentation for ResellPanda API integra
 - **Features:** Dependency injection, error handling, offline support
 - **Production:** ProGuard rules, security configurations
 
+### **🗄️ 6. [Database Migration Guide](DATABASE_MIGRATION_GUIDE.md)** ⭐ **ESSENTIAL**
+- **Overview:** Complete database migration and model management guide
+- **Purpose:** Prevent 500 errors when adding new model properties
+- **Contents:** Step-by-step migration process, troubleshooting, best practices
+- **Emergency:** Database reset procedures for critical issues
+- **Features:** Entity Framework Core workflows, Azure database management
+
 ---
 
 ## 🚀 **Quick Start Guide**
 
 ### **For New Developers:**
 1. Start with **[Android Integration Guide](ANDROID_INTEGRATION_GUIDE.md)** for project setup
+2. **IMPORTANT**: Read **[Database Migration Guide](DATABASE_MIGRATION_GUIDE.md)** before making model changes
 2. Review **[Authentication APIs](AUTHENTICATION_API.md)** for user management
 3. Implement **[Books Management](BOOKS_API.md)** for core functionality
 4. Add **[Location Services](LOCATION_AND_PROFILE_API.md)** for enhanced features
@@ -194,10 +202,12 @@ locationManager.syncCurrentLocation(userId)
 ## 🆘 **Support & Troubleshooting**
 
 ### **Common Issues:**
-1. **OTP Not Received:** Check email spam folder, use resend functionality
-2. **Image Upload Failed:** Ensure images are under 5MB, check network
-3. **Location Permission:** Request proper runtime permissions
-4. **Token Expired:** Implement automatic token refresh mechanism
+1. **500 Internal Server Error:** Usually caused by database schema mismatch - see [Database Migration Guide](DATABASE_MIGRATION_GUIDE.md)
+2. **OTP Not Received:** Check email spam folder, use resend functionality
+3. **Image Upload Failed:** Ensure images are under 5MB, check network
+4. **Location Permission:** Request proper runtime permissions
+5. **Token Expired:** Implement automatic token refresh mechanism
+6. **Migration Conflicts:** Follow emergency database reset procedure in migration guide
 
 ### **Debug Information:**
 - Enable network logging in debug builds

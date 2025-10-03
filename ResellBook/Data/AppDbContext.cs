@@ -15,6 +15,15 @@ namespace ResellBook.Data
         public DbSet<UserLocation> UserLocations { get; set; }
         public DbSet<Book> Books { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure decimal precision for Book.SellingPrice
+            modelBuilder.Entity<Book>()
+                .Property(b => b.SellingPrice)
+                .HasPrecision(18, 2); // 18 total digits, 2 decimal places
+        }
     }
 
 }

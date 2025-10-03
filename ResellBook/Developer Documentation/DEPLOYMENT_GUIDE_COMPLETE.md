@@ -40,7 +40,7 @@ SMTP__Pass=unknvvwbmpszgmyk
 # 1. Build and publish
 dotnet build --configuration Release
 dotnet publish --configuration Release
-
+dotnet publish -c Release -o publish
 # 2. Create deployment package
 Compress-Archive -Path "bin\Release\net8.0\publish\*" -DestinationPath "deploy.zip" -Force
 
