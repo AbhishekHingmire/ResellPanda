@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
 using ResellBook.Models;
+using System.ComponentModel.DataAnnotations;
 
     [ApiController]
     [Route("api/[controller]")]
@@ -76,6 +77,27 @@ using ResellBook.Models;
 
             return Ok(profile);
         }
+    [HttpPut("EditUser/{id}")]
+    public async Task<IActionResult> EditUser(Guid id, [FromBody] EditUserDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+            return NotFound(new { Message = "User not found" });
 
+        // Update fields
+        user.Name = string.IsNullOrWhiteSpace(dto.Name) ? user.Name : dto.Name;
+        user.Email = string.IsNullOrWhiteSpace(dto.Email) ? user.Email : dto.Email;
+        user.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? user.Phone : dto.Phone;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "User updated successfully" });
     }
+}
 
+public class EditUserDto
+{
+    public string? Name { get; set; }
+    [EmailAddress] public string? Email { get; set; }
+    public string? Phone { get; set; }
+}
