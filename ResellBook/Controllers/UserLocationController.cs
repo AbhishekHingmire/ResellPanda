@@ -14,13 +14,16 @@ using ResellBook.Models;
             _context = context;
         }
 
-        // POST: api/UserLocation/SyncLocation
-        [HttpPost("SyncLocation")]
-        public IActionResult SyncLocation([FromBody] UserLocation request)
-        {
-            if (!_context.Users.Any(u => u.Id == request.UserId))
-                return NotFound(new { Message = "User not found" });
+    // POST: api/UserLocation/SyncLocation
+    [HttpPost("SyncLocation")]
+    public IActionResult SyncLocation([FromBody] UserLocation request)
+    {
+        if (!_context.Users.Any(u => u.Id == request.UserId))
+            return NotFound(new { Message = "User not found" });
 
+        var userData = _context.UserLocations.FirstOrDefault(u => u.UserId == request.UserId);
+        if (userData == null)
+        {
             var location = new UserLocation
             {
                 UserId = request.UserId,
@@ -28,22 +31,22 @@ using ResellBook.Models;
                 Longitude = request.Longitude,
                 CreateDate = DateTime.UtcNow
             };
-        var userData = _context.UserLocations.Where(u => u.UserId == request.UserId).FirstOrDefault();
-        if (userData == null)
-        {
             _context.UserLocations.Add(location);
         }
         else
         {
-            location.Id = userData.Id;
-            _context.UserLocations.Update(location);
+            // This is the actual update command:
+            userData.Latitude = request.Latitude;
+            userData.Longitude = request.Longitude;
+            userData.CreateDate = DateTime.UtcNow;
+            // No need to call Update; EF Core tracks changes automatically
         }
         _context.SaveChanges();
         return Ok(new { Message = "Location synced successfully" });
-        }
+    }
 
-        // GET: api/UserLocation/GetLocations/{userId}
-        [HttpGet("GetLocations/{userId}")]
+    // GET: api/UserLocation/GetLocations/{userId}
+    [HttpGet("GetLocations/{userId}")]
         public IActionResult GetLocations(Guid userId)
         {
             var locations = _context.UserLocations
