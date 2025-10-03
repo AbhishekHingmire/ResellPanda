@@ -28,12 +28,14 @@ using ResellBook.Models;
                 Longitude = request.Longitude,
                 CreateDate = DateTime.UtcNow
             };
-        if (!_context.UserLocations.Any(u => u.Id == request.UserId))
+        var userData = _context.UserLocations.Where(u => u.UserId == request.UserId).FirstOrDefault();
+        if (userData == null)
         {
             _context.UserLocations.Add(location);
         }
         else
         {
+            location.Id = userData.Id;
             _context.UserLocations.Update(location);
         }
         _context.SaveChanges();
