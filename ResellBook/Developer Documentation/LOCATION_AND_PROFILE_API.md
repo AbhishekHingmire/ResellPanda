@@ -817,5 +817,445 @@ class RealTimeLocationTracker(private val context: Context) {
 
 ---
 
+### **4. Edit User Profile** 
+**`PUT /api/UserLocation/EditUser/{id}`**
+
+**Purpose:** Update user profile information (name, email, phone)
+
+**Authentication:** 🔒 JWT Token Required
+
+**URL Parameter:**
+- `id`: User ID (GUID format) - **Required**
+
+**Request Body:**
+```json
+{
+  "Name": "Updated Name",
+  "Email": "updated.email@example.com", 
+  "Phone": "+1234567890"
+}
+```
+
+**Field Validation:**
+- `Name`: Optional string, will keep existing if null/empty
+- `Email`: Optional string with email format validation, will keep existing if null/empty  
+- `Phone`: Optional string, will keep existing if null/empty
+
+**Success Response (200):**
+```json
+{
+  "Message": "User updated successfully"
+}
+```
+
+**Error Responses:**
+```json
+// 404 - User not found
+{
+  "Message": "User not found"
+}
+
+// 400 - Invalid email format
+{
+  "errors": {
+    "Email": ["The Email field is not a valid e-mail address."]
+  }
+}
+```
+
+**Android Kotlin Implementation:**
+```kotlin
+data class EditUserRequest(
+    val Name: String? = null,
+    val Email: String? = null,
+    val Phone: String? = null
+) {
+    fun isValid(): Pair<Boolean, String?> {
+        // Validate email format if provided
+        if (!Email.isNullOrBlank() && !android.util.Patterns.EMAIL_ADDRESS.matcher(Email).matches()) {
+            return false to "Invalid email format"
+        }
+        
+        // Validate phone format if provided
+        if (!Phone.isNullOrBlank() && !isValidPhoneNumber(Phone)) {
+            return false to "Invalid phone number format"
+        }
+        
+        // At least one field should be provided
+        if (Name.isNullOrBlank() && Email.isNullOrBlank() && Phone.isNullOrBlank()) {
+            return false to "At least one field must be provided for update"
+        }
+        
+        return true to null
+    }
+    
+    private fun isValidPhoneNumber(phone: String): Boolean {
+        val phonePattern = "^[+]?[1-9]\\d{1,14}\$".toRegex()
+        return phonePattern.matches(phone.replace(" ", "").replace("-", ""))
+    }
+}
+
+data class EditUserResponse(
+    val Message: String
+)
+
+interface UserApi {
+    @PUT("api/UserLocation/EditUser/{id}")
+    suspend fun editUser(
+        @Header("Authorization") token: String,
+        @Path("id") userId: String,
+        @Body request: EditUserRequest
+    ): Response<EditUserResponse>
+}
+
+// Repository
+class UserEditRepository {
+    private val userApi = ApiClient.retrofit.create(UserApi::class.java)
+    
+    suspend fun updateUser(userId: String, editRequest: EditUserRequest): Result<String> {
+        return try {
+            // Validate request first
+            val (isValid, errorMessage) = editRequest.isValid()
+            if (!isValid) {
+                return Result.failure(Exception(errorMessage ?: "Invalid request"))
+            }
+            
+            val token = "Bearer ${getAuthToken()}"
+            val response = userApi.editUser(token, userId, editRequest)
+            
+            if (response.isSuccessful) {
+                val message = response.body()?.Message ?: "User updated successfully"
+                
+                // Clear cached profile to force refresh
+                clearCachedProfile()
+                
+                Result.success(message)
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = parseErrorMessage(errorBody) ?: "Update failed"
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    private fun parseErrorMessage(errorBody: String?): String? {
+        return try {
+            if (errorBody != null) {
+                val gson = Gson()
+                val errorResponse = gson.fromJson(errorBody, JsonObject::class.java)
+                
+                // Handle validation errors
+                if (errorResponse.has("errors")) {
+                    val errors = errorResponse.getAsJsonObject("errors")
+                    val errorMessages = mutableListOf<String>()
+                    
+                    errors.entrySet().forEach { entry ->
+                        val fieldErrors = entry.value.asJsonArray
+                        fieldErrors.forEach { error ->
+                            errorMessages.add("${entry.key}: ${error.asString}")
+                        }
+                    }
+                    
+                    return errorMessages.joinToString("\n")
+                }
+                
+                // Handle simple message errors
+                if (errorResponse.has("Message")) {
+                    return errorResponse.get("Message").asString
+                }
+            }
+            null
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    private fun clearCachedProfile() {
+        val sharedPrefs = context.getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+        sharedPrefs.edit().remove("profile_data").apply()
+    }
+}
+
+// ViewModel for Edit Profile
+class EditProfileViewModel : ViewModel() {
+    private val repository = UserEditRepository()
+    
+    private val _updateStatus = MutableLiveData<UpdateStatus>()
+    val updateStatus: LiveData<UpdateStatus> = _updateStatus
+    
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+    
+    fun updateUserProfile(
+        userId: String, 
+        name: String? = null,
+        email: String? = null, 
+        phone: String? = null
+    ) {
+        _isLoading.value = true
+        
+        val request = EditUserRequest(
+            Name = name?.trim()?.takeIf { it.isNotEmpty() },
+            Email = email?.trim()?.takeIf { it.isNotEmpty() },
+            Phone = phone?.trim()?.takeIf { it.isNotEmpty() }
+        )
+        
+        viewModelScope.launch {
+            repository.updateUser(userId, request)
+                .onSuccess { message ->
+                    _updateStatus.value = UpdateStatus.Success(message)
+                    _isLoading.value = false
+                }
+                .onFailure { exception ->
+                    _updateStatus.value = UpdateStatus.Error(exception.message ?: "Update failed")
+                    _isLoading.value = false
+                }
+        }
+    }
+    
+    fun clearUpdateStatus() {
+        _updateStatus.value = null
+    }
+}
+
+sealed class UpdateStatus {
+    data class Success(val message: String) : UpdateStatus()
+    data class Error(val message: String) : UpdateStatus()
+}
+
+// Edit Profile Activity/Fragment
+class EditProfileFragment : Fragment() {
+    private lateinit var binding: FragmentEditProfileBinding
+    private lateinit var viewModel: EditProfileViewModel
+    private var currentProfile: UserProfile? = null
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        setupUI()
+        setupObservers()
+        
+        // Load current profile
+        currentProfile = arguments?.getParcelable("user_profile")
+        populateCurrentData()
+    }
+    
+    private fun setupUI() {
+        binding.apply {
+            // Save button click
+            buttonSave.setOnClickListener {
+                saveProfile()
+            }
+            
+            // Cancel button click
+            buttonCancel.setOnClickListener {
+                findNavController().navigateUp()
+            }
+            
+            // Input validation
+            setupInputValidation()
+        }
+    }
+    
+    private fun setupInputValidation() {
+        binding.apply {
+            // Real-time email validation
+            editEmail.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    validateEmail(s.toString())
+                }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+            
+            // Real-time phone validation
+            editPhone.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    validatePhone(s.toString())
+                }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+        }
+    }
+    
+    private fun validateEmail(email: String): Boolean {
+        val isValid = email.isEmpty() || android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        
+        binding.textEmailError.apply {
+            if (!isValid) {
+                text = "Invalid email format"
+                visibility = View.VISIBLE
+            } else {
+                visibility = View.GONE
+            }
+        }
+        
+        return isValid
+    }
+    
+    private fun validatePhone(phone: String): Boolean {
+        val isValid = phone.isEmpty() || phone.matches("^[+]?[1-9]\\d{1,14}$".toRegex())
+        
+        binding.textPhoneError.apply {
+            if (!isValid) {
+                text = "Invalid phone number format"
+                visibility = View.VISIBLE
+            } else {
+                visibility = View.GONE
+            }
+        }
+        
+        return isValid
+    }
+    
+    private fun populateCurrentData() {
+        currentProfile?.let { profile ->
+            binding.apply {
+                editName.setText(profile.Name)
+                editEmail.setText(profile.Email)
+                // Phone not available in current profile, leave empty
+            }
+        }
+    }
+    
+    private fun saveProfile() {
+        binding.apply {
+            val name = editName.text.toString().trim()
+            val email = editEmail.text.toString().trim()
+            val phone = editPhone.text.toString().trim()
+            
+            // Validate inputs
+            val isEmailValid = validateEmail(email)
+            val isPhoneValid = validatePhone(phone)
+            
+            if (!isEmailValid || !isPhoneValid) {
+                showError("Please fix validation errors before saving")
+                return
+            }
+            
+            // Check if any changes were made
+            val hasChanges = name != currentProfile?.Name ||
+                           email != currentProfile?.Email ||
+                           phone.isNotEmpty()
+            
+            if (!hasChanges) {
+                showError("No changes to save")
+                return
+            }
+            
+            // Update profile
+            val userId = getCurrentUserId()
+            viewModel.updateUserProfile(
+                userId = userId,
+                name = if (name != currentProfile?.Name) name else null,
+                email = if (email != currentProfile?.Email) email else null,
+                phone = if (phone.isNotEmpty()) phone else null
+            )
+        }
+    }
+    
+    private fun setupObservers() {
+        viewModel.updateStatus.observe(viewLifecycleOwner) { status ->
+            when (status) {
+                is UpdateStatus.Success -> {
+                    showSuccess(status.message)
+                    // Navigate back after successful update
+                    findNavController().navigateUp()
+                }
+                is UpdateStatus.Error -> {
+                    showError(status.message)
+                }
+                null -> {} // No status
+            }
+        }
+        
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.apply {
+                progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                buttonSave.isEnabled = !isLoading
+                buttonCancel.isEnabled = !isLoading
+                
+                // Disable input fields while loading
+                editName.isEnabled = !isLoading
+                editEmail.isEnabled = !isLoading
+                editPhone.isEnabled = !isLoading
+            }
+        }
+    }
+    
+    private fun showSuccess(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+            .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.success_green))
+            .show()
+    }
+    
+    private fun showError(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+            .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.error_red))
+            .show()
+    }
+}
+
+// Usage in Profile Screen
+class ProfileFragment : Fragment() {
+    private fun setupEditProfileButton() {
+        binding.buttonEditProfile.setOnClickListener {
+            val currentProfile = viewModel.profile.value
+            if (currentProfile != null) {
+                val bundle = bundleOf("user_profile" to currentProfile)
+                findNavController().navigate(
+                    R.id.action_profile_to_editProfile,
+                    bundle
+                )
+            }
+        }
+    }
+}
+
+// Form Validation Utility
+object ProfileValidationUtils {
+    fun validateProfileUpdate(
+        name: String?,
+        email: String?, 
+        phone: String?
+    ): ValidationResult {
+        val errors = mutableListOf<String>()
+        
+        // Check if at least one field has content
+        if (name.isNullOrBlank() && email.isNullOrBlank() && phone.isNullOrBlank()) {
+            errors.add("At least one field must be provided")
+        }
+        
+        // Validate email format
+        if (!email.isNullOrBlank() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            errors.add("Invalid email format")
+        }
+        
+        // Validate phone format
+        if (!phone.isNullOrBlank()) {
+            val cleanPhone = phone.replace(" ", "").replace("-", "")
+            if (!cleanPhone.matches("^[+]?[1-9]\\d{1,14}$".toRegex())) {
+                errors.add("Invalid phone number format")
+            }
+        }
+        
+        return ValidationResult(
+            isValid = errors.isEmpty(),
+            errors = errors
+        )
+    }
+}
+
+data class ValidationResult(
+    val isValid: Boolean,
+    val errors: List<String>
+)
+```
+
+---
+
 **User Location & Profile Complete! ✅**  
 Next: [Android Integration Guide →](ANDROID_INTEGRATION_GUIDE.md)
