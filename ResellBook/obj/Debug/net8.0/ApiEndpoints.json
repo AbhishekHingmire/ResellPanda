@@ -113,22 +113,6 @@
   },
   {
     "ContainingType": "BooksController",
-    "Method": "Delete",
-    "RelativePath": "api/Books/Delete/{bookId}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "bookId",
-        "Type": "System.Guid",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "BooksController",
     "Method": "EditListing",
     "RelativePath": "api/Books/EditListing/{id}",
     "HttpMethod": "PUT",
@@ -226,22 +210,6 @@
   },
   {
     "ContainingType": "BooksController",
-    "Method": "MarkAsSold",
-    "RelativePath": "api/Books/MarkAsSold/{bookId}",
-    "HttpMethod": "PATCH",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "bookId",
-        "Type": "System.Guid",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "BooksController",
     "Method": "ViewAll",
     "RelativePath": "api/Books/ViewAll/{userId}",
     "HttpMethod": "GET",
@@ -251,43 +219,6 @@
       {
         "Name": "userId",
         "Type": "System.Guid",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "BooksController",
-    "Method": "ViewMyListings",
-    "RelativePath": "api/Books/ViewMyListings/{userId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.Guid",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "UserLocationController",
-    "Method": "EditUser",
-    "RelativePath": "api/UserLocation/EditUser/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Guid",
-        "IsRequired": true
-      },
-      {
-        "Name": "dto",
-        "Type": "UserLocationController\u002BEditUserDto",
         "IsRequired": true
       }
     ],

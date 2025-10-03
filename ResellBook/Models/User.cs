@@ -15,7 +15,7 @@ namespace ResellBook.Models
 
         [Required]
         public required string PasswordHash { get; set; }
-        public string? Phone { get; set; }
+
         public bool IsEmailVerified { get; set; } = false;
     }
 }
