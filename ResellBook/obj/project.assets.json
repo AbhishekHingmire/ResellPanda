@@ -4461,23 +4461,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\abhis\\.nuget\\packages\\": {},
+    "C:\\Users\\ABHISHEK.HINGMIRE\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Projects\\ResellPanda\\ResellBook\\ResellBook.csproj",
+      "projectUniqueName": "C:\\Repos\\ResellPanda\\ResellBook\\ResellBook.csproj",
       "projectName": "ResellBook",
-      "projectPath": "D:\\Projects\\ResellPanda\\ResellBook\\ResellBook.csproj",
-      "packagesPath": "C:\\Users\\abhis\\.nuget\\packages\\",
-      "outputPath": "D:\\Projects\\ResellPanda\\ResellBook\\obj\\",
+      "projectPath": "C:\\Repos\\ResellPanda\\ResellBook\\ResellBook.csproj",
+      "packagesPath": "C:\\Users\\ABHISHEK.HINGMIRE\\.nuget\\packages\\",
+      "outputPath": "C:\\Repos\\ResellPanda\\ResellBook\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\abhis\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ABHISHEK.HINGMIRE\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4505,7 +4505,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net8.0": {
@@ -4573,7 +4573,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

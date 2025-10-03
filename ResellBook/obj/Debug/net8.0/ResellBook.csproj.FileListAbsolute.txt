@@ -157,9 +157,6 @@ C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\appsettings.json
 C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\ResellBook.staticwebassets.runtime.json
 C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\ResellBook.staticwebassets.endpoints.json
 C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\ResellBook.exe
-C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\Migrations\20250930140824_InitialCreate.cs
-C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\Migrations\20250930140824_InitialCreate.Designer.cs
-C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\Migrations\AppDbContextModelSnapshot.cs
 C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\ResellBook.deps.json
 C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\ResellBook.runtimeconfig.json
 C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\ResellBook.dll
@@ -310,8 +307,6 @@ C:\Repos\ResellPanda\ResellBook\obj\Debug\net8.0\refint\ResellBook.dll
 C:\Repos\ResellPanda\ResellBook\obj\Debug\net8.0\ResellBook.pdb
 C:\Repos\ResellPanda\ResellBook\obj\Debug\net8.0\ResellBook.genruntimeconfig.cache
 C:\Repos\ResellPanda\ResellBook\obj\Debug\net8.0\ref\ResellBook.dll
-C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\Migrations\20250930144032_my-migr2.cs
-C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\Migrations\20250930144032_my-migr2.Designer.cs
 D:\Projects\ResellPanda\ResellBook\obj\Debug\net8.0\ResellBook.csproj.AssemblyReference.cache
 D:\Projects\ResellPanda\ResellBook\obj\Debug\net8.0\rpswa.dswa.cache.json
 D:\Projects\ResellPanda\ResellBook\obj\Debug\net8.0\ResellBook.GeneratedMSBuildEditorConfig.editorconfig
@@ -473,3 +468,10 @@ D:\Projects\ResellPanda\ResellBook\obj\Debug\net8.0\staticwebassets.upToDateChec
 D:\Projects\ResellPanda\ResellBook\obj\Debug\net8.0\ResellBook.csproj.Up2Date
 D:\Projects\ResellPanda\ResellBook\obj\Debug\net8.0\ResellBook.genruntimeconfig.cache
 D:\Projects\ResellPanda\ResellBook\obj\Debug\net8.0\ref\ResellBook.dll
+C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\publish\web.config
+C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\publish\appsettings.Development.json
+C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\publish\appsettings.json
+C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\publish\ResellBook.deps.json
+C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\publish\ResellBook.runtimeconfig.json
+C:\Repos\ResellPanda\ResellBook\bin\Debug\net8.0\publish\ResellBook.staticwebassets.endpoints.json
+C:\Repos\ResellPanda\ResellBook\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
