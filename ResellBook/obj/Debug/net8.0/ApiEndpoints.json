@@ -225,6 +225,43 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "ResellBook.Controllers.ChatController",
+    "Method": "GetConversation",
+    "RelativePath": "api/Chat/Conversation/{user1Id}/{user2Id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "user1Id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "user2Id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.ChatController",
+    "Method": "Send",
+    "RelativePath": "api/Chat/Send",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "message",
+        "Type": "ResellBook.Models.ChatMessage",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "UserLocationController",
     "Method": "GetLocations",
     "RelativePath": "api/UserLocation/GetLocations/{userId}",

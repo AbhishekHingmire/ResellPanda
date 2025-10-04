@@ -132,7 +132,7 @@ public class AuthController : ControllerBase
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return BadRequest("Invalid credentials.");
-        if (!user.IsEmailVerified) return BadRequest("Email not verified.");
+       // if (!user.IsEmailVerified) return BadRequest("Email not verified.");
 
         var token = JwtHelper.GenerateToken(user.Email, user.Id);
         return Ok(new { Token = token });

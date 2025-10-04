@@ -14,7 +14,7 @@ namespace ResellBook.Data
         public DbSet<UserVerification> UserVerifications { get; set; }
         public DbSet<UserLocation> UserLocations { get; set; }
         public DbSet<Book> Books { get; set; }
-
+        public DbSet<ChatMessage> ChatMessages { get; set; }
     }
 
 }

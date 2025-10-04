@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
 using ResellBook.Services;
+using ResellBook.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Apply database migrations with enhanced error handling
@@ -97,7 +98,7 @@ app.UseRouting();
 app.UseStaticFiles();
 
 app.MapControllers();
-
+app.MapHub<ChatHub>("/chatHub");
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
 startupLogger.LogInformation("Application starting up...");
 
