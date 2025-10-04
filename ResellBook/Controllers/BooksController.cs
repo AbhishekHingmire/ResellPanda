@@ -16,51 +16,6 @@ public class BooksController : ControllerBase
         _context = context;
         _env = env;
     }
-
-    [HttpGet("test-static-files")]
-    public IActionResult TestStaticFiles()
-    {
-        try
-        {
-            var uploadsPath = Path.Combine(_env.WebRootPath, "uploads", "books");
-            
-            if (!Directory.Exists(uploadsPath))
-            {
-                return Ok(new { 
-                    status = "error", 
-                    message = "uploads/books directory not found",
-                    webRootPath = _env.WebRootPath
-                });
-            }
-
-            var files = Directory.GetFiles(uploadsPath)
-                .Select(f => new 
-                {
-                    fileName = Path.GetFileName(f),
-                    relativePath = $"uploads/books/{Path.GetFileName(f)}",
-                    fullUrl = $"{Request.Scheme}://{Request.Host}/uploads/books/{Path.GetFileName(f)}",
-                    exists = System.IO.File.Exists(f),
-                    size = new FileInfo(f).Length
-                })
-                .ToList();
-
-            return Ok(new { 
-                status = "success",
-                webRootPath = _env.WebRootPath,
-                uploadsPath = uploadsPath,
-                fileCount = files.Count,
-                files = files
-            });
-        }
-        catch (Exception ex)
-        {
-            return Ok(new { 
-                status = "error", 
-                message = ex.Message,
-                webRootPath = _env.WebRootPath
-            });
-        }
-    }
     [HttpGet("ViewMyListings/{userId}")]
     public async Task<IActionResult> ViewMyListings(Guid userId)
     {
@@ -238,8 +193,9 @@ public async Task<IActionResult> ViewAll(Guid userId)
     if (currentUserLocation == null)
         return BadRequest("User location not found.");
 
-    // Get all books
+    // Get all books with user information
     var booksData = await _context.Books
+        .Include(b => b.User)  // Include User data to get UserName
         .OrderByDescending(b => b.CreatedAt)
         .ToListAsync();
 
@@ -268,13 +224,17 @@ public async Task<IActionResult> ViewAll(Guid userId)
         return new
         {
             b.Id,
+            b.UserId,        // Include the userId of who listed the book
+            UserName = b.User.Name,  // ✨ ADDED: Include the name of who listed the book
             b.BookName,
             b.AuthorOrPublication,
             b.Category,
             b.SubCategory,
             b.SellingPrice,
             b.IsSold,
-            Images = DeserializeImages(b.ImagePathsJson),
+            Images = string.IsNullOrEmpty(b.ImagePathsJson)
+                        ? Array.Empty<string>()
+                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
             b.CreatedAt,
             Distance = distanceKm.HasValue
                 ? (distanceKm < 1
@@ -287,36 +247,8 @@ public async Task<IActionResult> ViewAll(Guid userId)
     return Ok(books);
 }
 
-private string[] DeserializeImages(string? json)
-{
-    if (string.IsNullOrEmpty(json))
-        return Array.Empty<string>();
-
-    try
-    {
-        var relativePaths = System.Text.Json.JsonSerializer.Deserialize<string[]>(json) ?? Array.Empty<string>();
-        
-        // Convert relative paths to full URLs for client consumption
-        return relativePaths.Select(path => 
-        {
-            // Remove leading slash if present to avoid double slashes
-            var cleanPath = path.TrimStart('/');
-            
-            // Get the current request's base URL
-            var request = HttpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            
-            return $"{baseUrl}/{cleanPath}";
-        }).ToArray();
-    }
-    catch
-    {
-        return Array.Empty<string>();
-    }
-}
-
-// Haversine formula to calculate distance (in km)
-private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    // Haversine formula to calculate distance (in km)
+    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
 {
     const double R = 6371; // Radius of Earth in km
     var dLat = ToRadians(lat2 - lat1);
