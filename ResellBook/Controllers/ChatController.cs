@@ -371,5 +371,67 @@ namespace ResellBook.Controllers
                 return StatusCode(500, new { Success = false, Message = "Failed to delete message" });
             }
         }
+
+        /// <summary>
+        /// Delete entire chat permanently between two users
+        /// </summary>
+        /// <param name="userId">Current user ID</param>
+        /// <param name="otherUserId">Other user ID</param>
+        /// <returns>Deletion confirmation</returns>
+        [HttpDelete("DeleteChat/{userId}/{otherUserId}")]
+        public async Task<ActionResult<DeleteChatResponse>> DeleteChat(Guid userId, Guid otherUserId)
+        {
+            try
+            {
+                _logger.LogInformation($"DeleteChat called - User: {userId}, Other: {otherUserId}");
+
+                // Validate both users exist
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new DeleteChatResponse { Success = false, Message = "User not found" });
+                }
+
+                var otherUser = await _context.Users.FindAsync(otherUserId);
+                if (otherUser == null)
+                {
+                    return NotFound(new DeleteChatResponse { Success = false, Message = "Other user not found" });
+                }
+
+                // Find all messages between these two users
+                var messagesToDelete = await _context.UserChats
+                    .Where(c => (c.SenderId == userId && c.ReceiverId == otherUserId) ||
+                               (c.SenderId == otherUserId && c.ReceiverId == userId))
+                    .ToListAsync();
+
+                if (messagesToDelete.Count == 0)
+                {
+                    return NotFound(new DeleteChatResponse { Success = false, Message = "No chat found between these users" });
+                }
+
+                // Delete all messages
+                _context.UserChats.RemoveRange(messagesToDelete);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Chat deleted successfully - {messagesToDelete.Count} messages removed between users {userId} and {otherUserId}");
+
+                return Ok(new DeleteChatResponse
+                { 
+                    Success = true, 
+                    Message = "Chat deleted permanently", 
+                    DeletedMessagesCount = messagesToDelete.Count,
+                    DeletedBetween = new ChatParticipants
+                    {
+                        User1Name = user.Name,
+                        User2Name = otherUser.Name
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting chat between users {userId} and {otherUserId}");
+                return StatusCode(500, new DeleteChatResponse { Success = false, Message = "Failed to delete chat" });
+            }
+        }
     }
 }

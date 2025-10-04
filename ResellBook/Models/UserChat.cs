@@ -97,4 +97,18 @@ namespace ResellBook.Models
         public string Message { get; set; } = string.Empty;
         public List<ChatListDto> Chats { get; set; } = new();
     }
+
+    public class DeleteChatResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public int DeletedMessagesCount { get; set; }
+        public ChatParticipants? DeletedBetween { get; set; }
+    }
+
+    public class ChatParticipants
+    {
+        public string User1Name { get; set; } = string.Empty;
+        public string User2Name { get; set; } = string.Empty;
+    }
 }

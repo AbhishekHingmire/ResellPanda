@@ -4,11 +4,12 @@
 
 1. [Authentication APIs](#authentication-apis)
 2. [Books Management APIs](#books-management-apis)
-3. [User Location APIs](#user-location-apis)
-4. [User Profile APIs](#user-profile-apis)
-5. [System APIs](#system-apis)
-6. [Error Handling](#error-handling)
-7. [Android Kotlin Integration Examples](#android-kotlin-integration-examples)
+3. [Chat & Messaging APIs](#chat--messaging-apis)
+4. [User Location APIs](#user-location-apis)
+5. [User Profile APIs](#user-profile-apis)
+6. [System APIs](#system-apis)
+7. [Error Handling](#error-handling)
+8. [Android Kotlin Integration Examples](#android-kotlin-integration-examples)
 
 ---
 
@@ -444,7 +445,232 @@ suspend fun getAllBooks(): Response<List<Book>>
 
 ---
 
-## 📍 **User Location APIs**
+## � **Chat & Messaging APIs**
+
+### **Base URL:** `https://resellbook20250929183655.azurewebsites.net/api/Chat`
+
+#### **1. Send Message to Book Owner**
+- **Endpoint:** `POST /api/Chat/SendMessage/{senderId}`
+- **Purpose:** Send message directly to book owner using BookId
+- **Content-Type:** `application/json`
+- **✨ Updated:** Now uses BookId instead of ReceiverId for easier integration
+
+**URL Parameters:**
+- `senderId`: ID of user sending the message (GUID)
+
+**Request Body:**
+```json
+{
+  "BookId": "123e4567-e89b-12d3-a456-426614174000",
+  "Message": "Hi! Is this book still available?"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Message sent successfully",
+  "ChatMessage": {
+    "Id": "789e4567-e89b-12d3-a456-426614174000",
+    "SenderId": "456e4567-e89b-12d3-a456-426614174000",
+    "ReceiverId": "123e4567-e89b-12d3-a456-426614174000",
+    "SenderName": "John Doe",
+    "ReceiverName": "Jane Smith",
+    "Message": "Hi! Is this book still available?",
+    "SentAt": "2025-10-04T13:45:00Z",
+    "IsRead": false,
+    "IsSentByMe": true
+  },
+  "BookContext": {
+    "BookId": "123e4567-e89b-12d3-a456-426614174000",
+    "BookName": "Advanced Mathematics",
+    "BookOwnerName": "Jane Smith",
+    "SellingPrice": 450.00
+  }
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class SendMessageRequest(
+    val BookId: String,
+    val Message: String
+)
+
+data class BookContext(
+    val BookId: String,
+    val BookName: String,
+    val BookOwnerName: String,
+    val SellingPrice: Double
+)
+
+data class ChatMessage(
+    val Id: String,
+    val SenderId: String,
+    val ReceiverId: String,
+    val SenderName: String,
+    val ReceiverName: String,
+    val Message: String,
+    val SentAt: String,
+    val IsRead: Boolean,
+    val IsSentByMe: Boolean
+)
+
+data class SendMessageResponse(
+    val Success: Boolean,
+    val Message: String,
+    val ChatMessage: ChatMessage?,
+    val BookContext: BookContext?
+)
+
+@POST("api/Chat/SendMessage/{senderId}")
+suspend fun sendMessageToBookOwner(
+    @Path("senderId") senderId: String,
+    @Body request: SendMessageRequest
+): Response<SendMessageResponse>
+```
+
+---
+
+#### **2. Get Chat List**
+- **Endpoint:** `GET /api/Chat/GetChats/{userId}`
+- **Purpose:** Get all chat conversations for user with unread counts
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Chats retrieved successfully",
+  "Chats": [
+    {
+      "UserId": "123e4567-e89b-12d3-a456-426614174000",
+      "UserName": "Jane Smith",
+      "LastMessage": "Sure, it's available!",
+      "LastMessageTime": "2025-10-04T14:30:00Z",
+      "UnreadCount": 2,
+      "IsOnline": false
+    }
+  ]
+}
+```
+
+---
+
+#### **3. Get Chat Messages**
+- **Endpoint:** `GET /api/Chat/GetChatMessages/{userId}/{otherUserId}?page=1`
+- **Purpose:** Get message history between two users
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Messages retrieved successfully",
+  "Messages": [
+    {
+      "Id": "789e4567-e89b-12d3-a456-426614174000",
+      "SenderId": "456e4567-e89b-12d3-a456-426614174000",
+      "ReceiverId": "123e4567-e89b-12d3-a456-426614174000",
+      "SenderName": "John Doe",
+      "ReceiverName": "Jane Smith",
+      "Message": "Hi! Is this book still available?",
+      "SentAt": "2025-10-04T13:45:00Z",
+      "IsRead": true,
+      "IsSentByMe": true
+    }
+  ]
+}
+```
+
+---
+
+#### **4. Mark Messages as Read**
+- **Endpoint:** `POST /api/Chat/MarkAsRead/{userId}`
+- **Purpose:** Mark all messages from another user as read
+
+**Request Body:**
+```json
+{
+  "OtherUserId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+---
+
+#### **5. Get Unread Count**
+- **Endpoint:** `GET /api/Chat/GetUnreadCount/{userId}`
+- **Purpose:** Get total unread message count for user
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Unread count retrieved successfully",
+  "UnreadCount": 5
+}
+```
+
+---
+
+#### **6. Delete Single Message**
+- **Endpoint:** `DELETE /api/Chat/DeleteMessage/{messageId}/{userId}`
+- **Purpose:** Delete a specific message (sender only)
+
+---
+
+#### **7. Delete Entire Chat (NEW)**
+- **Endpoint:** `DELETE /api/Chat/DeleteChat/{userId}/{otherUserId}`
+- **Purpose:** ⚠️ Permanently delete ALL messages between two users
+- **Warning:** This action is IRREVERSIBLE
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Chat deleted permanently",
+  "DeletedMessagesCount": 25,
+  "DeletedBetween": {
+    "User1Name": "John Doe",
+    "User2Name": "Jane Smith"
+  }
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class DeleteChatResponse(
+    val Success: Boolean,
+    val Message: String,
+    val DeletedMessagesCount: Int,
+    val DeletedBetween: ChatParticipants?
+)
+
+@DELETE("api/Chat/DeleteChat/{userId}/{otherUserId}")
+suspend fun deleteChat(
+    @Path("userId") userId: String,
+    @Path("otherUserId") otherUserId: String
+): Response<DeleteChatResponse>
+```
+
+---
+
+#### **8. Get Book for Messaging Context (Helper)**
+- **Endpoint:** `GET /api/Chat/GetBookForMessage/{bookId}`
+- **Purpose:** Get book details to show messaging context
+
+**Success Response (200):**
+```json
+{
+  "BookId": "123e4567-e89b-12d3-a456-426614174000",
+  "BookName": "Advanced Mathematics",
+  "BookOwnerName": "Jane Smith",
+  "SellingPrice": 450.00
+}
+```
+
+---
+
+## �📍 **User Location APIs**
 
 ### **Base URL:** `https://resellbook20250929183655.azurewebsites.net/api/UserLocation`
 

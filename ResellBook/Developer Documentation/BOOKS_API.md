@@ -360,44 +360,63 @@ class EditBookViewModel : ViewModel() {
 ---
 
 ### **3. View All Books** 
-**`GET /api/Books/ViewAll`**
+**`GET /api/Books/ViewAll/{userId}`**
 
-**Purpose:** Retrieve all book listings (public endpoint)
+**Purpose:** Retrieve all book listings with distance calculation and owner information
 
 **Authentication:** ❌ No authentication required
+
+**URL Parameters:**
+- `userId`: Current user's ID for distance calculation (GUID) - **Required**
+
+**✨ UPDATED:** Now includes UserId and UserName of book owners for messaging integration!
 
 **Success Response (200):**
 ```json
 [
   {
     "Id": "789e4567-e89b-12d3-a456-426614174000",
+    "UserId": "123e4567-e89b-12d3-a456-426614174000",
+    "UserName": "John Doe",
     "BookName": "Data Structures and Algorithms",
     "AuthorOrPublication": "Robert Lafore",
     "Category": "Computer Science",
     "SubCategory": "Programming",
     "SellingPrice": 299.99,
+    "IsSold": false,
     "Images": [
       "uploads/books/image1.jpg",
       "uploads/books/image2.jpg",
       "uploads/books/image3.jpg"
     ],
-    "CreatedAt": "2025-09-30T10:30:00Z"
+    "CreatedAt": "2025-09-30T10:30:00Z",
+    "Distance": "2.5 km"
   },
   {
     "Id": "456e4567-e89b-12d3-a456-426614174000",
+    "UserId": "987e4567-e89b-12d3-a456-426614174000",
+    "UserName": "Jane Smith",
     "BookName": "Clean Code",
     "AuthorOrPublication": "Robert C. Martin",
     "Category": "Software Engineering",
     "SubCategory": null,
     "SellingPrice": 450.00,
+    "IsSold": false,
     "Images": [
       "uploads/books/clean_code_1.jpg",
       "uploads/books/clean_code_2.jpg"
     ],
-    "CreatedAt": "2025-09-29T15:20:00Z"
+    "CreatedAt": "2025-09-29T15:20:00Z",
+    "Distance": "850 m"
   }
 ]
 ```
+
+**✅ New Fields Added:**
+- **`UserId`**: ID of the book owner (for messaging integration)
+- **`UserName`**: Name of the book owner (for display)
+- **`IsSold`**: Book availability status
+- **`Distance`**: Formatted distance from current user's location
 
 **Android Kotlin Implementation:**
 ```kotlin

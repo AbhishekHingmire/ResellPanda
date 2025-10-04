@@ -99,7 +99,18 @@ https://resellbook20250929183655.azurewebsites.net
 | **Auth** | `/api/Auth/reset-password` | POST | ❌ | Complete password reset |
 | **Books** | `/api/Books/ListBook` | POST | ✅ | Create book listing |
 | **Books** | `/api/Books/EditListing/{id}` | PUT | ✅ | Update book listing |
-| **Books** | `/api/Books/ViewAll` | GET | ❌ | Get all books |
+| **Books** | `/api/Books/ViewAll/{userId}` | GET | ❌ | Get all books with user info |
+| **Books** | `/api/Books/ViewMyListings/{userId}` | GET | ✅ | Get user's book listings |
+| **Books** | `/api/Books/MarkAsSold/{bookId}` | PATCH | ✅ | Mark book as sold |
+| **Books** | `/api/Books/Delete/{bookId}` | DELETE | ✅ | Delete book listing |
+| **Chat** | `/api/Chat/SendMessage/{senderId}` | POST | ✅ | Send message to book owner |
+| **Chat** | `/api/Chat/GetChats/{userId}` | GET | ✅ | Get user's chat conversations |
+| **Chat** | `/api/Chat/GetChatMessages/{userId}/{otherUserId}` | GET | ✅ | Get messages between users |
+| **Chat** | `/api/Chat/MarkAsRead/{userId}` | POST | ✅ | Mark messages as read |
+| **Chat** | `/api/Chat/GetUnreadCount/{userId}` | GET | ✅ | Get unread message count |
+| **Chat** | `/api/Chat/DeleteMessage/{messageId}/{userId}` | DELETE | ✅ | Delete single message |
+| **Chat** | `/api/Chat/DeleteChat/{userId}/{otherUserId}` | DELETE | ✅ | Delete entire chat |
+| **Chat** | `/api/Chat/GetBookForMessage/{bookId}` | GET | ✅ | Get book context for messaging |
 | **Location** | `/api/UserLocation/SyncLocation` | POST | ✅ | Sync GPS location |
 | **Location** | `/api/UserLocation/GetLocations/{userId}` | GET | ✅ | Get location history |
 | **Profile** | `/api/UserLocation/profile/{userId}` | GET | ✅ | Get user profile |

@@ -46,10 +46,12 @@ The Chat API provides a complete messaging system allowing users to:
 **Request Body:**
 ```json
 {
-  "ReceiverId": "123e4567-e89b-12d3-a456-426614174000",
+  "BookId": "123e4567-e89b-12d3-a456-426614174000",
   "Message": "Hello! Is this book still available?"
 }
 ```
+
+**✨ UPDATED:** Now uses `BookId` instead of `ReceiverId` - system automatically finds book owner!
 
 **Success Response (200):**
 ```json
@@ -61,14 +63,23 @@ The Chat API provides a complete messaging system allowing users to:
     "SenderId": "456e4567-e89b-12d3-a456-426614174000",
     "ReceiverId": "123e4567-e89b-12d3-a456-426614174000",
     "SenderName": "John Doe",
+    "ReceiverName": "Jane Smith",
     "Message": "Hello! Is this book still available?",
     "SentAt": "2025-10-04T13:45:00Z",
     "IsRead": false,
     "ReadAt": null,
     "IsSentByMe": true
+  },
+  "BookContext": {
+    "BookId": "123e4567-e89b-12d3-a456-426614174000",
+    "BookName": "Advanced Mathematics", 
+    "BookOwnerName": "Jane Smith",
+    "SellingPrice": 450.00
   }
 }
 ```
+
+**✨ ENHANCED:** Now includes `ReceiverName` and `BookContext` for better user experience!
 
 **Error Responses:**
 ```json
@@ -251,13 +262,107 @@ The Chat API provides a complete messaging system allowing users to:
 
 ---
 
+### **7. Delete Entire Chat (NEW)**
+**`DELETE /api/Chat/DeleteChat/{userId}/{otherUserId}`**
+
+**⚠️ WARNING:** This permanently deletes ALL messages between two users. This action is IRREVERSIBLE!
+
+**Purpose:** Permanently delete entire chat conversation between two users
+
+**URL Parameters:**
+- `userId`: Current user ID (GUID) - **Required**
+- `otherUserId`: Other user ID (GUID) - **Required**
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Chat deleted permanently",
+  "DeletedMessagesCount": 25,
+  "DeletedBetween": {
+    "User1Name": "John Doe",
+    "User2Name": "Jane Smith"
+  }
+}
+```
+
+**Error Responses:**
+```json
+// 404 - User not found
+{
+  "Success": false,
+  "Message": "User not found",
+  "DeletedMessagesCount": 0,
+  "DeletedBetween": null
+}
+
+// 404 - No chat exists
+{
+  "Success": false,
+  "Message": "No chat found between these users",
+  "DeletedMessagesCount": 0,
+  "DeletedBetween": null
+}
+```
+
+---
+
+### **8. Get Book for Messaging Context**
+**`GET /api/Chat/GetBookForMessage/{bookId}`**
+
+**Purpose:** Get book details for messaging context (helpful when using BookId-based messaging)
+
+**URL Parameters:**
+- `bookId`: Book ID (GUID) - **Required**
+
+**Success Response (200):**
+```json
+{
+  "BookId": "123e4567-e89b-12d3-a456-426614174000",
+  "BookName": "Advanced Mathematics",
+  "BookOwnerName": "Jane Smith",
+  "SellingPrice": 450.00
+}
+```
+
+**Error Response (404):**
+```json
+{
+  "Message": "Book not found"
+}
+```
+
+---
+
 ## **📱 Android Implementation**
 
 ### **Data Models:**
 ```kotlin
+// ✨ UPDATED: Uses BookId instead of ReceiverId
 data class SendMessageRequest(
-    val ReceiverId: String,
+    val BookId: String,        // Changed from ReceiverId
     val Message: String
+)
+
+// ✨ NEW: Book context information
+data class BookContext(
+    val BookId: String,
+    val BookName: String,
+    val BookOwnerName: String,
+    val SellingPrice: Double
+)
+
+// ✨ NEW: Delete chat response
+data class DeleteChatResponse(
+    val Success: Boolean,
+    val Message: String,
+    val DeletedMessagesCount: Int,
+    val DeletedBetween: ChatParticipants?
+)
+
+data class ChatParticipants(
+    val User1Name: String,
+    val User2Name: String
 )
 
 data class ChatMessage(
@@ -265,6 +370,7 @@ data class ChatMessage(
     val SenderId: String,
     val ReceiverId: String,
     val SenderName: String,
+    val ReceiverName: String,    // ✨ NEW: Added receiver name
     val Message: String,
     val SentAt: String,
     val IsRead: Boolean,
@@ -354,6 +460,19 @@ interface ChatApi {
         @Path("messageId") messageId: String,
         @Path("userId") userId: String
     ): Response<GenericResponse>
+    
+    // ✨ NEW: Delete entire chat
+    @DELETE("api/Chat/DeleteChat/{userId}/{otherUserId}")
+    suspend fun deleteChat(
+        @Path("userId") userId: String,
+        @Path("otherUserId") otherUserId: String
+    ): Response<DeleteChatResponse>
+    
+    // ✨ NEW: Get book context for messaging
+    @GET("api/Chat/GetBookForMessage/{bookId}")
+    suspend fun getBookForMessage(
+        @Path("bookId") bookId: String
+    ): Response<BookContext>
 }
 ```
 
