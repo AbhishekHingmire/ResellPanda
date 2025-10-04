@@ -16,6 +16,51 @@ public class BooksController : ControllerBase
         _context = context;
         _env = env;
     }
+
+    [HttpGet("test-static-files")]
+    public IActionResult TestStaticFiles()
+    {
+        try
+        {
+            var uploadsPath = Path.Combine(_env.WebRootPath, "uploads", "books");
+            
+            if (!Directory.Exists(uploadsPath))
+            {
+                return Ok(new { 
+                    status = "error", 
+                    message = "uploads/books directory not found",
+                    webRootPath = _env.WebRootPath
+                });
+            }
+
+            var files = Directory.GetFiles(uploadsPath)
+                .Select(f => new 
+                {
+                    fileName = Path.GetFileName(f),
+                    relativePath = $"uploads/books/{Path.GetFileName(f)}",
+                    fullUrl = $"{Request.Scheme}://{Request.Host}/uploads/books/{Path.GetFileName(f)}",
+                    exists = System.IO.File.Exists(f),
+                    size = new FileInfo(f).Length
+                })
+                .ToList();
+
+            return Ok(new { 
+                status = "success",
+                webRootPath = _env.WebRootPath,
+                uploadsPath = uploadsPath,
+                fileCount = files.Count,
+                files = files
+            });
+        }
+        catch (Exception ex)
+        {
+            return Ok(new { 
+                status = "error", 
+                message = ex.Message,
+                webRootPath = _env.WebRootPath
+            });
+        }
+    }
     [HttpGet("ViewMyListings/{userId}")]
     public async Task<IActionResult> ViewMyListings(Guid userId)
     {
@@ -249,7 +294,20 @@ private string[] DeserializeImages(string? json)
 
     try
     {
-        return System.Text.Json.JsonSerializer.Deserialize<string[]>(json) ?? Array.Empty<string>();
+        var relativePaths = System.Text.Json.JsonSerializer.Deserialize<string[]>(json) ?? Array.Empty<string>();
+        
+        // Convert relative paths to full URLs for client consumption
+        return relativePaths.Select(path => 
+        {
+            // Remove leading slash if present to avoid double slashes
+            var cleanPath = path.TrimStart('/');
+            
+            // Get the current request's base URL
+            var request = HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+            
+            return $"{baseUrl}/{cleanPath}";
+        }).ToArray();
     }
     catch
     {

@@ -94,6 +94,50 @@ namespace ResellBook.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ResellBook.Models.UserChat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ReceiverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SentAt")
+                        .HasDatabaseName("IX_UserChats_SentAt");
+
+                    b.HasIndex("ReceiverId", "IsRead")
+                        .HasDatabaseName("IX_UserChats_ReceiverUnread");
+
+                    b.HasIndex("SenderId", "ReceiverId")
+                        .HasDatabaseName("IX_UserChats_SenderReceiver");
+
+                    b.ToTable("UserChats");
+                });
+
             modelBuilder.Entity("ResellBook.Models.UserLocation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -157,6 +201,25 @@ namespace ResellBook.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ResellBook.Models.UserChat", b =>
+                {
+                    b.HasOne("ResellBook.Models.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ResellBook.Models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("ResellBook.Models.UserLocation", b =>
