@@ -664,3 +664,4 @@ C:\Users\ranas\Source\Repos\ResellPandaa\ResellBook\obj\Debug\net8.0\refint\Rese
 C:\Users\ranas\Source\Repos\ResellPandaa\ResellBook\obj\Debug\net8.0\ResellBook.pdb
 C:\Users\ranas\Source\Repos\ResellPandaa\ResellBook\obj\Debug\net8.0\ResellBook.genruntimeconfig.cache
 C:\Users\ranas\Source\Repos\ResellPandaa\ResellBook\obj\Debug\net8.0\ref\ResellBook.dll
+C:\Users\ranas\Source\Repos\ResellPandaa\ResellBook\bin\Debug\net8.0\Migrations\AppDbContextModelSnapshot.cs
