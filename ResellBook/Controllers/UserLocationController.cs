@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
 using ResellBook.Models;
+using ResellBook.Helpers;
 using System.ComponentModel.DataAnnotations;
 
     [ApiController]
@@ -30,7 +31,7 @@ using System.ComponentModel.DataAnnotations;
                 UserId = request.UserId,
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
-                CreateDate = DateTime.UtcNow
+                CreateDate = IndianTimeHelper.UtcNow
             };
             _context.UserLocations.Add(location);
         }
@@ -39,7 +40,7 @@ using System.ComponentModel.DataAnnotations;
             // This is the actual update command:
             userData.Latitude = request.Latitude;
             userData.Longitude = request.Longitude;
-            userData.CreateDate = DateTime.UtcNow;
+            userData.CreateDate = IndianTimeHelper.UtcNow;
             // No need to call Update; EF Core tracks changes automatically
         }
         _context.SaveChanges();

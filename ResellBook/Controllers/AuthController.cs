@@ -95,7 +95,7 @@ public class AuthController : ControllerBase
         Console.WriteLine($"Found {allVerifications.Count} active verifications for user {user.Email}:");
         foreach (var v in allVerifications)
         {
-            Console.WriteLine($"- OTP: {v.Code}, Expiry: {v.Expiry}, IsExpired: {v.Expiry < DateTime.UtcNow}");
+            Console.WriteLine($"- OTP: {v.Code}, Expiry: {IndianTimeHelper.ToIndianFormat(v.Expiry)}, IsExpired: {IndianTimeHelper.IsExpired(v.Expiry)}");
         }
 
         var verification = await _context.UserVerifications
@@ -110,9 +110,9 @@ public class AuthController : ControllerBase
             return BadRequest("Invalid OTP.");
         }
 
-        if (verification.Expiry < DateTime.UtcNow)
+        if (IndianTimeHelper.IsExpired(verification.Expiry))
         {
-            Console.WriteLine($"OTP expired. Expiry: {verification.Expiry}, Current: {DateTime.UtcNow}");
+            Console.WriteLine($"OTP expired. Expiry: {IndianTimeHelper.ToIndianFormat(verification.Expiry)}, Current: {IndianTimeHelper.ToIndianFormat(IndianTimeHelper.UtcNow)}");
             return BadRequest("Expired OTP.");
         }
 
@@ -171,7 +171,7 @@ public class AuthController : ControllerBase
         Console.WriteLine($"Found {allVerifications.Count} active reset verifications for user {user.Email}:");
         foreach (var v in allVerifications)
         {
-            Console.WriteLine($"- OTP: {v.Code}, Expiry: {v.Expiry}, IsExpired: {v.Expiry < DateTime.UtcNow}");
+            Console.WriteLine($"- OTP: {v.Code}, Expiry: {IndianTimeHelper.ToIndianFormat(v.Expiry)}, IsExpired: {IndianTimeHelper.IsExpired(v.Expiry)}");
         }
 
         var verification = await _context.UserVerifications
@@ -186,9 +186,9 @@ public class AuthController : ControllerBase
             return BadRequest("Invalid OTP.");
         }
 
-        if (verification.Expiry < DateTime.UtcNow)
+        if (IndianTimeHelper.IsExpired(verification.Expiry))
         {
-            Console.WriteLine($"Reset OTP expired. Expiry: {verification.Expiry}, Current: {DateTime.UtcNow}");
+            Console.WriteLine($"Reset OTP expired. Expiry: {IndianTimeHelper.ToIndianFormat(verification.Expiry)}, Current: {IndianTimeHelper.ToIndianFormat(IndianTimeHelper.UtcNow)}");
             return BadRequest("Expired OTP.");
         }
 
@@ -248,7 +248,7 @@ public class AuthController : ControllerBase
             UserId = user.Id,
             Code = otp,
             Type = type,
-            Expiry = DateTime.UtcNow.AddMinutes(10),
+            Expiry = IndianTimeHelper.AddMinutesToNow(10),
             IsUsed = false
         };
 

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
 using ResellBook.Models;
+using ResellBook.Helpers;
 using System.ComponentModel.DataAnnotations;
 
 [ApiController]
@@ -125,7 +126,7 @@ public class BooksController : ControllerBase
             SubCategory = dto.SubCategory,
             SellingPrice = dto.SellingPrice,
             ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(imagePaths),
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = IndianTimeHelper.UtcNow
         };
 
         _context.Books.Add(book);

@@ -94,11 +94,56 @@ namespace ResellBook.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ResellBook.Models.UserBlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("BlockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("BlockedUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlockerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockedUserId")
+                        .HasDatabaseName("IX_UserBlocks_BlockedUser");
+
+                    b.HasIndex("BlockerId")
+                        .HasDatabaseName("IX_UserBlocks_Blocker");
+
+                    b.HasIndex("BlockerId", "BlockedUserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserBlocks_BlockerBlocked");
+
+                    b.ToTable("UserBlocks");
+                });
+
             modelBuilder.Entity("ResellBook.Models.UserChat", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("DeletedByReceiver")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DeletedByReceiverAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("DeletedBySender")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DeletedBySenderAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
@@ -201,6 +246,25 @@ namespace ResellBook.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ResellBook.Models.UserBlock", b =>
+                {
+                    b.HasOne("ResellBook.Models.User", "BlockedUser")
+                        .WithMany()
+                        .HasForeignKey("BlockedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ResellBook.Models.User", "Blocker")
+                        .WithMany()
+                        .HasForeignKey("BlockerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BlockedUser");
+
+                    b.Navigation("Blocker");
                 });
 
             modelBuilder.Entity("ResellBook.Models.UserChat", b =>

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ResellBook.Helpers;
 
 namespace ResellBook.Models
 {
@@ -19,11 +20,17 @@ namespace ResellBook.Models
         public string Message { get; set; } = string.Empty;
 
         [Required]
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        public DateTime SentAt { get; set; } = IndianTimeHelper.UtcNow;
 
         public bool IsRead { get; set; } = false;
 
         public DateTime? ReadAt { get; set; }
+
+        // Soft deletion tracking - which users have deleted this message from their view
+        public bool DeletedBySender { get; set; } = false;
+        public bool DeletedByReceiver { get; set; } = false;
+        public DateTime? DeletedBySenderAt { get; set; }
+        public DateTime? DeletedByReceiverAt { get; set; }
 
         // Navigation properties
         [ForeignKey("SenderId")]

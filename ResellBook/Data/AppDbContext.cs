@@ -15,6 +15,7 @@ namespace ResellBook.Data
         public DbSet<UserLocation> UserLocations { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<UserChat> UserChats { get; set; }
+        public DbSet<UserBlock> UserBlocks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,6 +62,33 @@ namespace ResellBook.Data
 
                 entity.HasIndex(uc => new { uc.ReceiverId, uc.IsRead })
                       .HasDatabaseName("IX_UserChats_ReceiverUnread");
+            });
+
+            // Configure UserBlock relationships
+            modelBuilder.Entity<UserBlock>(entity =>
+            {
+                // Configure foreign key relationships
+                entity.HasOne(ub => ub.Blocker)
+                      .WithMany()
+                      .HasForeignKey(ub => ub.BlockerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ub => ub.BlockedUser)
+                      .WithMany()
+                      .HasForeignKey(ub => ub.BlockedUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Ensure one user can only block another user once
+                entity.HasIndex(ub => new { ub.BlockerId, ub.BlockedUserId })
+                      .IsUnique()
+                      .HasDatabaseName("IX_UserBlocks_BlockerBlocked");
+
+                // Index for faster lookups
+                entity.HasIndex(ub => ub.BlockerId)
+                      .HasDatabaseName("IX_UserBlocks_Blocker");
+
+                entity.HasIndex(ub => ub.BlockedUserId)
+                      .HasDatabaseName("IX_UserBlocks_BlockedUser");
             });
         }
     }

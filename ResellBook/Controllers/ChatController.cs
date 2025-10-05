@@ -54,13 +54,26 @@ namespace ResellBook.Controllers
                     });
                 }
 
+                // Check if sender is blocked by receiver
+                var isBlocked = await _context.UserBlocks
+                    .AnyAsync(ub => ub.BlockerId == dto.ReceiverId && ub.BlockedUserId == senderId);
+
+                if (isBlocked)
+                {
+                    return BadRequest(new SendMessageResponse 
+                    { 
+                        Success = false, 
+                        Message = "You cannot send messages to this user" 
+                    });
+                }
+
                 // Create new chat message
                 var chatMessage = new UserChat
                 {
                     SenderId = senderId,
                     ReceiverId = dto.ReceiverId,
                     Message = dto.Message.Trim(),
-                    SentAt = DateTime.UtcNow,
+                    SentAt = IndianTimeHelper.UtcNow,
                     IsRead = false
                 };
 
@@ -123,9 +136,10 @@ namespace ResellBook.Controllers
                     });
                 }
 
-                // Get all users that have chatted with this user
+                // Get all users that have chatted with this user (excluding deleted conversations)
                 var chatPartners = await _context.UserChats
-                    .Where(c => c.SenderId == userId || c.ReceiverId == userId)
+                    .Where(c => (c.SenderId == userId && !c.DeletedBySender) || 
+                               (c.ReceiverId == userId && !c.DeletedByReceiver))
                     .Select(c => c.SenderId == userId ? c.ReceiverId : c.SenderId)
                     .Distinct()
                     .ToListAsync();
@@ -137,18 +151,22 @@ namespace ResellBook.Controllers
                     var partner = await _context.Users.FindAsync(partnerId);
                     if (partner == null) continue;
 
-                    // Get last message between these users
+                    // Get last message between these users (not deleted by current user)
                     var lastMessage = await _context.UserChats
-                        .Where(c => (c.SenderId == userId && c.ReceiverId == partnerId) ||
-                                   (c.SenderId == partnerId && c.ReceiverId == userId))
+                        .Where(c => ((c.SenderId == userId && c.ReceiverId == partnerId && !c.DeletedBySender) ||
+                                   (c.SenderId == partnerId && c.ReceiverId == userId && !c.DeletedByReceiver)))
                         .OrderByDescending(c => c.SentAt)
                         .FirstOrDefaultAsync();
 
-                    // Count unread messages from this partner
+                    // Skip if no visible messages exist
+                    if (lastMessage == null) continue;
+
+                    // Count unread messages from this partner (not deleted by current user)
                     var unreadCount = await _context.UserChats
                         .CountAsync(c => c.SenderId == partnerId && 
                                         c.ReceiverId == userId && 
-                                        !c.IsRead);
+                                        !c.IsRead && 
+                                        !c.DeletedByReceiver);
 
                     chatList.Add(new ChatListDto
                     {
@@ -216,11 +234,11 @@ namespace ResellBook.Controllers
                     });
                 }
 
-                // Get messages between these users with pagination
+                // Get messages between these users with pagination (excluding those deleted by current user)
                 var messages = await _context.UserChats
                     .Include(c => c.Sender)
-                    .Where(c => (c.SenderId == userId && c.ReceiverId == otherUserId) ||
-                               (c.SenderId == otherUserId && c.ReceiverId == userId))
+                    .Where(c => ((c.SenderId == userId && c.ReceiverId == otherUserId && !c.DeletedBySender) ||
+                               (c.SenderId == otherUserId && c.ReceiverId == userId && !c.DeletedByReceiver)))
                     .OrderByDescending(c => c.SentAt)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
@@ -286,7 +304,7 @@ namespace ResellBook.Controllers
                     foreach (var message in unreadMessages)
                     {
                         message.IsRead = true;
-                        message.ReadAt = DateTime.UtcNow;
+                        message.ReadAt = IndianTimeHelper.UtcNow;
                     }
 
                     await _context.SaveChangesAsync();
@@ -320,7 +338,7 @@ namespace ResellBook.Controllers
             try
             {
                 var unreadCount = await _context.UserChats
-                    .CountAsync(c => c.ReceiverId == userId && !c.IsRead);
+                    .CountAsync(c => c.ReceiverId == userId && !c.IsRead && !c.DeletedByReceiver);
 
                 return Ok(new { 
                     Success = true, 
@@ -398,28 +416,42 @@ namespace ResellBook.Controllers
                     return NotFound(new DeleteChatResponse { Success = false, Message = "Other user not found" });
                 }
 
-                // Find all messages between these two users
-                var messagesToDelete = await _context.UserChats
-                    .Where(c => (c.SenderId == userId && c.ReceiverId == otherUserId) ||
-                               (c.SenderId == otherUserId && c.ReceiverId == userId))
+                // Find all messages between these two users that are not already deleted by current user
+                var messagesToMarkDeleted = await _context.UserChats
+                    .Where(c => ((c.SenderId == userId && c.ReceiverId == otherUserId && !c.DeletedBySender) ||
+                               (c.SenderId == otherUserId && c.ReceiverId == userId && !c.DeletedByReceiver)))
                     .ToListAsync();
 
-                if (messagesToDelete.Count == 0)
+                if (messagesToMarkDeleted.Count == 0)
                 {
-                    return NotFound(new DeleteChatResponse { Success = false, Message = "No chat found between these users" });
+                    return NotFound(new DeleteChatResponse { Success = false, Message = "No chat found between these users or already deleted" });
                 }
 
-                // Delete all messages
-                _context.UserChats.RemoveRange(messagesToDelete);
+                // Mark messages as deleted by current user (soft deletion)
+                var deletionTime = IndianTimeHelper.UtcNow;
+                foreach (var message in messagesToMarkDeleted)
+                {
+                    if (message.SenderId == userId)
+                    {
+                        message.DeletedBySender = true;
+                        message.DeletedBySenderAt = deletionTime;
+                    }
+                    else if (message.ReceiverId == userId)
+                    {
+                        message.DeletedByReceiver = true;
+                        message.DeletedByReceiverAt = deletionTime;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Chat deleted successfully - {messagesToDelete.Count} messages removed between users {userId} and {otherUserId}");
+                _logger.LogInformation($"Chat deleted successfully for user {userId} - {messagesToMarkDeleted.Count} messages marked as deleted");
 
                 return Ok(new DeleteChatResponse
                 { 
                     Success = true, 
-                    Message = "Chat deleted permanently", 
-                    DeletedMessagesCount = messagesToDelete.Count,
+                    Message = "Chat deleted from your view", 
+                    DeletedMessagesCount = messagesToMarkDeleted.Count,
                     DeletedBetween = new ChatParticipants
                     {
                         User1Name = user.Name,
@@ -431,6 +463,180 @@ namespace ResellBook.Controllers
             {
                 _logger.LogError(ex, $"Error deleting chat between users {userId} and {otherUserId}");
                 return StatusCode(500, new DeleteChatResponse { Success = false, Message = "Failed to delete chat" });
+            }
+        }
+
+        /// <summary>
+        /// Block a user
+        /// </summary>
+        /// <param name="userId">Current user ID</param>
+        /// <param name="dto">Block request details</param>
+        /// <returns>Block confirmation</returns>
+        [HttpPost("BlockUser/{userId}")]
+        public async Task<ActionResult<BlockUserResponse>> BlockUser(Guid userId, [FromBody] BlockUserDto dto)
+        {
+            try
+            {
+                _logger.LogInformation($"BlockUser called - Blocker: {userId}, UserToBlock: {dto.UserIdToBlock}");
+
+                // Validate both users exist
+                var blocker = await _context.Users.FindAsync(userId);
+                if (blocker == null)
+                {
+                    return NotFound(new BlockUserResponse { Success = false, Message = "User not found" });
+                }
+
+                var userToBlock = await _context.Users.FindAsync(dto.UserIdToBlock);
+                if (userToBlock == null)
+                {
+                    return NotFound(new BlockUserResponse { Success = false, Message = "User to block not found" });
+                }
+
+                // Check if user is trying to block themselves
+                if (userId == dto.UserIdToBlock)
+                {
+                    return BadRequest(new BlockUserResponse { Success = false, Message = "You cannot block yourself" });
+                }
+
+                // Check if user is already blocked
+                var existingBlock = await _context.UserBlocks
+                    .FirstOrDefaultAsync(ub => ub.BlockerId == userId && ub.BlockedUserId == dto.UserIdToBlock);
+
+                if (existingBlock != null)
+                {
+                    return BadRequest(new BlockUserResponse { Success = false, Message = "User is already blocked" });
+                }
+
+                // Create new block
+                var userBlock = new UserBlock
+                {
+                    BlockerId = userId,
+                    BlockedUserId = dto.UserIdToBlock,
+                    BlockedAt = IndianTimeHelper.UtcNow,
+                    Reason = dto.Reason?.Trim()
+                };
+
+                _context.UserBlocks.Add(userBlock);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"User blocked successfully - Blocker: {userId}, Blocked: {dto.UserIdToBlock}");
+
+                return Ok(new BlockUserResponse
+                {
+                    Success = true,
+                    Message = "User blocked successfully",
+                    BlockedUserName = userToBlock.Name,
+                    BlockedAt = userBlock.BlockedAt
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error blocking user {dto.UserIdToBlock} by user {userId}");
+                return StatusCode(500, new BlockUserResponse { Success = false, Message = "Failed to block user" });
+            }
+        }
+
+        /// <summary>
+        /// Unblock a user
+        /// </summary>
+        /// <param name="userId">Current user ID</param>
+        /// <param name="blockedUserId">User ID to unblock</param>
+        /// <returns>Unblock confirmation</returns>
+        [HttpDelete("UnblockUser/{userId}/{blockedUserId}")]
+        public async Task<ActionResult<UnblockUserResponse>> UnblockUser(Guid userId, Guid blockedUserId)
+        {
+            try
+            {
+                _logger.LogInformation($"UnblockUser called - Blocker: {userId}, UserToUnblock: {blockedUserId}");
+
+                // Validate both users exist
+                var blocker = await _context.Users.FindAsync(userId);
+                if (blocker == null)
+                {
+                    return NotFound(new UnblockUserResponse { Success = false, Message = "User not found" });
+                }
+
+                var userToUnblock = await _context.Users.FindAsync(blockedUserId);
+                if (userToUnblock == null)
+                {
+                    return NotFound(new UnblockUserResponse { Success = false, Message = "User to unblock not found" });
+                }
+
+                // Find the block
+                var userBlock = await _context.UserBlocks
+                    .FirstOrDefaultAsync(ub => ub.BlockerId == userId && ub.BlockedUserId == blockedUserId);
+
+                if (userBlock == null)
+                {
+                    return NotFound(new UnblockUserResponse { Success = false, Message = "User is not blocked" });
+                }
+
+                // Remove the block
+                _context.UserBlocks.Remove(userBlock);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"User unblocked successfully - Blocker: {userId}, Unblocked: {blockedUserId}");
+
+                return Ok(new UnblockUserResponse
+                {
+                    Success = true,
+                    Message = "User unblocked successfully",
+                    UnblockedUserName = userToUnblock.Name
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error unblocking user {blockedUserId} by user {userId}");
+                return StatusCode(500, new UnblockUserResponse { Success = false, Message = "Failed to unblock user" });
+            }
+        }
+
+        /// <summary>
+        /// Get list of blocked users
+        /// </summary>
+        /// <param name="userId">Current user ID</param>
+        /// <returns>List of blocked users</returns>
+        [HttpGet("GetBlockedUsers/{userId}")]
+        public async Task<ActionResult<BlockedUsersResponse>> GetBlockedUsers(Guid userId)
+        {
+            try
+            {
+                _logger.LogInformation($"GetBlockedUsers called for user: {userId}");
+
+                // Validate user exists
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new BlockedUsersResponse { Success = false, Message = "User not found" });
+                }
+
+                // Get blocked users
+                var blockedUsers = await _context.UserBlocks
+                    .Include(ub => ub.BlockedUser)
+                    .Where(ub => ub.BlockerId == userId)
+                    .OrderByDescending(ub => ub.BlockedAt)
+                    .Select(ub => new BlockedUserDto
+                    {
+                        UserId = ub.BlockedUserId,
+                        UserName = ub.BlockedUser.Name,
+                        UserEmail = ub.BlockedUser.Email,
+                        BlockedAt = ub.BlockedAt,
+                        Reason = ub.Reason
+                    })
+                    .ToListAsync();
+
+                return Ok(new BlockedUsersResponse
+                {
+                    Success = true,
+                    Message = "Blocked users retrieved successfully",
+                    BlockedUsers = blockedUsers,
+                    TotalCount = blockedUsers.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting blocked users for user {userId}");
+                return StatusCode(500, new BlockedUsersResponse { Success = false, Message = "Failed to get blocked users" });
             }
         }
     }

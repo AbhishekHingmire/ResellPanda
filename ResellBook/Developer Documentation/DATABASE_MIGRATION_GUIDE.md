@@ -175,7 +175,7 @@ public class BookReview
     public Guid UserId { get; set; }
     public int Rating { get; set; } // 1-5 stars
     public string? Comment { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = IndianTimeHelper.UtcNow;
     
     // Navigation properties
     public Book Book { get; set; }

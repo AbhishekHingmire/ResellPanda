@@ -618,16 +618,16 @@ suspend fun sendMessageToBookOwner(
 
 ---
 
-#### **7. Delete Entire Chat (NEW)**
+#### **7. Delete Chat from Your View (UPDATED)**
 - **Endpoint:** `DELETE /api/Chat/DeleteChat/{userId}/{otherUserId}`
-- **Purpose:** ⚠️ Permanently delete ALL messages between two users
-- **Warning:** This action is IRREVERSIBLE
+- **Purpose:** ✨ Delete chat from YOUR view only (not from other user's view)
+- **Note:** Uses soft deletion - messages are hidden from your view but remain for the other user
 
 **Success Response (200):**
 ```json
 {
   "Success": true,
-  "Message": "Chat deleted permanently",
+  "Message": "Chat deleted from your view",
   "DeletedMessagesCount": 25,
   "DeletedBetween": {
     "User1Name": "John Doe",
@@ -654,7 +654,130 @@ suspend fun deleteChat(
 
 ---
 
-#### **8. Get Book for Messaging Context (Helper)**
+#### **8. Block User (NEW)**
+- **Endpoint:** `POST /api/Chat/BlockUser/{userId}`
+- **Purpose:** Block a user from sending messages to you
+- **Content-Type:** `application/json`
+
+**Request Body:**
+```json
+{
+  "UserIdToBlock": "123e4567-e89b-12d3-a456-426614174000",
+  "Reason": "Spam/Inappropriate behavior" // Optional
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "User blocked successfully",
+  "BlockedUserName": "John Doe",
+  "BlockedAt": "2025-10-05T10:30:00Z"
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class BlockUserRequest(
+    val UserIdToBlock: String,
+    val Reason: String? = null
+)
+
+data class BlockUserResponse(
+    val Success: Boolean,
+    val Message: String,
+    val BlockedUserName: String?,
+    val BlockedAt: String?
+)
+
+@POST("api/Chat/BlockUser/{userId}")
+suspend fun blockUser(
+    @Path("userId") userId: String,
+    @Body request: BlockUserRequest
+): Response<BlockUserResponse>
+```
+
+---
+
+#### **9. Unblock User (NEW)**
+- **Endpoint:** `DELETE /api/Chat/UnblockUser/{userId}/{blockedUserId}`
+- **Purpose:** Unblock a previously blocked user
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "User unblocked successfully",
+  "UnblockedUserName": "John Doe"
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class UnblockUserResponse(
+    val Success: Boolean,
+    val Message: String,
+    val UnblockedUserName: String?
+)
+
+@DELETE("api/Chat/UnblockUser/{userId}/{blockedUserId}")
+suspend fun unblockUser(
+    @Path("userId") userId: String,
+    @Path("blockedUserId") blockedUserId: String
+): Response<UnblockUserResponse>
+```
+
+---
+
+#### **10. Get Blocked Users (NEW)**
+- **Endpoint:** `GET /api/Chat/GetBlockedUsers/{userId}`
+- **Purpose:** Get list of all blocked users
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Blocked users retrieved successfully",
+  "BlockedUsers": [
+    {
+      "UserId": "123e4567-e89b-12d3-a456-426614174000",
+      "UserName": "John Doe",
+      "UserEmail": "john@example.com",
+      "BlockedAt": "2025-10-05T10:30:00Z",
+      "Reason": "Spam"
+    }
+  ],
+  "TotalCount": 1
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class BlockedUserDto(
+    val UserId: String,
+    val UserName: String,
+    val UserEmail: String?,
+    val BlockedAt: String,
+    val Reason: String?
+)
+
+data class BlockedUsersResponse(
+    val Success: Boolean,
+    val Message: String,
+    val BlockedUsers: List<BlockedUserDto>,
+    val TotalCount: Int
+)
+
+@GET("api/Chat/GetBlockedUsers/{userId}")
+suspend fun getBlockedUsers(
+    @Path("userId") userId: String
+): Response<BlockedUsersResponse>
+```
+
+---
+
+#### **11. Get Book for Messaging Context (Helper)**
 - **Endpoint:** `GET /api/Chat/GetBookForMessage/{bookId}`
 - **Purpose:** Get book details to show messaging context
 
