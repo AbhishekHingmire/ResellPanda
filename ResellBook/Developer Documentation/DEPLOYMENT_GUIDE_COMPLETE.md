@@ -34,20 +34,34 @@ SMTP__Pass=unknvvwbmpszgmyk
 
 ## 🚀 Quick Deployment Process
 
-### For Regular Code Updates (Migration Already Works)
+### ⚡ **RECOMMENDED: Safe Deployment (Preserves wwwroot)**
+
+**✅ Use this method to preserve uploaded images and files:**
+
+```powershell
+# Use the automated preservation script
+.\deploy-simple-preserve.ps1
+```
+
+**What this script does:**
+- ✅ Builds your application
+- ✅ Excludes wwwroot folder from deployment
+- ✅ Preserves all uploaded images/files
+- ✅ Deploys only code changes
+- ✅ Zero risk of file loss
+
+### 🚨 **LEGACY: Standard Deployment (OVERWRITES wwwroot)**
+
+**⚠️ WARNING: This method will DELETE all uploaded files in production wwwroot!**
 
 ```bash
-# 1. Build and publish
-dotnet build --configuration Release
-dotnet publish --configuration Release
+# DON'T USE THIS - It will delete uploaded files!
 dotnet publish -c Release -o publish
-# 2. Create deployment package
-Compress-Archive -Path "bin\Release\net8.0\publish\*" -DestinationPath "deploy.zip" -Force
-
-# 3. Deploy to Azure
+Compress-Archive -Path "publish\*" -DestinationPath "deploy.zip" -Force
 az webapp deploy --resource-group resell-panda-rg --name ResellBook20250929183655 --src-path "deploy.zip" --type zip
+```
 
-# 4. Test deployment
+### 🔍 **Deployment Verification**
 curl https://resellbook20250929183655.azurewebsites.net/api/health/database
 ```
 
