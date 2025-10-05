@@ -21,6 +21,14 @@
 - **Full Guide**: `DEPLOYMENT_GUIDE_LOGGING.md`
 - **Safety Protocol**: `DEPLOYMENT_SAFETY_PROTOCOL.md`
 - **API Docs**: `LOGS_CONTROLLER_API.md`
+- **Project Structure**: `Developer Documentation/PROJECT_STRUCTURE.md`
+- **Maintenance**: `Developer Documentation/MAINTENANCE_SCRIPTS.md`
+
+## 🧹 PROJECT MAINTENANCE
+```powershell
+# Clean up temporary files and check project health
+.\maintenance.ps1
+```
 
 ---
 
