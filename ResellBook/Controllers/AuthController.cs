@@ -5,6 +5,7 @@ using ResellBook.Data;
 using ResellBook.Helpers;
 using ResellBook.Models;
 using ResellBook.Services;
+using ResellBook.Utils;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -12,13 +13,11 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly EmailService _emailService;
-    private readonly ILogService _logService;
 
-    public AuthController(AppDbContext context, EmailService emailService, ILogService logService)
+    public AuthController(AppDbContext context, EmailService emailService)
     {
         _context = context;
         _emailService = emailService;
-        _logService = logService;
     }
 
     // ------------------ SIGNUP -------------------
@@ -133,73 +132,30 @@ public class AuthController : ControllerBase
     {
         try
         {
-            await _logService.LogNormalAsync("AuthController", "Login", 
-                $"Login attempt for email: {request.Email}", Request.Path);
+            SimpleLogger.LogNormal("AuthController", "Login", $"Login attempt for email: {request.Email}");
 
-            // Input validation
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            {
-                await _logService.LogCriticalAsync("AuthController", "Login", 
-                    "Login attempt with missing email or password", null, Request.Path);
-                return BadRequest(new { success = false, message = "Email and password are required." });
-            }
-
-            // Find user
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            if (user == null)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
-                await _logService.LogCriticalAsync("AuthController", "Login", 
-                    $"Login attempt failed - User not found for email: {request.Email}", null, Request.Path);
-                return BadRequest(new { success = false, message = "Invalid email or password." });
+                SimpleLogger.LogCritical("AuthController", "Login", $"Failed login attempt for email: {request.Email}");
+                return BadRequest("Invalid credentials.");
+            }
+            
+            if (!user.IsEmailVerified) 
+            {
+                SimpleLogger.LogCritical("AuthController", "Login", $"Unverified email login attempt: {request.Email}", null, user.Id.ToString());
+                return BadRequest("Email not verified.");
             }
 
-            // Verify password
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            {
-                await _logService.LogCriticalAsync("AuthController", "Login", 
-                    $"Login attempt failed - Invalid password for user: {user.Id}", null, Request.Path, user.Id.ToString());
-                return BadRequest(new { success = false, message = "Invalid emil or password." });
-            }
-
-            // Check email verification
-            if (!user.IsEmailVerified)
-            {
-                await _logService.LogCriticalAsync("AuthController", "Login", 
-                    $"Login attempt failed - Email not verified for user: {user.Id}", null, Request.Path, user.Id.ToString());
-                return BadRequest(new { success = false, message = "Email not verified. Please verify your email first." });
-            }
-
-            // Generate token
             var token = JwtHelper.GenerateToken(user.Email, user.Id);
-
-            await _logService.LogNormalAsync("AuthController", "Login", 
-                $"Login successful for user: {user.Id}", Request.Path, user.Id.ToString());
-
-            return Ok(new 
-            { 
-                success = true,
-                token = token,
-                user = new
-                {
-                    id = user.Id,
-                    name = user.Name,
-                    email = user.Email,
-                    isEmailVerified = user.IsEmailVerified
-                },
-                message = "Login successful"
-            });
+            SimpleLogger.LogNormal("AuthController", "Login", "Login successful", user.Id.ToString());
+            
+            return Ok(new { Token = token });
         }
         catch (Exception ex)
         {
-            await _logService.LogCriticalAsync("AuthController", "Login", 
-                "Unexpected error during login", ex, Request.Path);
-                
-            return StatusCode(500, new 
-            { 
-                success = false, 
-                message = "An unexpected error occurred during login. Please try again later.",
-                errorId = Guid.NewGuid().ToString()
-            });
+            SimpleLogger.LogCritical("AuthController", "Login", "Login method error", ex);
+            return StatusCode(500, "Login failed");
         }
     }
 

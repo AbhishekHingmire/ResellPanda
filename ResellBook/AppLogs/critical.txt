@@ -1,0 +1,24 @@
+05-10-2025 09:35:17 PM | BooksController | ViewAll | ViewAll method failed | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | Error: An item with the same key has already been added. Key: e518e64f-ba1b-4035-92ba-e3a6fb45b7c7 | Stack:    at System.Collections.Generic.Dictionary`2.TryInsert(TKey key, TValue value, InsertionBehavior behavior)
+   at System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at BooksController.ViewAll(Guid userId) in C:\Repos\ResellPanda\ResellBook\Controllers\BooksController.cs:line 243
+05-10-2025 09:37:47 PM | LogsController | TestLogging | Test critical log entry created | UserId: N/A
+05-10-2025 09:39:02 PM | LogsController | TestLogging | Test critical log entry created | UserId: N/A
+05-10-2025 09:39:06 PM | LogsController | TestLogging | Test critical log entry created | UserId: N/A
+05-10-2025 09:39:28 PM | BooksController | ViewAll | ViewAll method failed | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | Error: An item with the same key has already been added. Key: e518e64f-ba1b-4035-92ba-e3a6fb45b7c7 | Stack:    at System.Collections.Generic.Dictionary`2.TryInsert(TKey key, TValue value, InsertionBehavior behavior)
+   at System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at BooksController.ViewAll(Guid userId) in C:\Repos\ResellPanda\ResellBook\Controllers\BooksController.cs:line 243
+05-10-2025 09:39:33 PM | LogsController | TestLogging | Test critical log entry created | UserId: N/A
+05-10-2025 09:43:00 PM | BooksController | ViewAll | ViewAll method failed | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | Error: An item with the same key has already been added. Key: e518e64f-ba1b-4035-92ba-e3a6fb45b7c7 | Stack:    at System.Collections.Generic.Dictionary`2.TryInsert(TKey key, TValue value, InsertionBehavior behavior)
+   at System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at BooksController.ViewAll(Guid userId) in C:\Repos\ResellPanda\ResellBook\Controllers\BooksController.cs:line 243
+05-10-2025 09:47:56 PM | BooksController | ViewAll | ViewAll method failed | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | Error: An item with the same key has already been added. Key: e518e64f-ba1b-4035-92ba-e3a6fb45b7c7 | Stack:    at System.Collections.Generic.Dictionary`2.TryInsert(TKey key, TValue value, InsertionBehavior behavior)
+   at System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToDictionaryAsync[TSource,TKey,TElement](IQueryable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer, CancellationToken cancellationToken)
+   at BooksController.ViewAll(Guid userId) in C:\Repos\ResellPanda\ResellBook\Controllers\BooksController.cs:line 243

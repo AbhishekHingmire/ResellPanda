@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ResellBook.Services;
-using ResellBook.Models;
+using ResellBook.Utils;
 
 namespace ResellBook.Controllers
 {
@@ -8,190 +7,110 @@ namespace ResellBook.Controllers
     [Route("api/[controller]")]
     public class LogsController : ControllerBase
     {
-        private readonly ILogService _logService;
-
-        public LogsController(ILogService logService)
-        {
-            _logService = logService;
-        }
-
-        /// <summary>
-        /// Get normal logs with pagination
-        /// </summary>
-        /// <param name="page">Page number (default: 1)</param>
-        /// <param name="pageSize">Number of logs per page (default: 50, max: 100)</param>
-        /// <returns>Paginated normal logs</returns>
         [HttpGet("GetNormalLogs")]
-        public async Task<IActionResult> GetNormalLogs([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+        public IActionResult GetNormalLogs([FromQuery] int maxLines = 100)
         {
             try
             {
-                // Validate parameters
-                if (page < 1) page = 1;
-                if (pageSize < 1 || pageSize > 100) pageSize = 50;
-
-                await _logService.LogNormalAsync("LogsController", "GetNormalLogs", 
-                    $"Fetching normal logs - Page: {page}, PageSize: {pageSize}", Request.Path);
-
-                var result = await _logService.GetNormalLogsAsync(page, pageSize);
+                SimpleLogger.LogNormal("LogsController", "GetNormalLogs", $"Fetching {maxLines} normal logs");
                 
-                if (!result.Success)
-                {
-                    await _logService.LogCriticalAsync("LogsController", "GetNormalLogs", 
-                        "Failed to retrieve normal logs", null, Request.Path);
-                    return StatusCode(500, new { message = "Failed to retrieve logs", error = result.ErrorMessage });
-                }
-
+                var logs = SimpleLogger.GetNormalLogs(maxLines);
+                
                 return Ok(new
                 {
                     success = true,
-                    data = result.Logs,
-                    pagination = new
-                    {
-                        currentPage = page,
-                        pageSize = pageSize,
-                        totalCount = result.TotalCount,
-                        totalPages = (int)Math.Ceiling((double)result.TotalCount / pageSize),
-                        hasNextPage = page * pageSize < result.TotalCount,
-                        hasPreviousPage = page > 1
-                    }
+                    data = logs,
+                    count = logs.Count,
+                    message = $"Retrieved {logs.Count} normal log entries"
                 });
             }
             catch (Exception ex)
             {
-                await _logService.LogCriticalAsync("LogsController", "GetNormalLogs", 
-                    "Unexpected error while fetching normal logs", ex, Request.Path);
-                    
-                return StatusCode(500, new { 
+                SimpleLogger.LogCritical("LogsController", "GetNormalLogs", "Failed to retrieve normal logs", ex);
+                
+                return StatusCode(500, new 
+                { 
                     success = false, 
-                    message = "An unexpected error occurred while retrieving logs" 
+                    message = "Failed to retrieve normal logs", 
+                    error = ex.Message 
                 });
             }
         }
 
-        /// <summary>
-        /// Get critical logs with pagination
-        /// </summary>
-        /// <param name="page">Page number (default: 1)</param>
-        /// <param name="pageSize">Number of logs per page (default: 50, max: 100)</param>
-        /// <returns>Paginated critical logs</returns>
         [HttpGet("GetCriticalLogs")]
-        public async Task<IActionResult> GetCriticalLogs([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+        public IActionResult GetCriticalLogs([FromQuery] int maxLines = 100)
         {
             try
             {
-                // Validate parameters
-                if (page < 1) page = 1;
-                if (pageSize < 1 || pageSize > 100) pageSize = 50;
-
-                await _logService.LogNormalAsync("LogsController", "GetCriticalLogs", 
-                    $"Fetching critical logs - Page: {page}, PageSize: {pageSize}", Request.Path);
-
-                var result = await _logService.GetCriticalLogsAsync(page, pageSize);
+                SimpleLogger.LogNormal("LogsController", "GetCriticalLogs", $"Fetching {maxLines} critical logs");
                 
-                if (!result.Success)
-                {
-                    await _logService.LogCriticalAsync("LogsController", "GetCriticalLogs", 
-                        "Failed to retrieve critical logs", null, Request.Path);
-                    return StatusCode(500, new { message = "Failed to retrieve logs", error = result.ErrorMessage });
-                }
-
+                var logs = SimpleLogger.GetCriticalLogs(maxLines);
+                
                 return Ok(new
                 {
                     success = true,
-                    data = result.Logs,
-                    pagination = new
-                    {
-                        currentPage = page,
-                        pageSize = pageSize,
-                        totalCount = result.TotalCount,
-                        totalPages = (int)Math.Ceiling((double)result.TotalCount / pageSize),
-                        hasNextPage = page * pageSize < result.TotalCount,
-                        hasPreviousPage = page > 1
-                    }
+                    data = logs,
+                    count = logs.Count,
+                    message = $"Retrieved {logs.Count} critical log entries"
                 });
             }
             catch (Exception ex)
             {
-                await _logService.LogCriticalAsync("LogsController", "GetCriticalLogs", 
-                    "Unexpected error while fetching critical logs", ex, Request.Path);
-                    
-                return StatusCode(500, new { 
+                SimpleLogger.LogCritical("LogsController", "GetCriticalLogs", "Failed to retrieve critical logs", ex);
+                
+                return StatusCode(500, new 
+                { 
                     success = false, 
-                    message = "An unexpected error occurred while retrieving logs" 
+                    message = "Failed to retrieve critical logs", 
+                    error = ex.Message 
                 });
             }
         }
 
-        /// <summary>
-        /// Get logs summary with counts and time ranges
-        /// </summary>
-        /// <returns>Summary of all logs</returns>
         [HttpGet("GetLogsSummary")]
-        public async Task<IActionResult> GetLogsSummary()
+        public IActionResult GetLogsSummary()
         {
             try
             {
-                await _logService.LogNormalAsync("LogsController", "GetLogsSummary", 
-                    "Fetching logs summary", Request.Path);
-
-                var result = await _logService.GetLogsSummaryAsync();
+                SimpleLogger.LogNormal("LogsController", "GetLogsSummary", "Fetching logs summary");
                 
-                if (!result.Success)
-                {
-                    await _logService.LogCriticalAsync("LogsController", "GetLogsSummary", 
-                        "Failed to retrieve logs summary", null, Request.Path);
-                    return StatusCode(500, new { message = "Failed to retrieve logs summary", error = result.ErrorMessage });
-                }
-
+                var (normalCount, criticalCount) = SimpleLogger.GetLogCounts();
+                
                 return Ok(new
                 {
                     success = true,
                     summary = new
                     {
-                        normalLogsCount = result.NormalLogsCount,
-                        criticalLogsCount = result.CriticalLogsCount,
-                        totalLogsCount = result.NormalLogsCount + result.CriticalLogsCount,
-                        latestLogTime = result.LatestLogTime?.ToString("dd/MM/yyyy hh:mm:ss tt"),
-                        oldestLogTime = result.OldestLogTime?.ToString("dd/MM/yyyy hh:mm:ss tt"),
+                        normalLogsCount = normalCount,
+                        criticalLogsCount = criticalCount,
+                        totalLogsCount = normalCount + criticalCount,
+                        timestamp = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"),
                         timeZone = "IST (Indian Standard Time)"
                     }
                 });
             }
             catch (Exception ex)
             {
-                await _logService.LogCriticalAsync("LogsController", "GetLogsSummary", 
-                    "Unexpected error while fetching logs summary", ex, Request.Path);
-                    
-                return StatusCode(500, new { 
+                SimpleLogger.LogCritical("LogsController", "GetLogsSummary", "Failed to get logs summary", ex);
+                
+                return StatusCode(500, new 
+                { 
                     success = false, 
-                    message = "An unexpected error occurred while retrieving logs summary" 
+                    message = "Failed to get logs summary", 
+                    error = ex.Message 
                 });
             }
         }
 
-        /// <summary>
-        /// Clear all logs (use with caution)
-        /// </summary>
-        /// <returns>Confirmation of log clearing</returns>
         [HttpPost("ClearAllLogs")]
-        public async Task<IActionResult> ClearAllLogs()
+        public IActionResult ClearAllLogs()
         {
             try
             {
-                await _logService.LogCriticalAsync("LogsController", "ClearAllLogs", 
-                    "Log clearing requested - This is a critical operation", null, Request.Path);
-
-                var logsPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
-                var normalLogsPath = Path.Combine(logsPath, "normal_logs.txt");
-                var criticalLogsPath = Path.Combine(logsPath, "critical_logs.txt");
-
-                if (System.IO.File.Exists(normalLogsPath))
-                    await System.IO.File.WriteAllTextAsync(normalLogsPath, string.Empty);
-
-                if (System.IO.File.Exists(criticalLogsPath))
-                    await System.IO.File.WriteAllTextAsync(criticalLogsPath, string.Empty);
-
+                SimpleLogger.LogCritical("LogsController", "ClearAllLogs", "Log clearing requested - CRITICAL OPERATION");
+                
+                SimpleLogger.ClearLogs();
+                
                 return Ok(new
                 {
                     success = true,
@@ -201,9 +120,36 @@ namespace ResellBook.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { 
+                return StatusCode(500, new 
+                { 
                     success = false, 
                     message = "Failed to clear logs", 
+                    error = ex.Message 
+                });
+            }
+        }
+
+        [HttpGet("TestLogging")]
+        public IActionResult TestLogging()
+        {
+            try
+            {
+                SimpleLogger.LogNormal("LogsController", "TestLogging", "Test normal log entry created");
+                SimpleLogger.LogCritical("LogsController", "TestLogging", "Test critical log entry created");
+                
+                return Ok(new
+                {
+                    success = true,
+                    message = "Test logs created successfully",
+                    timestamp = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt")
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new 
+                { 
+                    success = false, 
+                    message = "Failed to create test logs", 
                     error = ex.Message 
                 });
             }

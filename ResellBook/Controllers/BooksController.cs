@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
 using ResellBook.Models;
 using ResellBook.Helpers;
-using ResellBook.Services;
+using ResellBook.Utils;
 using System.ComponentModel.DataAnnotations;
 
 [ApiController]
@@ -12,36 +12,23 @@ public class BooksController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IWebHostEnvironment _env;
-    private readonly ILogService _logService;
 
-    public BooksController(AppDbContext context, IWebHostEnvironment env, ILogService logService)
+    public BooksController(AppDbContext context, IWebHostEnvironment env)
     {
         _context = context;
         _env = env;
-        _logService = logService;
     }
     [HttpGet("ViewMyListings/{userId}")]
     public async Task<IActionResult> ViewMyListings(Guid userId)
     {
         try
         {
-            await _logService.LogNormalAsync("BooksController", "ViewMyListings", 
-                $"ViewMyListings request for userId: {userId}", Request.Path, userId.ToString());
-
-            if (userId == Guid.Empty)
-            {
-                await _logService.LogCriticalAsync("BooksController", "ViewMyListings", 
-                    "Invalid userId provided - Empty GUID", null, Request.Path, userId.ToString());
-                return BadRequest(new { success = false, message = "Invalid user ID provided." });
-            }
-
+            SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Request for userId: {userId}", userId.ToString());
+            
             var books = await _context.Books
                 .Where(b => b.UserId == userId)
                 .OrderByDescending(b => b.CreatedAt)
                 .ToListAsync();
-
-            await _logService.LogNormalAsync("BooksController", "ViewMyListings", 
-                $"Retrieved {books.Count} books for user {userId}", Request.Path, userId.ToString());
 
             var result = books.Select(b => new
             {
@@ -55,22 +42,16 @@ public class BooksController : ControllerBase
                             ? Array.Empty<string>()
                             : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
                 b.IsSold,
-                CreatedAt = b.CreatedAt.ToString("dd/MM/yyyy hh:mm:ss tt")
+                b.CreatedAt
             });
 
-            return Ok(new { success = true, data = result, totalCount = books.Count });
+            SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Retrieved {books.Count} books", userId.ToString());
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            await _logService.LogCriticalAsync("BooksController", "ViewMyListings", 
-                "Unexpected error in ViewMyListings method", ex, Request.Path, userId.ToString());
-                
-            return StatusCode(500, new 
-            { 
-                success = false, 
-                message = "Failed to retrieve your listings. Please try again later.",
-                errorId = Guid.NewGuid().ToString()
-            });
+            SimpleLogger.LogCritical("BooksController", "ViewMyListings", "ViewMyListings failed", ex, userId.ToString());
+            return StatusCode(500, "Failed to retrieve listings");
         }
     }
 
@@ -127,113 +108,35 @@ public class BooksController : ControllerBase
     {
         try
         {
-            await _logService.LogNormalAsync("BooksController", "ListBook", 
-                $"Book listing request for userId: {dto.UserId}, BookName: {dto.BookName}", 
-                Request.Path, dto.UserId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listing request for userId: {dto.UserId}, BookName: {dto.BookName}", dto.UserId.ToString());
 
-            // Validate user exists
-            var userExists = await _context.Users.AnyAsync(u => u.Id == dto.UserId);
-            if (!userExists)
+            if (!await _context.Users.AnyAsync(u => u.Id == dto.UserId))
             {
-                await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                    $"User not found with ID: {dto.UserId}", null, Request.Path, dto.UserId.ToString());
-                return NotFound(new { success = false, message = "User not found" });
+                SimpleLogger.LogCritical("BooksController", "ListBook", $"User not found: {dto.UserId}", null, dto.UserId.ToString());
+                return NotFound(new { Message = "User not found" });
             }
 
-            // Validate images
             if (dto.Images == null || dto.Images.Length < 2 || dto.Images.Length > 4)
             {
-                await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                    $"Invalid image count: {dto.Images?.Length ?? 0}. Required: 2-4 images", 
-                    null, Request.Path, dto.UserId.ToString());
-                return BadRequest(new { success = false, message = "You must upload between 2 and 4 images." });
+                SimpleLogger.LogCritical("BooksController", "ListBook", $"Invalid image count: {dto.Images?.Length ?? 0}", null, dto.UserId.ToString());
+                return BadRequest(new { Message = "You must upload between 2 and 4 images." });
             }
 
-            // Validate image sizes and types
-            foreach (var image in dto.Images)
-            {
-                if (image.Length > 5 * 1024 * 1024) // 5MB limit
-                {
-                    await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                        $"Image too large: {image.FileName} ({image.Length} bytes)", 
-                        null, Request.Path, dto.UserId.ToString());
-                    return BadRequest(new { success = false, message = $"Image {image.FileName} is too large. Maximum size is 5MB." });
-                }
-
-                var allowedTypes = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-                var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
-                if (!allowedTypes.Contains(extension))
-                {
-                    await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                        $"Invalid image type: {image.FileName} ({extension})", 
-                        null, Request.Path, dto.UserId.ToString());
-                    return BadRequest(new { success = false, message = $"Invalid image type: {extension}. Allowed types: jpg, jpeg, png, webp" });
-                }
-            }
-
-            // Ensure upload directory exists
             var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
-            
-            try
-            {
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                    await _logService.LogNormalAsync("BooksController", "ListBook", 
-                        $"Created uploads directory: {uploadsFolder}", Request.Path, dto.UserId.ToString());
-                }
-            }
-            catch (Exception dirEx)
-            {
-                await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                    "Failed to create uploads directory", dirEx, Request.Path, dto.UserId.ToString());
-                return StatusCode(500, new { success = false, message = "Failed to prepare file storage. Please try again." });
-            }
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
 
-            // Process and save images
             var imagePaths = new List<string>();
-            var savedFiles = new List<string>(); // Track saved files for cleanup on error
-
-            try
+            foreach (var image in dto.Images)
             {
-                foreach (var image in dto.Images)
-                {
-                    var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
-                    var savePath = Path.Combine(uploadsFolder, fileName);
-                    
-                    using (var stream = new FileStream(savePath, FileMode.Create))
-                    {
-                        await image.CopyToAsync(stream);
-                    }
-                    
-                    var relativePath = Path.Combine("uploads/books", fileName).Replace('\\', '/');
-                    imagePaths.Add(relativePath);
-                    savedFiles.Add(savePath);
-                }
-
-                await _logService.LogNormalAsync("BooksController", "ListBook", 
-                    $"Successfully saved {imagePaths.Count} images", Request.Path, dto.UserId.ToString());
-            }
-            catch (Exception imgEx)
-            {
-                // Cleanup any successfully saved files
-                foreach (var filePath in savedFiles)
-                {
-                    try
-                    {
-                        if (System.IO.File.Exists(filePath))
-                            System.IO.File.Delete(filePath);
-                    }
-                    catch { /* Ignore cleanup errors */ }
-                }
-
-                await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                    "Failed to save images", imgEx, Request.Path, dto.UserId.ToString());
-                return StatusCode(500, new { success = false, message = "Failed to save images. Please try again." });
+                var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+                var savePath = Path.Combine(uploadsFolder, fileName);
+                using var stream = new FileStream(savePath, FileMode.Create);
+                await image.CopyToAsync(stream);
+                imagePaths.Add(Path.Combine("uploads/books", fileName));
             }
 
-            // Create book record
             var book = new Book
             {
                 UserId = dto.UserId,
@@ -246,51 +149,16 @@ public class BooksController : ControllerBase
                 CreatedAt = IndianTimeHelper.UtcNow
             };
 
-            try
-            {
-                _context.Books.Add(book);
-                await _context.SaveChangesAsync();
+            _context.Books.Add(book);
+            await _context.SaveChangesAsync();
 
-                await _logService.LogNormalAsync("BooksController", "ListBook", 
-                    $"Book listed successfully with ID: {book.Id}", Request.Path, dto.UserId.ToString());
-
-                return Ok(new 
-                { 
-                    success = true,
-                    message = "Book listed successfully", 
-                    bookId = book.Id,
-                    imagesCount = imagePaths.Count
-                });
-            }
-            catch (Exception dbEx)
-            {
-                // Cleanup uploaded files if database save fails
-                foreach (var filePath in savedFiles)
-                {
-                    try
-                    {
-                        if (System.IO.File.Exists(filePath))
-                            System.IO.File.Delete(filePath);
-                    }
-                    catch { /* Ignore cleanup errors */ }
-                }
-
-                await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                    "Failed to save book to database", dbEx, Request.Path, dto.UserId.ToString());
-                return StatusCode(500, new { success = false, message = "Failed to save book listing. Please try again." });
-            }
+            SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listed successfully with ID: {book.Id}", dto.UserId.ToString());
+            return Ok(new { Message = "Book listed successfully", BookId = book.Id });
         }
         catch (Exception ex)
         {
-            await _logService.LogCriticalAsync("BooksController", "ListBook", 
-                "Unexpected error in ListBook method", ex, Request.Path, dto.UserId.ToString());
-                
-            return StatusCode(500, new 
-            { 
-                success = false, 
-                message = "An unexpected error occurred while listing your book. Please try again later.",
-                errorId = Guid.NewGuid().ToString()
-            });
+            SimpleLogger.LogCritical("BooksController", "ListBook", "ListBook method failed", ex, dto.UserId.ToString());
+            return StatusCode(500, "Failed to list book");
         }
     }
 
@@ -348,203 +216,85 @@ public async Task<IActionResult> ViewAll(Guid userId)
 {
     try
     {
-        await _logService.LogNormalAsync("BooksController", "ViewAll", 
-            $"ViewAll request received for userId: {userId}", Request.Path, userId.ToString());
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}", userId.ToString());
 
-        // Input validation
-        if (userId == Guid.Empty)
-        {
-            await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                "Invalid userId provided - Empty GUID", null, Request.Path, userId.ToString());
-            return BadRequest(new { success = false, message = "Invalid user ID provided." });
-        }
-
-        // Get current user location with timeout and error handling
-        UserLocation? currentUserLocation = null;
-        try
-        {
-            var locationTask = _context.UserLocations
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-            
-            // Add timeout to prevent hanging queries
-            currentUserLocation = await locationTask.ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                "Failed to fetch user location", ex, Request.Path, userId.ToString());
-            return StatusCode(500, new { success = false, message = "Failed to retrieve user location." });
-        }
+        // Get current user location
+        var currentUserLocation = await _context.UserLocations
+            .FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (currentUserLocation == null)
         {
-            await _logService.LogNormalAsync("BooksController", "ViewAll", 
-                $"User location not found for userId: {userId}", Request.Path, userId.ToString());
-            return BadRequest(new { success = false, message = "User location not found. Please update your location first." });
+            SimpleLogger.LogCritical("BooksController", "ViewAll", $"User location not found for userId: {userId}", null, userId.ToString());
+            return BadRequest("User location not found.");
         }
 
-        await _logService.LogNormalAsync("BooksController", "ViewAll", 
-            "User location retrieved successfully", Request.Path, userId.ToString());
+        // Get all books with user information
+        var booksData = await _context.Books
+            .Include(b => b.User)  // Include User data to get UserName
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
 
-        // Get all books with user information - with proper error handling
-        List<Book> booksData;
-        try
-        {
-            booksData = await _context.Books
-                .Include(b => b.User)  // Include User data to get UserName
-                .Where(b => !b.IsSold)  // Only show available books
-                .OrderByDescending(b => b.CreatedAt)
-                .ToListAsync()
-                .ConfigureAwait(false);
-                
-            await _logService.LogNormalAsync("BooksController", "ViewAll", 
-                $"Retrieved {booksData.Count} books from database", Request.Path, userId.ToString());
-        }
-        catch (Exception ex)
-        {
-            await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                "Failed to fetch books data", ex, Request.Path, userId.ToString());
-            return StatusCode(500, new { success = false, message = "Failed to retrieve books data." });
-        }
-
-        if (!booksData.Any())
-        {
-            await _logService.LogNormalAsync("BooksController", "ViewAll", 
-                "No books found in database", Request.Path, userId.ToString());
-            return Ok(new { success = true, data = new List<object>(), message = "No books available at the moment." });
-        }
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {booksData.Count} books", userId.ToString());
 
         // Get unique userIds from books
         var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
-        await _logService.LogNormalAsync("BooksController", "ViewAll", 
-            $"Processing books from {userIds.Count} unique users", Request.Path, userId.ToString());
 
-        // Fetch all user locations for these userIds - with error handling
-        Dictionary<Guid, UserLocation> userLocations;
-        try
-        {
-            userLocations = await _context.UserLocations
-                .Where(u => userIds.Contains(u.UserId))
-                .ToDictionaryAsync(u => u.UserId, u => u)
-                .ConfigureAwait(false);
-                
-            await _logService.LogNormalAsync("BooksController", "ViewAll", 
-                $"Retrieved locations for {userLocations.Count} users", Request.Path, userId.ToString());
-        }
-        catch (Exception ex)
-        {
-            await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                "Failed to fetch user locations", ex, Request.Path, userId.ToString());
-            // Continue without locations rather than fail completely
-            userLocations = new Dictionary<Guid, UserLocation>();
-        }
+        // Fetch the most recent user location for these userIds (in case users have multiple location entries)
+        var allLocations = await _context.UserLocations
+            .Where(u => userIds.Contains(u.UserId))
+            .OrderByDescending(u => u.CreateDate)
+            .ToListAsync();
 
-        // Process books data safely
-        var books = new List<object>();
-        var processingErrors = 0;
+        var userLocations = allLocations
+            .GroupBy(u => u.UserId)
+            .ToDictionary(g => g.Key, g => g.First());
 
-        foreach (var book in booksData)
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved locations for {userLocations.Count} users", userId.ToString());
+
+        var books = booksData.Select(b =>
         {
-            try
+            double? distanceKm = null;
+            if (userLocations.ContainsKey(b.UserId))
             {
-                double? distanceKm = null;
-                if (userLocations.ContainsKey(book.UserId))
-                {
-                    var loc = userLocations[book.UserId];
-                    try
-                    {
-                        distanceKm = CalculateDistance(
-                            currentUserLocation.Latitude,
-                            currentUserLocation.Longitude,
-                            loc.Latitude,
-                            loc.Longitude
-                        );
-                    }
-                    catch (Exception distEx)
-                    {
-                        await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                            $"Distance calculation failed for book {book.Id}", distEx, Request.Path, userId.ToString());
-                        // Continue without distance
-                    }
-                }
-
-                // Safe image parsing
-                string[] images;
-                try
-                {
-                    images = string.IsNullOrEmpty(book.ImagePathsJson)
-                        ? Array.Empty<string>()
-                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(book.ImagePathsJson) ?? Array.Empty<string>();
-                }
-                catch (Exception imgEx)
-                {
-                    await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                        $"Image JSON parsing failed for book {book.Id}", imgEx, Request.Path, userId.ToString());
-                    images = Array.Empty<string>();
-                }
-
-                var bookResult = new
-                {
-                    book.Id,
-                    book.UserId,        // Include the userId of who listed the book
-                    UserName = book.User?.Name ?? "Unknown User",  // Safe access to User name
-                    book.BookName,
-                    book.AuthorOrPublication,
-                    book.Category,
-                    book.SubCategory,
-                    book.SellingPrice,
-                    book.IsSold,
-                    Images = images,
-                    CreatedAt = book.CreatedAt.ToString("dd/MM/yyyy hh:mm:ss tt"), // IST formatted
-                    Distance = distanceKm.HasValue
-                        ? (distanceKm < 1
-                            ? $"{Math.Round(distanceKm.Value * 1000)} m"
-                            : $"{Math.Round(distanceKm.Value, 2)} km")
-                        : "N/A"
-                };
-
-                books.Add(bookResult);
+                var loc = userLocations[b.UserId];
+                distanceKm = CalculateDistance(
+                    currentUserLocation.Latitude,
+                    currentUserLocation.Longitude,
+                    loc.Latitude,
+                    loc.Longitude
+                );
             }
-            catch (Exception bookEx)
+
+            return new
             {
-                processingErrors++;
-                await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                    $"Failed to process book {book.Id}", bookEx, Request.Path, userId.ToString());
-                // Continue with other books
-            }
-        }
+                b.Id,
+                b.UserId,        // Include the userId of who listed the book
+                UserName = b.User.Name,  // ✨ ADDED: Include the name of who listed the book
+                b.BookName,
+                b.AuthorOrPublication,
+                b.Category,
+                b.SubCategory,
+                b.SellingPrice,
+                b.IsSold,
+                Images = string.IsNullOrEmpty(b.ImagePathsJson)
+                            ? Array.Empty<string>()
+                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
+                b.CreatedAt,
+                Distance = distanceKm.HasValue
+                    ? (distanceKm < 1
+                        ? $"{Math.Round(distanceKm.Value * 1000)} m"
+                        : $"{Math.Round(distanceKm.Value, 2)} km")
+                    : "N/A"
+            };
+        }).ToList();
 
-        if (processingErrors > 0)
-        {
-            await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-                $"Encountered {processingErrors} errors while processing books", null, Request.Path, userId.ToString());
-        }
-
-        await _logService.LogNormalAsync("BooksController", "ViewAll", 
-            $"Successfully processed {books.Count} books for user {userId}", Request.Path, userId.ToString());
-
-        return Ok(new
-        {
-            success = true,
-            data = books,
-            totalCount = books.Count,
-            processingErrors = processingErrors,
-            message = processingErrors > 0 
-                ? $"Retrieved {books.Count} books with {processingErrors} processing errors."
-                : $"Successfully retrieved {books.Count} books."
-        });
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"Processed {books.Count} books successfully", userId.ToString());
+        return Ok(books);
     }
     catch (Exception ex)
     {
-        await _logService.LogCriticalAsync("BooksController", "ViewAll", 
-            "Unexpected error in ViewAll method", ex, Request.Path, userId.ToString());
-            
-        return StatusCode(500, new 
-        { 
-            success = false, 
-            message = "An unexpected error occurred while retrieving books. Please try again later.",
-            errorId = Guid.NewGuid().ToString() // Provide error ID for tracking
-        });
+        SimpleLogger.LogCritical("BooksController", "ViewAll", "ViewAll method failed", ex, userId.ToString());
+        return StatusCode(500, "Failed to retrieve books");
     }
 }
 
