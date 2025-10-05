@@ -7,9 +7,10 @@
 3. [Chat & Messaging APIs](#chat--messaging-apis)
 4. [User Location APIs](#user-location-apis)
 5. [User Profile APIs](#user-profile-apis)
-6. [System APIs](#system-apis)
-7. [Error Handling](#error-handling)
-8. [Android Kotlin Integration Examples](#android-kotlin-integration-examples)
+6. [File & Image Serving APIs](#file--image-serving-apis)
+7. [System APIs](#system-apis)
+8. [Error Handling](#error-handling)
+9. [Android Kotlin Integration Examples](#android-kotlin-integration-examples)
 
 ---
 
@@ -1016,6 +1017,228 @@ data class UserProfile(
 @GET("api/UserLocation/profile/{userId}")
 suspend fun getUserProfile(@Path("userId") userId: String): Response<UserProfile>
 ```
+
+---
+
+## 📁 **File & Image Serving APIs**
+
+### **Base URL for Images:** `https://resellbook20250929183655.azurewebsites.net/uploads/books/`
+
+#### **1. Access Book Images**
+- **URL Pattern:** `/uploads/books/{fileName}`
+- **Purpose:** Direct access to uploaded book images
+- **Method:** GET
+- **Authentication:** None required
+- **✨ Features:** Smart file location detection, automatic content-type handling
+
+**URL Examples:**
+```
+https://resellbook20250929183655.azurewebsites.net/uploads/books/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png
+https://resellbook20250929183655.azurewebsites.net/uploads/books/8de9098e-b267-45b5-9282-6056c1f88dc4.jpg
+```
+
+**Supported Formats:** PNG, JPG, JPEG, GIF, BMP, WEBP
+
+**Response Headers:**
+```
+Content-Type: image/png (or appropriate image type)
+Content-Length: [file-size]
+```
+
+**Error Responses:**
+- `404 Not Found`: Image file doesn't exist
+- `500 Internal Server Error`: Server error accessing file
+
+**Frontend Integration:**
+```javascript
+// Convert API response path to public URL
+function getImageUrl(apiPath) {
+    const baseUrl = "https://resellbook20250929183655.azurewebsites.net/";
+    const cleanPath = apiPath.replace(/\\/g, '/');
+    return baseUrl + cleanPath;
+}
+
+// Usage example
+const apiResponse = "uploads/books\\image-name.png";
+const publicUrl = getImageUrl(apiResponse);
+// Result: https://resellbook20250929183655.azurewebsites.net/uploads/books/image-name.png
+
+// Display in React
+<img src={publicUrl} alt="Book Image" />
+```
+
+---
+
+#### **2. Debug File Location (Development)**
+- **Endpoint:** `GET /uploads/books/debug/{fileName}`
+- **Purpose:** Debug file location and path resolution
+- **Use Case:** Troubleshoot missing images during development
+
+**Example:**
+```
+GET /uploads/books/debug/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png
+```
+
+**Success Response (200):**
+```json
+{
+  "fileName": "e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "contentRootPath": "C:\\home\\site\\wwwroot",
+  "webRootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "searchedPaths": [
+    {
+      "path": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+      "exists": true
+    },
+    {
+      "path": "C:\\home\\site\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+      "exists": false
+    }
+  ],
+  "foundAt": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png"
+}
+```
+
+---
+
+#### **3. File System Testing & Diagnostics**
+
+##### **Check All Files**
+- **Endpoint:** `GET /api/FileTest/CheckFiles`
+- **Purpose:** List all files in wwwroot and uploads directories
+- **Use Case:** Verify file uploads and directory structure
+
+**Success Response (200):**
+```json
+{
+  "contentRootPath": "C:\\home\\site\\wwwroot",
+  "webRootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "actualWwwrootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "wwwrootExists": true,
+  "uploadsPath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books",
+  "uploadsExists": true,
+  "files": [
+    "e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+    "8de9098e-b267-45b5-9282-6056c1f88dc4.jpg",
+    "another-book-image.png"
+  ],
+  "allPossiblePaths": [
+    {
+      "path": "C:\\home\\site\\wwwroot\\wwwroot",
+      "exists": true
+    },
+    {
+      "path": "C:\\home\\site\\wwwroot\\uploads\\books",
+      "exists": false
+    }
+  ]
+}
+```
+
+##### **Test Specific File**
+- **Endpoint:** `GET /api/FileTest/TestFile/{fileName}`
+- **Purpose:** Check if a specific file exists and get detailed path information
+
+**Example:**
+```
+GET /api/FileTest/TestFile/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png
+```
+
+**Success Response (200):**
+```json
+{
+  "fileName": "e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "filePath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "actualFilePath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "actualWwwrootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "fileExists": true,
+  "actualFileExists": true,
+  "expectedUrl": "https://resellbook20250929183655.azurewebsites.net/uploads/books/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "fileSize": 245760,
+  "allTestedPaths": [
+    {
+      "wwwrootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+      "testPath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+      "exists": true
+    }
+  ]
+}
+```
+
+---
+
+#### **4. File Upload Handling (Books API Integration)**
+
+When using the Books API to upload images, files are automatically stored in the `uploads/books/` directory with GUID-based filenames for uniqueness.
+
+**Storage Location:** `wwwroot/uploads/books/{guid-filename}.{extension}`
+**Public Access:** `https://resellbook20250929183655.azurewebsites.net/uploads/books/{guid-filename}.{extension}`
+
+**API Response Format:**
+```json
+{
+  "images": [
+    "uploads/books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+    "uploads/books\\8de9098e-b267-45b5-9282-6056c1f88dc4.jpg"
+  ]
+}
+```
+
+**Convert to Public URLs:**
+```javascript
+// JavaScript helper function
+function convertImagesToUrls(book) {
+  const baseUrl = "https://resellbook20250929183655.azurewebsites.net/";
+  
+  return {
+    ...book,
+    imageUrls: book.images.map(imagePath => {
+      const cleanPath = imagePath.replace(/\\/g, '/');
+      return baseUrl + cleanPath;
+    })
+  };
+}
+
+// Usage
+const bookFromAPI = {
+  id: "123",
+  name: "Math Book",
+  images: [
+    "uploads/books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+    "uploads/books\\8de9098e-b267-45b5-9282-6056c1f88dc4.jpg"
+  ]
+};
+
+const bookWithUrls = convertImagesToUrls(bookFromAPI);
+// Result: imageUrls array contains full public URLs
+```
+
+---
+
+#### **5. Troubleshooting Image Access**
+
+**Common Issues & Solutions:**
+
+1. **404 Not Found:**
+   - Use `/api/FileTest/TestFile/{fileName}` to verify file exists
+   - Check if file was uploaded successfully using Books API
+   - Verify filename matches exactly (case-sensitive)
+
+2. **Path Format Issues:**
+   - API returns paths with backslashes: `uploads/books\\filename.png`
+   - Convert to forward slashes for URLs: `uploads/books/filename.png`
+   - Use the helper function provided above
+
+3. **File Location Debugging:**
+   - Use `/api/FileTest/CheckFiles` to see all available files
+   - Use `/uploads/books/debug/{fileName}` to see search paths
+   - Check server logs for file access attempts
+
+**Development Testing Checklist:**
+- ✅ Upload images via Books API
+- ✅ Verify files appear in `/api/FileTest/CheckFiles`
+- ✅ Test direct image URL access
+- ✅ Confirm path conversion in frontend code
 
 ---
 

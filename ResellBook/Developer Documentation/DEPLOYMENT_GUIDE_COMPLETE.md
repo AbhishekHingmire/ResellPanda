@@ -34,21 +34,40 @@ SMTP__Pass=unknvvwbmpszgmyk
 
 ## 🚀 Quick Deployment Process
 
-### ⚡ **RECOMMENDED: Safe Deployment (Preserves wwwroot)**
+### ⚡ **RECOMMENDED: Safe Deployment (Preserves wwwroot & Images)**
 
-**✅ Use this method to preserve uploaded images and files:**
+**✅ ALWAYS use this method to preserve uploaded book images and files:**
 
 ```powershell
-# Use the automated preservation script
+# Use the automated preservation script (RECOMMENDED)
 .\deploy-simple-preserve.ps1
 ```
 
 **What this script does:**
-- ✅ Builds your application
-- ✅ Excludes wwwroot folder from deployment
-- ✅ Preserves all uploaded images/files
-- ✅ Deploys only code changes
-- ✅ Zero risk of file loss
+- ✅ Builds your application with Release configuration
+- ✅ **Excludes wwwroot folder** from deployment package
+- ✅ **Preserves ALL uploaded images** in production
+- ✅ Deploys only application code changes
+- ✅ **Zero risk of file loss** - uploaded files remain intact
+- ✅ Maintains existing static file structure
+
+**File Structure Preserved:**
+```
+Production wwwroot/
+├── uploads/
+│   └── books/
+│       ├── e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png ✅ PRESERVED
+│       ├── 8de9098e-b267-45b5-9282-6056c1f88dc4.jpg ✅ PRESERVED
+│       └── [all other uploaded images] ✅ PRESERVED
+└── [other static files] ✅ PRESERVED
+```
+
+**Image Access After Deployment:**
+```
+✅ WORKS: https://resellbook20250929183655.azurewebsites.net/uploads/books/your-image.png
+✅ WORKS: All existing frontend image URLs continue functioning
+✅ WORKS: New image uploads work normally
+```
 
 ### 🚨 **LEGACY: Standard Deployment (OVERWRITES wwwroot)**
 
@@ -65,7 +84,69 @@ az webapp deploy --resource-group resell-panda-rg --name ResellBook2025092918365
 curl https://resellbook20250929183655.azurewebsites.net/api/health/database
 ```
 
-## 🔧 When to Reconfigure Azure Settings
+## � File Management During Deployment
+
+### **Critical File Preservation Guidelines**
+
+**🚨 IMPORTANT - What Gets Preserved vs. What Gets Overwritten:**
+
+| Component | Standard Deploy | Safe Deploy | Notes |
+|-----------|----------------|-------------|-------|
+| **Application Code** | ✅ Updated | ✅ Updated | Always safe to overwrite |
+| **Database** | ✅ Preserved | ✅ Preserved | Connection string maintained |
+| **wwwroot/uploads/** | ❌ **DELETED** | ✅ **PRESERVED** | **CRITICAL for images** |
+| **Configuration** | ✅ Updated | ✅ Updated | appsettings maintained |
+| **Static Files** | ❌ **DELETED** | ✅ **PRESERVED** | CSS, JS, images |
+
+### **File System Troubleshooting**
+
+**If Images Stop Working After Deployment:**
+
+1. **Check if wwwroot was overwritten:**
+```powershell
+# Check Azure App Service via Kudu Console
+https://resellbook20250929183655.scm.azurewebsites.net/DebugConsole
+# Navigate to: site/wwwroot/uploads/books/
+```
+
+2. **Use diagnostic endpoints:**
+```http
+GET /api/FileTest/structure
+GET /api/FileTest/check-file/your-image-name.png
+```
+
+3. **Verify file serving:**
+```http
+GET /uploads/books/your-image.png
+```
+
+### **Emergency File Recovery**
+
+**If you accidentally used standard deployment and lost files:**
+
+❌ **Unfortunately, uploaded images cannot be recovered** - they are permanently deleted
+✅ **Prevention is key** - always use `.\deploy-simple-preserve.ps1`
+
+**Recovery Steps:**
+1. Re-upload any available backup images
+2. Users will need to re-upload book images
+3. Implement safe deployment process going forward
+
+### **File Management Best Practices**
+
+**✅ DO:**
+- Always use `.\deploy-simple-preserve.ps1` for deployments
+- Test image URLs after deployment
+- Monitor file system via diagnostic endpoints
+- Keep local backups of critical images
+
+**❌ DON'T:**
+- Use standard `dotnet publish` for production deployments
+- Deploy without checking file preservation
+- Ignore wwwroot folder in deployment planning
+- Assume files will survive deployment without proper exclusion
+
+## �🔧 When to Reconfigure Azure Settings
 
 ### 🚫 **DO NOT SET AGAIN** - Already Configured:
 - ❌ Database connection string (Password@2001)
@@ -315,6 +396,90 @@ dotnet run                 # Test locally
 
 ---
 
-**✨ Your ResellPanda app is fully deployed with automatic database migration!**
+## 🔍 Post-Deployment Monitoring & Maintenance
 
-*No manual database setup required - everything happens automatically on deployment.*
+### **Essential Health Checks After Each Deployment**
+
+**1. Application Health:**
+```http
+GET https://resellbook20250929183655.azurewebsites.net/weatherforecast
+# Should return weather data array
+```
+
+**2. Database Connectivity:**
+```http
+GET https://resellbook20250929183655.azurewebsites.net/api/health/database
+# Should return "Database connection successful"
+```
+
+**3. Image Serving Verification:**
+```http
+GET https://resellbook20250929183655.azurewebsites.net/api/FileTest/structure
+# Should show wwwroot/uploads/books/ structure
+```
+
+**4. File System Integrity:**
+```http
+GET https://resellbook20250929183655.azurewebsites.net/api/FileTest/check-file/[existing-image-name.png]
+# Should return file found details
+```
+
+### **Regular Maintenance Tasks**
+
+**Weekly Checks:**
+- ✅ Verify image uploads are working: Test book creation with image
+- ✅ Check file system health: Use `/api/FileTest/structure`
+- ✅ Monitor database performance: Check response times
+- ✅ Validate authentication: Test login/registration flows
+
+**Monthly Reviews:**
+- 📊 Review wwwroot folder size growth
+- 🗂️ Archive old or unused images if needed
+- 🔒 Update security configurations if required
+- 📈 Monitor app performance metrics in Azure portal
+
+### **Deployment Checklist Template**
+
+**Before Each Deployment:**
+- [ ] ✅ Using `.\deploy-simple-preserve.ps1` script
+- [ ] ✅ Tested changes in local environment
+- [ ] ✅ Database migrations are ready (if any)
+- [ ] ✅ No breaking changes to existing APIs
+
+**After Each Deployment:**
+- [ ] ✅ Application loads successfully
+- [ ] ✅ Database connectivity confirmed
+- [ ] ✅ Image serving works (test existing images)
+- [ ] ✅ New image uploads functional
+- [ ] ✅ Authentication flows operational
+- [ ] ✅ Critical API endpoints responding
+
+**Emergency Rollback Plan:**
+```powershell
+# If deployment causes issues:
+# 1. Check Azure portal for error logs
+# 2. Use Azure deployment center to rollback to previous version
+# 3. Files are preserved, so rollback is safe
+# 4. Test all functionality after rollback
+```
+
+---
+
+## 📞 Quick Reference
+
+**Live Application:** https://resellbook20250929183655.azurewebsites.net
+**Deployment Command:** `.\deploy-simple-preserve.ps1`
+**Health Check:** `/weatherforecast`
+**File System Check:** `/api/FileTest/structure`
+**Image Test:** `/uploads/books/[image-name]`
+
+**🚨 Emergency Contacts & Resources:**
+- Azure Portal: https://portal.azure.com
+- Kudu Console: https://resellbook20250929183655.scm.azurewebsites.net
+- Application Logs: Available in Azure portal under Monitoring > Log stream
+
+---
+
+**✨ Your ResellPanda app is fully deployed with automatic database migration and file preservation!**
+
+*Complete deployment workflow established - all features documented and operational.*
