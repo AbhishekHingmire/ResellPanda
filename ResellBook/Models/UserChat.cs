@@ -60,6 +60,8 @@ namespace ResellBook.Models
         public DateTime? LastMessageTime { get; set; }
         public int UnreadCount { get; set; }
         public bool IsOnline { get; set; } = false;
+        public bool IsBlocked { get; set; } = false; // True if current user has blocked this user
+        public bool IsBlockedBy { get; set; } = false; // True if current user is blocked by this user
     }
 
     // DTO for individual chat message

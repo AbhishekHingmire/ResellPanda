@@ -72,4 +72,15 @@ namespace ResellBook.Models
         public List<BlockedUserDto> BlockedUsers { get; set; } = new();
         public int TotalCount { get; set; }
     }
+
+    // Response DTO for checking block status
+    public class BlockStatusResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public bool HasBlocked { get; set; } // True if current user has blocked the other user
+        public bool IsBlockedBy { get; set; } // True if current user is blocked by the other user
+        public bool CanSendMessage { get; set; } // True if current user can send messages to other user
+        public string? OtherUserName { get; set; }
+    }
 }

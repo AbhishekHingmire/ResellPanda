@@ -168,6 +168,13 @@ namespace ResellBook.Controllers
                                         !c.IsRead && 
                                         !c.DeletedByReceiver);
 
+                    // Check blocking status between users
+                    var isBlocked = await _context.UserBlocks
+                        .AnyAsync(ub => ub.BlockerId == userId && ub.BlockedUserId == partnerId);
+                    
+                    var isBlockedBy = await _context.UserBlocks
+                        .AnyAsync(ub => ub.BlockerId == partnerId && ub.BlockedUserId == userId);
+
                     chatList.Add(new ChatListDto
                     {
                         UserId = partnerId,
@@ -175,7 +182,9 @@ namespace ResellBook.Controllers
                         LastMessage = lastMessage?.Message,
                         LastMessageTime = lastMessage?.SentAt,
                         UnreadCount = unreadCount,
-                        IsOnline = false // You can implement online status later
+                        IsOnline = false, // You can implement online status later
+                        IsBlocked = isBlocked, // True if current user has blocked this partner
+                        IsBlockedBy = isBlockedBy // True if current user is blocked by this partner
                     });
                 }
 
@@ -637,6 +646,53 @@ namespace ResellBook.Controllers
             {
                 _logger.LogError(ex, $"Error getting blocked users for user {userId}");
                 return StatusCode(500, new BlockedUsersResponse { Success = false, Message = "Failed to get blocked users" });
+            }
+        }
+
+        /// <summary>
+        /// Check blocking status between two users
+        /// </summary>
+        /// <param name="userId">Current user ID</param>
+        /// <param name="otherUserId">Other user ID to check</param>
+        /// <returns>Blocking status information</returns>
+        [HttpGet("CheckBlockStatus/{userId}/{otherUserId}")]
+        public async Task<ActionResult<BlockStatusResponse>> CheckBlockStatus(Guid userId, Guid otherUserId)
+        {
+            try
+            {
+                _logger.LogInformation($"CheckBlockStatus called - User: {userId}, Other: {otherUserId}");
+
+                // Validate both users exist
+                var user = await _context.Users.FindAsync(userId);
+                var otherUser = await _context.Users.FindAsync(otherUserId);
+
+                if (user == null || otherUser == null)
+                {
+                    return NotFound(new BlockStatusResponse { Success = false, Message = "One or both users not found" });
+                }
+
+                // Check if current user has blocked the other user
+                var hasBlocked = await _context.UserBlocks
+                    .AnyAsync(ub => ub.BlockerId == userId && ub.BlockedUserId == otherUserId);
+
+                // Check if current user is blocked by the other user
+                var isBlockedBy = await _context.UserBlocks
+                    .AnyAsync(ub => ub.BlockerId == otherUserId && ub.BlockedUserId == userId);
+
+                return Ok(new BlockStatusResponse
+                {
+                    Success = true,
+                    Message = "Block status retrieved successfully",
+                    HasBlocked = hasBlocked,
+                    IsBlockedBy = isBlockedBy,
+                    CanSendMessage = !isBlockedBy, // Can send message if not blocked by other user
+                    OtherUserName = otherUser.Name
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking block status between users {userId} and {otherUserId}");
+                return StatusCode(500, new BlockStatusResponse { Success = false, Message = "Failed to check block status" });
             }
         }
     }

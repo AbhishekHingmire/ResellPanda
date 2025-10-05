@@ -533,9 +533,10 @@ suspend fun sendMessageToBookOwner(
 
 ---
 
-#### **2. Get Chat List**
+#### **2. Get Chat List (UPDATED)**
 - **Endpoint:** `GET /api/Chat/GetChats/{userId}`
-- **Purpose:** Get all chat conversations for user with unread counts
+- **Purpose:** Get all chat conversations for user with unread counts and blocking status
+- **✨ New:** Now includes `IsBlocked` and `IsBlockedBy` parameters
 
 **Success Response (200):**
 ```json
@@ -549,11 +550,27 @@ suspend fun sendMessageToBookOwner(
       "LastMessage": "Sure, it's available!",
       "LastMessageTime": "2025-10-04T14:30:00Z",
       "UnreadCount": 2,
-      "IsOnline": false
+      "IsOnline": false,
+      "IsBlocked": false,
+      "IsBlockedBy": false
+    },
+    {
+      "UserId": "456e4567-e89b-12d3-a456-426614174001",
+      "UserName": "John Blocked",
+      "LastMessage": "Last message before block",
+      "LastMessageTime": "2025-10-03T10:00:00Z",
+      "UnreadCount": 0,
+      "IsOnline": false,
+      "IsBlocked": true,
+      "IsBlockedBy": false
     }
   ]
 }
 ```
+
+**Field Explanations:**
+- `IsBlocked`: `true` if current user has blocked this chat partner
+- `IsBlockedBy`: `true` if current user is blocked by this chat partner
 
 ---
 
@@ -777,7 +794,65 @@ suspend fun getBlockedUsers(
 
 ---
 
-#### **11. Get Book for Messaging Context (Helper)**
+#### **11. Check Block Status (NEW)**
+- **Endpoint:** `GET /api/Chat/CheckBlockStatus/{userId}/{otherUserId}`
+- **Purpose:** Check blocking relationship between two users
+- **Use Case:** Determine if user can send message, show block/unblock button
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Block status retrieved successfully",
+  "HasBlocked": false,
+  "IsBlockedBy": true,
+  "CanSendMessage": false,
+  "OtherUserName": "John Doe"
+}
+```
+
+**Field Explanations:**
+- `HasBlocked`: `true` if current user has blocked the other user
+- `IsBlockedBy`: `true` if current user is blocked by the other user  
+- `CanSendMessage`: `true` if current user can send messages (not blocked by other user)
+
+**React/Android Example:**
+```javascript
+// React
+const checkBlockStatus = async (currentUserId, otherUserId) => {
+  const response = await fetch(`${BASE_URL}/api/Chat/CheckBlockStatus/${currentUserId}/${otherUserId}`);
+  const data = await response.json();
+  
+  if (data.Success) {
+    // Update UI based on blocking status
+    setCanSendMessage(data.CanSendMessage);
+    setHasBlocked(data.HasBlocked);
+    setIsBlockedBy(data.IsBlockedBy);
+  }
+  
+  return data;
+};
+
+// Android Kotlin
+data class BlockStatusResponse(
+    val Success: Boolean,
+    val Message: String,
+    val HasBlocked: Boolean,
+    val IsBlockedBy: Boolean,
+    val CanSendMessage: Boolean,
+    val OtherUserName: String?
+)
+
+@GET("api/Chat/CheckBlockStatus/{userId}/{otherUserId}")
+suspend fun checkBlockStatus(
+    @Path("userId") userId: String,
+    @Path("otherUserId") otherUserId: String
+): Response<BlockStatusResponse>
+```
+
+---
+
+#### **12. Get Book for Messaging Context (Helper)**
 - **Endpoint:** `GET /api/Chat/GetBookForMessage/{bookId}`
 - **Purpose:** Get book details to show messaging context
 
