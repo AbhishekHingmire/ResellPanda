@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
@@ -127,6 +128,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ LOGIN -------------------
+    
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {

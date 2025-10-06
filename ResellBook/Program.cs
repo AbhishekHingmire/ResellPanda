@@ -89,7 +89,7 @@ else
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthorization();
 // Enable CORS
 app.UseCors("AllowVercel");
 

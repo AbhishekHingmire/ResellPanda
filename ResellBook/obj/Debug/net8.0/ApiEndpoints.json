@@ -166,6 +166,11 @@
         "IsRequired": false
       },
       {
+        "Name": "Description",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
         "Name": "NewImages",
         "Type": "Microsoft.AspNetCore.Http.IFormFile[]",
         "IsRequired": false
@@ -173,6 +178,27 @@
       {
         "Name": "ExistingImages",
         "Type": "System.String[]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BooksController",
+    "Method": "GetCityName",
+    "RelativePath": "api/Books/GetCityName",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "latitude",
+        "Type": "System.Double",
+        "IsRequired": false
+      },
+      {
+        "Name": "longitude",
+        "Type": "System.Double",
         "IsRequired": false
       }
     ],
@@ -203,6 +229,11 @@
       },
       {
         "Name": "Category",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Description",
         "Type": "System.String",
         "IsRequired": false
       },
@@ -242,6 +273,22 @@
   },
   {
     "ContainingType": "BooksController",
+    "Method": "MarkAsUnSold",
+    "RelativePath": "api/Books/MarkAsUnSold/{bookId}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BooksController",
     "Method": "ViewAll",
     "RelativePath": "api/Books/ViewAll/{userId}",
     "HttpMethod": "GET",
@@ -252,6 +299,16 @@
         "Name": "userId",
         "Type": "System.Guid",
         "IsRequired": true
+      },
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -274,6 +331,99 @@
   },
   {
     "ContainingType": "ResellBook.Controllers.ChatController",
+    "Method": "BlockUser",
+    "RelativePath": "api/Chat/BlockUser/{userId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "ResellBook.Models.BlockUserDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "ResellBook.Models.BlockUserResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.ChatController",
+    "Method": "CheckBlockStatus",
+    "RelativePath": "api/Chat/CheckBlockStatus/{userId}/{otherUserId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "otherUserId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "ResellBook.Models.BlockStatusResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.ChatController",
+    "Method": "DeleteChat",
+    "RelativePath": "api/Chat/DeleteChat/{userId}/{otherUserId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "otherUserId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "ResellBook.Models.DeleteChatResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.ChatController",
     "Method": "DeleteMessage",
     "RelativePath": "api/Chat/DeleteMessage/{messageId}/{userId}",
     "HttpMethod": "DELETE",
@@ -292,6 +442,32 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.ChatController",
+    "Method": "GetBlockedUsers",
+    "RelativePath": "api/Chat/GetBlockedUsers/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "ResellBook.Models.BlockedUsersResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "ResellBook.Controllers.ChatController",
@@ -429,6 +605,145 @@
     ]
   },
   {
+    "ContainingType": "ResellBook.Controllers.ChatController",
+    "Method": "UnblockUser",
+    "RelativePath": "api/Chat/UnblockUser/{userId}/{blockedUserId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "blockedUserId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "ResellBook.Models.UnblockUserResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.FileTestController",
+    "Method": "CheckFiles",
+    "RelativePath": "api/FileTest/CheckFiles",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.FileTestController",
+    "Method": "TestFile",
+    "RelativePath": "api/FileTest/TestFile/{fileName}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileName",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.LogsController",
+    "Method": "ClearAllLogs",
+    "RelativePath": "api/Logs/ClearAllLogs",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.LogsController",
+    "Method": "GetCriticalLogs",
+    "RelativePath": "api/Logs/GetCriticalLogs",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maxLines",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.LogsController",
+    "Method": "GetLogsSummary",
+    "RelativePath": "api/Logs/GetLogsSummary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.LogsController",
+    "Method": "GetNormalLogs",
+    "RelativePath": "api/Logs/GetNormalLogs",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maxLines",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.LogsController",
+    "Method": "TestLogging",
+    "RelativePath": "api/Logs/TestLogging",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.TestController",
+    "Method": "CheckLogsFolder",
+    "RelativePath": "api/Test/check-logs-folder",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.TestController",
+    "Method": "Ping",
+    "RelativePath": "api/Test/ping",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "UserLocationController",
     "Method": "EditUser",
     "RelativePath": "api/UserLocation/EditUser/{id}",
@@ -492,6 +807,38 @@
       {
         "Name": "request",
         "Type": "ResellBook.Models.UserLocation",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.FileController",
+    "Method": "ServeBookImage",
+    "RelativePath": "uploads/books/{fileName}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileName",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ResellBook.Controllers.FileController",
+    "Method": "DebugFileLocations",
+    "RelativePath": "uploads/books/debug/{fileName}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileName",
+        "Type": "System.String",
         "IsRequired": true
       }
     ],
