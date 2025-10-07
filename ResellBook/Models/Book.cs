@@ -10,6 +10,7 @@ namespace ResellBook.Models
         [Required] public required string BookName { get; set; }
         public string? AuthorOrPublication { get; set; }
         [Required] public required string Category { get; set; }
+        [Required] public required string Description { get; set; }
         public string? SubCategory { get; set; }
         [Required] public decimal SellingPrice { get; set; }
         public bool IsSold { get; set; } = false;

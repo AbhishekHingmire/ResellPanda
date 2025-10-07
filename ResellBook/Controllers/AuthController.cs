@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
@@ -44,12 +45,12 @@ public class AuthController : ControllerBase
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             IsEmailVerified = false
         };
-
+        SimpleLogger.LogNormal("AuthController", "Signup", $"Signup Attempted");
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
         Console.WriteLine($"New user created: {user.Email}, ID: {user.Id}");
-
+        SimpleLogger.LogNormal("AuthController", "Signup", $"Account Created");
         // Generate verification OTP
         await CreateAndSendOtp(user, VerificationType.EmailVerification);
 
@@ -127,6 +128,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ LOGIN -------------------
+    
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
