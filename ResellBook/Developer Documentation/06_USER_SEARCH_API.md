@@ -6,7 +6,7 @@
 
 ## **API Endpoints**
 
-### **1. Log User Search** ⭐ NEW
+### **1. Log User Search**
 **`POST /api/UserSearch/LogSearch`**
 
 **Purpose:** Log user search activity for analytics and recommendations
@@ -51,6 +51,76 @@
 
 ---
 
+### **2. Get All Searches** ⭐ NEW
+**`GET /api/UserSearch/GetAllSearches`**
+
+**Purpose:** Retrieve all user search logs with pagination (ascending order by date)
+
+**Authentication:** ✅ JWT Token Required
+
+**Query Parameters:**
+- `page` (optional): Page number (default: 1, minimum: 1)
+- `pageSize` (optional): Items per page (default: 50, maximum: 100)
+
+**Example Request:**
+```
+GET /api/UserSearch/GetAllSearches?page=1&pageSize=20
+```
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Retrieved 20 searches (page 1 of 5)",
+  "Data": [
+    {
+      "Id": "550e8400-e29b-41d4-a716-446655440001",
+      "SearchDate": "2024-10-06T15:30:45",
+      "UserId": "123e4567-e89b-12d3-a456-426614174000",
+      "SearchTerm": "java programming",
+      "LogEntry": "2024-10-06 15:30:45 | UserId: 123e4567-e89b-12d3-a456-426614174000 | SearchTerm: java programming"
+    },
+    {
+      "Id": "550e8400-e29b-41d4-a716-446655440002",
+      "SearchDate": "2024-10-06T15:35:12",
+      "UserId": "456e7890-e89b-12d3-a456-426614174001",
+      "SearchTerm": "data structures",
+      "LogEntry": "2024-10-06 15:35:12 | UserId: 456e7890-e89b-12d3-a456-426614174001 | SearchTerm: data structures"
+    }
+  ],
+  "TotalCount": 100,
+  "Page": 1,
+  "PageSize": 20,
+  "TotalPages": 5
+}
+```
+
+**Empty Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "No searches found",
+  "Data": [],
+  "TotalCount": 0,
+  "Page": 1,
+  "PageSize": 50,
+  "TotalPages": 0
+}
+```
+
+**Error Responses:**
+```json
+// 500 - Server Error
+{
+  "Message": "Failed to retrieve searches"
+}
+
+// 401 - Unauthorized
+{"Message": "Unauthorized"}
+```
+
+---
+
 ## **📱 Android Kotlin Implementation**
 
 ### **Data Models:**
@@ -63,6 +133,24 @@ data class UserSearchDto(
 data class SearchLogResponse(
     @SerializedName("Message") val message: String
 )
+
+data class UserSearchLogEntry(
+    @SerializedName("Id") val id: String,
+    @SerializedName("SearchDate") val searchDate: String,
+    @SerializedName("UserId") val userId: String,
+    @SerializedName("SearchTerm") val searchTerm: String,
+    @SerializedName("LogEntry") val logEntry: String
+)
+
+data class GetAllSearchesResponse(
+    @SerializedName("Success") val success: Boolean,
+    @SerializedName("Message") val message: String,
+    @SerializedName("Data") val data: List<UserSearchLogEntry>,
+    @SerializedName("TotalCount") val totalCount: Int,
+    @SerializedName("Page") val page: Int,
+    @SerializedName("PageSize") val pageSize: Int,
+    @SerializedName("TotalPages") val totalPages: Int
+)
 ```
 
 ### **API Interface:**
@@ -73,6 +161,13 @@ interface UserSearchApi {
         @Header("Authorization") token: String,
         @Body request: UserSearchDto
     ): Response<SearchLogResponse>
+    
+    @GET("api/UserSearch/GetAllSearches")
+    suspend fun getAllSearches(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 50
+    ): Response<GetAllSearchesResponse>
 }
 ```
 
@@ -98,6 +193,26 @@ class UserSearchRepository : BaseRepository() {
             }
         } catch (e: Exception) {
             emit(Resource.Error("Failed to log search: ${e.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+    
+    suspend fun getAllSearches(page: Int = 1, pageSize: Int = 50): Flow<Resource<GetAllSearchesResponse>> = flow {
+        emit(Resource.Loading())
+        
+        try {
+            val token = "Bearer ${getAuthToken()}"
+            val response = searchApi.getAllSearches(token, page, pageSize)
+            
+            if (response.isSuccessful) {
+                response.body()?.let { searchResponse ->
+                    emit(Resource.Success(searchResponse))
+                } ?: emit(Resource.Error("Empty response received"))
+            } else {
+                val errorMessage = parseErrorResponse(response)
+                emit(Resource.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error("Failed to retrieve searches: ${e.message}"))
         }
     }.flowOn(Dispatchers.IO)
 }
@@ -272,3 +387,22 @@ userSearchRepository.logUserSearch(userId, searchQuery).collect { resource ->
 - Provide search results or suggestions
 
 **This API should be called alongside your existing search functionality to provide analytics data that can improve the overall user experience.**
+
+---
+
+## **🧪 API Testing Results** ⭐ NEW
+
+✅ **Deployment Status:** Successfully deployed to production  
+✅ **LogSearch Endpoint:** Working correctly - logs searches to `UserSearches.log`  
+✅ **GetAllSearches Endpoint:** Working correctly with pagination  
+✅ **Data Storage:** File-based logging in `AppLogs/UserSearches.log`  
+✅ **Pagination:** Verified with multiple page sizes and pages  
+✅ **Data Ordering:** Ascending by search date (oldest first)  
+
+**Test Results:**
+- Total searches logged: 8+ entries
+- Pagination tested: ✅ page=1&pageSize=3 (3 total pages)
+- Response format: ✅ Consistent with documentation
+- Error handling: ✅ Graceful handling of empty results
+
+**Live API Base URL:** `https://resellbook20250929183655.azurewebsites.net/api/UserSearch`

@@ -156,3 +156,9 @@ C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\ResellBook.staticwebassets.ru
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\SixLabors.Fonts.dll
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\SixLabors.ImageSharp.dll
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\SixLabors.ImageSharp.Drawing.dll
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\web.config
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\appsettings.Development.json
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\appsettings.json
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\ResellBook.deps.json
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\ResellBook.runtimeconfig.json
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\publish\ResellBook.staticwebassets.endpoints.json

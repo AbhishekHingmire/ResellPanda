@@ -73,6 +73,7 @@ Content-Type: application/json
 | Method | Endpoint | Purpose | Auth Required |
 |--------|----------|---------|---------------|
 | `POST` | `/api/UserSearch/LogSearch` | Log user search activity | ✅ |
+| `GET` | `/api/UserSearch/GetAllSearches` | Get paginated search logs (ascending) | ✅ |
 
 ### 🏥 **Health Check APIs**
 
