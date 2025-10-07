@@ -485,9 +485,492 @@ class AuthViewModel(private val authRepository: AuthRepository) : BaseViewModel(
 }
 ```
 
-### **3. Books ViewModel**
+### **3. Books ViewModel** (Updated with Description field)
 ```kotlin
 class BooksViewModel(private val booksRepository: BooksRepository) : BaseViewModel() {
+    
+    private val _books = MutableLiveData<List<Book>>()
+    val books: LiveData<List<Book>> = _books
+    
+    private val _uploadResult = MutableLiveData<BookListResponse>()
+    val uploadResult: LiveData<BookListResponse> = _uploadResult
+    
+    fun loadBooks() {
+        viewModelScope.launch {
+            booksRepository.getAllBooks().collect { resource ->
+                handleResource(resource) { booksList ->
+                    _books.value = booksList
+                }
+            }
+        }
+    }
+    
+    fun uploadBook(
+        userId: String,
+        bookData: BookData,
+        imageFiles: List<File>
+    ) {
+        viewModelScope.launch {
+            booksRepository.uploadBook(
+                userId = userId,
+                bookName = bookData.bookName,
+                category = bookData.category,
+                description = bookData.description, // ⭐ NEW REQUIRED FIELD
+                sellingPrice = bookData.sellingPrice,
+                authorOrPublication = bookData.author,
+                subCategory = bookData.subCategory,
+                imageFiles = imageFiles
+            ).collect { resource ->
+                handleResource(resource) { response ->
+                    _uploadResult.value = response
+                    setSuccess("Book uploaded successfully")
+                    loadBooks() // Refresh list
+                }
+            }
+        }
+    }
+    
+    fun markBookAsSold(bookId: String) {
+        viewModelScope.launch {
+            booksRepository.markBookAsSold(bookId).collect { resource ->
+                handleResource(resource) { message ->
+                    setSuccess(message)
+                    loadBooks() // Refresh list
+                }
+            }
+        }
+    }
+    
+    fun markBookAsUnSold(bookId: String) { // ⭐ NEW ENDPOINT
+        viewModelScope.launch {
+            booksRepository.markBookAsUnSold(bookId).collect { resource ->
+                handleResource(resource) { message ->
+                    setSuccess(message)
+                    loadBooks() // Refresh list
+                }
+            }
+        }
+    }
+    
+    fun searchBooks(query: String) {
+        val currentBooks = _books.value ?: return
+        val filteredBooks = currentBooks.filter { book ->
+            book.BookName.contains(query, ignoreCase = true) ||
+            book.Category.contains(query, ignoreCase = true) ||
+            book.Description.contains(query, ignoreCase = true) || // ⭐ Search in description
+            book.AuthorOrPublication?.contains(query, ignoreCase = true) == true
+        }
+        _books.value = filteredBooks
+    }
+}
+
+// Updated Book Data Model with Description
+data class BookData(
+    val bookName: String,
+    val category: String,
+    val description: String, // ⭐ NEW REQUIRED FIELD
+    val sellingPrice: Double,
+    val author: String? = null,
+    val subCategory: String? = null
+)
+```
+
+---
+
+## **🖼️ Image Handling Utilities**
+
+### **1. Image Picker Helper**
+```kotlin
+class ImagePickerHelper(private val activity: AppCompatActivity) {
+    
+    private var imagePickerLauncher: ActivityResultLauncher<Intent>? = null
+    private var imagePickerCallback: ((List<Uri>) -> Unit)? = null
+    
+    fun initialize() {
+        imagePickerLauncher = activity.registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.let { data ->
+                    val imageUris = mutableListOf<Uri>()
+                    
+                    // Handle single image
+                    data.data?.let { uri ->
+                        imageUris.add(uri)
+                    }
+                    
+                    // Handle multiple images
+                    data.clipData?.let { clipData ->
+                        for (i in 0 until clipData.itemCount) {
+                            imageUris.add(clipData.getItemAt(i).uri)
+                        }
+                    }
+                    
+                    imagePickerCallback?.invoke(imageUris)
+                }
+            }
+        }
+    }
+    
+    fun pickImages(maxCount: Int = 4, callback: (List<Uri>) -> Unit) {
+        imagePickerCallback = callback
+        
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, maxCount > 1)
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+        
+        imagePickerLauncher?.launch(Intent.createChooser(intent, "Select Images"))
+    }
+}
+```
+
+### **2. Image Compression Utility**
+```kotlin
+class ImageCompressionUtil {
+    
+    companion object {
+        private const val MAX_FILE_SIZE = 150 * 1024 // 150KB
+        private const val MAX_WIDTH = 1080
+        private const val MAX_HEIGHT = 1080
+        private const val INITIAL_QUALITY = 80
+        private const val MIN_QUALITY = 10
+        
+        suspend fun compressImage(context: Context, uri: Uri): File? = withContext(Dispatchers.IO) {
+            try {
+                val bitmap = loadBitmap(context, uri) ?: return@withContext null
+                val resizedBitmap = resizeBitmap(bitmap, MAX_WIDTH, MAX_HEIGHT)
+                
+                val compressedFile = File(context.cacheDir, "compressed_${System.currentTimeMillis()}.jpg")
+                
+                var quality = INITIAL_QUALITY
+                var outputStream: FileOutputStream
+                
+                do {
+                    outputStream = FileOutputStream(compressedFile)
+                    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+                    outputStream.close()
+                    
+                    if (compressedFile.length() <= MAX_FILE_SIZE || quality <= MIN_QUALITY) {
+                        break
+                    }
+                    
+                    quality -= 10
+                } while (quality > MIN_QUALITY)
+                
+                resizedBitmap.recycle()
+                compressedFile
+                
+            } catch (e: Exception) {
+                Log.e("ImageCompression", "Error compressing image", e)
+                null
+            }
+        }
+        
+        private fun loadBitmap(context: Context, uri: Uri): Bitmap? {
+            return try {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    BitmapFactory.decodeStream(inputStream)
+                }
+            } catch (e: Exception) {
+                Log.e("ImageCompression", "Error loading bitmap", e)
+                null
+            }
+        }
+        
+        private fun resizeBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+            val width = bitmap.width
+            val height = bitmap.height
+            
+            if (width <= maxWidth && height <= maxHeight) {
+                return bitmap
+            }
+            
+            val aspectRatio = width.toFloat() / height.toFloat()
+            val (newWidth, newHeight) = if (aspectRatio > 1) {
+                maxWidth to (maxWidth / aspectRatio).toInt()
+            } else {
+                (maxHeight * aspectRatio).toInt() to maxHeight
+            }
+            
+            return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        }
+    }
+}
+```
+
+---
+
+## **📱 Complete UI Implementation Example**
+
+### **1. Create Book Activity (Updated with Description)**
+```kotlin
+class CreateBookActivity : AppCompatActivity() {
+    
+    private lateinit var binding: ActivityCreateBookBinding
+    private lateinit var viewModel: BooksViewModel
+    private lateinit var imagePickerHelper: ImagePickerHelper
+    
+    private var selectedImages = mutableListOf<Uri>()
+    private val maxImages = 4
+    private val minImages = 2
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_book)
+        
+        setupImagePicker()
+        setupObservers()
+        setupClickListeners()
+    }
+    
+    private fun setupImagePicker() {
+        imagePickerHelper = ImagePickerHelper(this)
+        imagePickerHelper.initialize()
+    }
+    
+    private fun setupClickListeners() {
+        binding.buttonSelectImages.setOnClickListener {
+            imagePickerHelper.pickImages(maxImages) { uris ->
+                if (uris.size > maxImages) {
+                    showError("Maximum $maxImages images allowed")
+                    return@pickImages
+                }
+                selectedImages.clear()
+                selectedImages.addAll(uris)
+                updateImagePreview()
+            }
+        }
+        
+        binding.buttonCreateBook.setOnClickListener {
+            validateAndCreateBook()
+        }
+    }
+    
+    private fun validateAndCreateBook() {
+        val bookName = binding.editTextBookName.text.toString().trim()
+        val category = binding.editTextCategory.text.toString().trim()
+        val description = binding.editTextDescription.text.toString().trim() // ⭐ NEW
+        val author = binding.editTextAuthor.text.toString().trim()
+        val subCategory = binding.editTextSubCategory.text.toString().trim()
+        val priceString = binding.editTextPrice.text.toString().trim()
+        
+        // Validation
+        when {
+            bookName.isEmpty() -> {
+                binding.editTextBookName.error = "Book name is required"
+                return
+            }
+            category.isEmpty() -> {
+                binding.editTextCategory.error = "Category is required"
+                return
+            }
+            description.isEmpty() -> { // ⭐ NEW VALIDATION
+                binding.editTextDescription.error = "Description is required"
+                return
+            }
+            priceString.isEmpty() -> {
+                binding.editTextPrice.error = "Price is required"
+                return
+            }
+            selectedImages.size < minImages -> {
+                showError("Please select at least $minImages images")
+                return
+            }
+            selectedImages.size > maxImages -> {
+                showError("Maximum $maxImages images allowed")
+                return
+            }
+        }
+        
+        val price = priceString.toDoubleOrNull()
+        if (price == null || price <= 0) {
+            binding.editTextPrice.error = "Please enter a valid price"
+            return
+        }
+        
+        // Compress and upload images
+        lifecycleScope.launch {
+            val compressedFiles = compressImages()
+            if (compressedFiles.isNotEmpty()) {
+                val bookData = BookData(
+                    bookName = bookName,
+                    category = category,
+                    description = description, // ⭐ NEW FIELD
+                    sellingPrice = price,
+                    author = author.ifEmpty { null },
+                    subCategory = subCategory.ifEmpty { null }
+                )
+                
+                val userId = getUserId() // Get current user ID
+                viewModel.uploadBook(userId, bookData, compressedFiles)
+            }
+        }
+    }
+    
+    private suspend fun compressImages(): List<File> {
+        val compressedFiles = mutableListOf<File>()
+        
+        binding.progressBar.visibility = View.VISIBLE
+        binding.textProgress.text = "Compressing images..."
+        
+        selectedImages.forEachIndexed { index, uri ->
+            binding.textProgress.text = "Compressing image ${index + 1}/${selectedImages.size}..."
+            
+            val compressedFile = ImageCompressionUtil.compressImage(this@CreateBookActivity, uri)
+            compressedFile?.let { compressedFiles.add(it) }
+        }
+        
+        binding.progressBar.visibility = View.GONE
+        return compressedFiles
+    }
+    
+    private fun setupObservers() {
+        viewModel.uploadResult.observe(this) { result ->
+            showSuccess("Book listed successfully!")
+            finish()
+        }
+        
+        viewModel.error.observe(this) { error ->
+            showError(error)
+        }
+        
+        viewModel.isLoading.observe(this) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.buttonCreateBook.isEnabled = !isLoading
+        }
+    }
+    
+    private fun updateImagePreview() {
+        binding.textImageCount.text = "${selectedImages.size}/$maxImages images selected"
+        
+        // Update image preview recycler view
+        val adapter = ImagePreviewAdapter(selectedImages) { position ->
+            selectedImages.removeAt(position)
+            updateImagePreview()
+        }
+        binding.recyclerViewImages.adapter = adapter
+    }
+}
+```
+
+### **2. Book Details Activity (Updated with MarkAsUnSold)**
+```kotlin
+class BookDetailsActivity : AppCompatActivity() {
+    
+    private lateinit var binding: ActivityBookDetailsBinding
+    private lateinit var viewModel: BooksViewModel
+    
+    private lateinit var bookId: String
+    private var currentBook: Book? = null
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_book_details)
+        
+        bookId = intent.getStringExtra("BOOK_ID") ?: return finish()
+        
+        setupObservers()
+        setupClickListeners()
+        loadBookDetails()
+    }
+    
+    private fun setupClickListeners() {
+        binding.buttonMarkSold.setOnClickListener {
+            showMarkSoldConfirmation()
+        }
+        
+        binding.buttonMarkUnSold.setOnClickListener { // ⭐ NEW BUTTON
+            showMarkUnSoldConfirmation()
+        }
+    }
+    
+    private fun showMarkSoldConfirmation() {
+        AlertDialog.Builder(this)
+            .setTitle("Mark as Sold")
+            .setMessage("Are you sure you want to mark this book as sold?")
+            .setPositiveButton("Yes") { _, _ ->
+                viewModel.markBookAsSold(bookId)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showMarkUnSoldConfirmation() { // ⭐ NEW METHOD
+        AlertDialog.Builder(this)
+            .setTitle("Mark as Available")
+            .setMessage("Are you sure you want to mark this book as available for sale again?")
+            .setPositiveButton("Yes") { _, _ ->
+                viewModel.markBookAsUnSold(bookId)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun setupObservers() {
+        viewModel.success.observe(this) { message ->
+            showSuccess(message)
+            loadBookDetails() // Refresh book details
+        }
+        
+        viewModel.error.observe(this) { error ->
+            showError(error)
+        }
+    }
+    
+    private fun updateUI(book: Book) {
+        currentBook = book
+        
+        binding.textBookName.text = book.BookName
+        binding.textCategory.text = book.Category
+        binding.textDescription.text = book.Description // ⭐ Display description
+        binding.textPrice.text = "₹${book.SellingPrice}"
+        binding.textAuthor.text = book.AuthorOrPublication ?: "Author not specified"
+        
+        // Update button visibility based on sold status
+        binding.buttonMarkSold.visibility = if (!book.IsSold) View.VISIBLE else View.GONE
+        binding.buttonMarkUnSold.visibility = if (book.IsSold) View.VISIBLE else View.GONE // ⭐ NEW
+        
+        // Load book images
+        loadBookImages(book.Images)
+    }
+}
+```
+
+---
+
+## **🔧 Complete Integration Summary**
+
+### **✅ Updated Features (October 2025)**
+
+#### **1. Books API Updates:**
+- **Description Field:** Now required for all new book listings
+- **MarkAsUnSold Endpoint:** Allow reverting sold status
+- **Enhanced Search:** Search includes description field
+
+#### **2. New UserSearch API:**
+- **Search Logging:** Track user search behavior for analytics
+- **Privacy-Focused:** Only logs search terms and user IDs
+- **Analytics Ready:** Provides data for improving recommendations
+
+#### **3. Enhanced Android Integration:**
+- **Image Compression:** Automatic compression to 100-150KB
+- **Error Handling:** Comprehensive error handling with user feedback
+- **Secure Token Management:** Encrypted SharedPreferences
+- **Background Tasks:** WorkManager for location sync and chat polling
+
+### **🚀 Production Ready Features:**
+✅ **JWT Authentication** with secure token storage  
+✅ **Image Upload & Compression** with progress tracking  
+✅ **Real-time Chat** with 10-second polling  
+✅ **Location Services** with background sync  
+✅ **Search Analytics** with privacy protection  
+✅ **Comprehensive Error Handling** with user-friendly messages  
+✅ **Offline Support** with local caching  
+✅ **Security Best Practices** with encrypted storage  
+
+**Your Android app now has complete integration with all ResellPanda APIs including the latest Description field and MarkAsUnSold functionality!** 🎉
     
     private val _books = MutableLiveData<List<Book>>()
     val books: LiveData<List<Book>> = _books

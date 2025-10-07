@@ -41,8 +41,9 @@ https://resellbook20250929183655.azurewebsites.net
 | Category | Base Path | Purpose |
 |----------|-----------|---------|
 | Authentication | `/api/Auth/*` | User registration, login, password reset |
-| Books | `/api/Books/*` | Book listings, search, management |
+| Books | `/api/Books/*` | Book listings, search, management (with Description) ⭐ |
 | User Location | `/api/UserLocation/*` | GPS sync, location tracking |
+| User Search | `/api/UserSearch/*` | Search analytics and behavior tracking ⭐ NEW |
 | Logs | `/api/Logs/*` | System monitoring (for developers) |
 
 ---

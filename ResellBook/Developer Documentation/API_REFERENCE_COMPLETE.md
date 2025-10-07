@@ -27,8 +27,9 @@ Content-Type: application/json
 |--------|----------|---------|---------------|
 | `GET` | `/api/Books/ViewMyListings/{userId}` | Get user's book listings | ✅ |
 | `PATCH` | `/api/Books/MarkAsSold/{bookId}` | Mark book as sold | ✅ |
+| `PATCH` | `/api/Books/MarkAsUnSold/{bookId}` | Mark book as unsold | ✅ |
 | `DELETE` | `/api/Books/Delete/{bookId}` | Delete book listing | ✅ |
-| `POST` | `/api/Books/ListBook` | Create new book listing | ✅ |
+| `POST` | `/api/Books/ListBook` | Create new book listing (with Description) | ✅ |
 | `PUT` | `/api/Books/EditListing/{id}` | Edit existing listing | ✅ |
 | `GET` | `/api/Books/ViewAll/{userId}` | Browse all available books | ✅ |
 
@@ -66,6 +67,12 @@ Content-Type: application/json
 | `GET` | `/api/Logs/GetLogsSummary` | Get logs summary | ❌ |
 | `POST` | `/api/Logs/ClearAllLogs` | Clear all logs | ❌ |
 | `GET` | `/api/Logs/TestLogging` | Test logging system | ❌ |
+
+### 🔍 **User Search APIs** `/api/UserSearch`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `POST` | `/api/UserSearch/LogSearch` | Log user search activity | ✅ |
 
 ### 🏥 **Health Check APIs**
 

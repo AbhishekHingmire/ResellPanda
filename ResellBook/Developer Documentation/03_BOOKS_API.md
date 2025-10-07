@@ -21,6 +21,7 @@ UserId: "123e4567-e89b-12d3-a456-426614174000" (GUID - Required)
 BookName: "Data Structures and Algorithms" (String - Required)
 AuthorOrPublication: "Robert Lafore" (String - Optional)
 Category: "Computer Science" (String - Required)
+Description: "Comprehensive guide to data structures with examples" (String - Required) ⭐ NEW
 SubCategory: "Programming" (String - Optional)
 SellingPrice: 299.99 (Decimal - Required)
 Images: [File1, File2, File3, File4] (IFormFile[] - Required, 2-4 files)
@@ -30,6 +31,7 @@ Images: [File1, File2, File3, File4] (IFormFile[] - Required, 2-4 files)
 - ✅ **UserId**: Must exist in Users database
 - ✅ **BookName**: Required, not empty or whitespace
 - ✅ **Category**: Required, not empty or whitespace
+- ✅ **Description**: Required, not empty or whitespace ⭐ NEW FIELD
 - ✅ **SellingPrice**: Required, must be positive decimal value
 - ✅ **Images**: Required, minimum 2 files, maximum 4 files
 - ✅ **File Types**: Image formats (jpg, png, gif, etc.)
@@ -70,6 +72,7 @@ interface BooksApi {
         @Part("UserId") userId: RequestBody,
         @Part("BookName") bookName: RequestBody,
         @Part("Category") category: RequestBody,
+        @Part("Description") description: RequestBody, // ⭐ NEW REQUIRED FIELD
         @Part("SellingPrice") sellingPrice: RequestBody,
         @Part("AuthorOrPublication") authorOrPublication: RequestBody? = null,
         @Part("SubCategory") subCategory: RequestBody? = null,
@@ -950,7 +953,64 @@ class BookDetailsFragment {
 
 ---
 
-### **6. Delete Book Listing** 
+### **6. Mark Book as Unsold** ⭐ NEW
+**`PATCH /api/Books/MarkAsUnSold/{bookId}`**
+
+**Purpose:** Mark a book listing as unsold (revert sold status)
+
+**Authentication:** 🔒 JWT Token Required
+
+**URL Parameters:**
+- `bookId`: Book GUID - **Required**
+
+**Success Response (200):**
+```json
+{"Message": "Book marked as Unsold successfully."}
+```
+
+**Error Responses:**
+```json
+// 404 - Book not found
+{"Message": "Book not found"}
+
+// 400 - Already unsold
+{"Message": "This book is already marked as Unsold."}
+
+// 401 - Unauthorized
+{"Message": "Unauthorized"}
+```
+
+**Android Kotlin Implementation:**
+```kotlin
+interface BooksApi {
+    @PATCH("api/Books/MarkAsUnSold/{bookId}")
+    suspend fun markAsUnSold(
+        @Header("Authorization") token: String,
+        @Path("bookId") bookId: String
+    ): Response<MessageResponse>
+}
+
+// Repository
+suspend fun markBookAsUnSold(bookId: String): Result<String> {
+    return try {
+        val token = "Bearer ${getAuthToken()}"
+        val response = booksApi.markAsUnSold(token, bookId)
+        
+        if (response.isSuccessful) {
+            Result.success(response.body()?.Message ?: "Book marked as unsold")
+        } else {
+            val errorMessage = parseErrorMessage(response.errorBody()?.string())
+            Result.failure(Exception(errorMessage))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+}
+```
+
+---
+
+### **7. Delete Book Listing** 
 **`DELETE /api/Books/Delete/{bookId}`**
 
 **Purpose:** Permanently delete a book listing and its images
