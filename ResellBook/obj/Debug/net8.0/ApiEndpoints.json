@@ -813,6 +813,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "ResellBook.Controllers.UserSearchController",
+    "Method": "LogSearch",
+    "RelativePath": "api/UserSearch/LogSearch",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ResellBook.Controllers.UserSearchDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "ResellBook.Controllers.FileController",
     "Method": "ServeBookImage",
     "RelativePath": "uploads/books/{fileName}",

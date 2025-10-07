@@ -5,9 +5,12 @@ using ResellBook.Data;
 using ResellBook.Helpers;
 using ResellBook.Models;
 using ResellBook.Utils;
+using SixLabors.ImageSharp.Formats.Jpeg;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
-
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
 [ApiController]
 [Route("api/[controller]")]
 public class BooksController : ControllerBase
@@ -63,31 +66,33 @@ public class BooksController : ControllerBase
     [HttpPatch("MarkAsSold/{bookId}")]
     public async Task<IActionResult> MarkAsSold(Guid bookId)
     {
+        SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Request for bookId: {bookId}", bookId.ToString());
         var book = await _context.Books.FindAsync(bookId);
         if (book == null)
             return NotFound(new { Message = "Book not found" });
-
+        SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"BookId not found: {bookId}", bookId.ToString());
         if (book.IsSold)
             return BadRequest(new { Message = "This book is already marked as sold." });
 
         book.IsSold = true;
         await _context.SaveChangesAsync();
-
+        SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book marked as sold successfully: {bookId}", bookId.ToString());
         return Ok(new { Message = "Book marked as sold successfully." });
     }
     [HttpPatch("MarkAsUnSold/{bookId}")]
     public async Task<IActionResult> MarkAsUnSold(Guid bookId)
     {
+        SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Request for bookId: {bookId}", bookId.ToString());
         var book = await _context.Books.FindAsync(bookId);
         if (book == null)
             return NotFound(new { Message = "Book not found" });
-
+        SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"BookId not found: {bookId}", bookId.ToString());
         if (book.IsSold == false)
             return BadRequest(new { Message = "This book is already marked as Unsold." });
 
         book.IsSold = false;
         await _context.SaveChangesAsync();
-
+        SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book marked as Unsoldsold successfully: {bookId}", bookId.ToString());
         return Ok(new { Message = "Book marked as Unsold successfully." });
     }
     // DELETE: api/Books/Delete/{bookId}
@@ -122,11 +127,21 @@ public class BooksController : ControllerBase
         return Ok(new { Message = "Book deleted successfully" });
     }
     // POST: List Book
+
+
     [HttpPost("ListBook")]
     public async Task<IActionResult> ListBook([FromForm] BookCreateDto dto)
     {
         try
         {
+            var currentUserLocation = await _context.UserLocations
+                .FirstOrDefaultAsync(u => u.UserId == dto.UserId);
+
+            if (currentUserLocation == null)
+            {
+                SimpleLogger.LogCritical("BooksController", "ListBook", $"User location not found for userId: {dto.UserId}", null, dto.UserId.ToString());
+                return BadRequest("User location not found.");
+            }
             SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listing request for userId: {dto.UserId}, BookName: {dto.BookName}", dto.UserId.ToString());
 
             if (!await _context.Users.AnyAsync(u => u.Id == dto.UserId))
@@ -147,12 +162,30 @@ public class BooksController : ControllerBase
                 Directory.CreateDirectory(uploadsFolder);
 
             var imagePaths = new List<string>();
+
             foreach (var image in dto.Images)
             {
                 var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
                 var savePath = Path.Combine(uploadsFolder, fileName);
-                using var stream = new FileStream(savePath, FileMode.Create);
-                await image.CopyToAsync(stream);
+
+                using var imageStream = image.OpenReadStream();
+                using var img = await Image.LoadAsync(imageStream);
+
+                // Compress image to target 100 KB - 150 KB
+                var quality = 75;
+                var options = new JpegEncoder { Quality = quality }; // Capital Q
+                using var ms = new MemoryStream();
+                await img.SaveAsJpegAsync(ms, options);
+                while (ms.Length > 150 * 1024 && quality > 10)
+                {
+                    ms.SetLength(0);
+                    quality = quality - 5;
+                    options = new JpegEncoder { Quality = quality }; // create a new JpegEncoder with the updated quality
+                    await img.SaveAsJpegAsync(ms, options);
+                }
+
+                // Save final image
+                await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
                 imagePaths.Add(Path.Combine("uploads/books", fileName));
             }
 
@@ -182,8 +215,8 @@ public class BooksController : ControllerBase
         }
     }
 
-    // PUT: Edit Book
-    [HttpPut("EditListing/{id}")]
+// PUT: Edit Book
+[HttpPut("EditListing/{id}")]
     public async Task<IActionResult> EditListing(Guid id, [FromForm] BookEditDto dto)
     {
         var book = await _context.Books.FindAsync(id);

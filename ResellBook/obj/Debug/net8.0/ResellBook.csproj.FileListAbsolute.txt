@@ -635,3 +635,6 @@ C:\Users\ranas\Source\Repos\ResellPandaaa\ResellBook\obj\Debug\net8.0\refint\Res
 C:\Users\ranas\Source\Repos\ResellPandaaa\ResellBook\obj\Debug\net8.0\ResellBook.pdb
 C:\Users\ranas\Source\Repos\ResellPandaaa\ResellBook\obj\Debug\net8.0\ResellBook.genruntimeconfig.cache
 C:\Users\ranas\Source\Repos\ResellPandaaa\ResellBook\obj\Debug\net8.0\ref\ResellBook.dll
+C:\Users\ranas\Source\Repos\ResellPandaaa\ResellBook\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\Users\ranas\Source\Repos\ResellPandaaa\ResellBook\bin\Debug\net8.0\SixLabors.ImageSharp.dll
+C:\Users\ranas\Source\Repos\ResellPandaaa\ResellBook\bin\Debug\net8.0\SixLabors.ImageSharp.Drawing.dll

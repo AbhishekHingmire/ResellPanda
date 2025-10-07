@@ -63,3 +63,5 @@
 06/10/2025 01:45:43 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
 06/10/2025 01:52:05 PM | AuthController | Login | Login attempt for email: ranasingh06779@gmail.com | UserId: N/A
 06/10/2025 01:52:07 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+07/10/2025 11:40:06 AM | BooksController | ListBook | Book listing request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, BookName: Test Kb | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+07/10/2025 11:40:08 AM | BooksController | ListBook | Book listed successfully with ID: a6e6e73e-7bca-49dd-833f-73631f9bd618 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
