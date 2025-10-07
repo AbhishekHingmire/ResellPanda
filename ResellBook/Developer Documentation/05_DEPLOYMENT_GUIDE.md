@@ -40,7 +40,7 @@ SMTP__Pass=unknvvwbmpszgmyk
 
 ```powershell
 # Use the automated preservation script (RECOMMENDED)
-.\deploy-simple-preserve.ps1
+.\deploy.ps1
 ```
 
 **What this script does:**
