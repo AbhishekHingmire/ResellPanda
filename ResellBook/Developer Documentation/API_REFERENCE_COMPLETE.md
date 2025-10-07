@@ -1,16 +1,113 @@
-# ResellPanda API Documentation
+# 📋 ResellPanda - Complete API Reference Guide
 
-## 📋 **Table of Contents**
+## 🎯 **Base URL & Authentication**
+```
+Base URL: https://resellbook20250929183655.azurewebsites.net
+Authorization: Bearer <your_jwt_token>
+Content-Type: application/json
+```
 
-1. [Authentication APIs](#authentication-apis)
-2. [Books Management APIs](#books-management-apis)
-3. [Chat & Messaging APIs](#chat--messaging-apis)
-4. [User Location APIs](#user-location-apis)
-5. [User Profile APIs](#user-profile-apis)
-6. [File & Image Serving APIs](#file--image-serving-apis)
-7. [System APIs](#system-apis)
-8. [Error Handling](#error-handling)
-9. [Android Kotlin Integration Examples](#android-kotlin-integration-examples)
+## 📋 **Quick Reference Table**
+
+### 🔐 **Authentication APIs** `/api/Auth`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `POST` | `/api/Auth/signup` | Register new user | ❌ |
+| `POST` | `/api/Auth/resend-otp` | Resend email OTP | ❌ |  
+| `POST` | `/api/Auth/verify-email` | Verify email with OTP | ❌ |
+| `POST` | `/api/Auth/login` | User authentication | ❌ |
+| `POST` | `/api/Auth/forgot-password` | Request password reset | ❌ |
+| `POST` | `/api/Auth/verify-reset-otp` | Verify reset OTP | ❌ |
+| `POST` | `/api/Auth/reset-password` | Complete password reset | ❌ |
+
+### 📚 **Books Management APIs** `/api/Books`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `GET` | `/api/Books/ViewMyListings/{userId}` | Get user's book listings | ✅ |
+| `PATCH` | `/api/Books/MarkAsSold/{bookId}` | Mark book as sold | ✅ |
+| `DELETE` | `/api/Books/Delete/{bookId}` | Delete book listing | ✅ |
+| `POST` | `/api/Books/ListBook` | Create new book listing | ✅ |
+| `PUT` | `/api/Books/EditListing/{id}` | Edit existing listing | ✅ |
+| `GET` | `/api/Books/ViewAll/{userId}` | Browse all available books | ✅ |
+
+### 💬 **Chat & Messaging APIs** `/api/Chat`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `POST` | `/api/Chat/SendMessage/{senderId}` | Send message | ✅ |
+| `GET` | `/api/Chat/GetChats/{userId}` | Get user's chat list | ✅ |
+| `GET` | `/api/Chat/GetChatMessages/{userId}/{otherUserId}` | Get chat messages | ✅ |
+| `PUT` | `/api/Chat/MarkAsRead/{userId}` | Mark messages as read | ✅ |
+| `GET` | `/api/Chat/GetUnreadCount/{userId}` | Get unread count | ✅ |
+| `DELETE` | `/api/Chat/DeleteMessage/{messageId}/{userId}` | Delete message | ✅ |
+| `DELETE` | `/api/Chat/DeleteChat/{userId}/{otherUserId}` | Delete entire chat | ✅ |
+| `POST` | `/api/Chat/BlockUser/{userId}` | Block another user | ✅ |
+| `DELETE` | `/api/Chat/UnblockUser/{userId}/{blockedUserId}` | Unblock user | ✅ |
+| `GET` | `/api/Chat/GetBlockedUsers/{userId}` | Get blocked users list | ✅ |
+| `GET` | `/api/Chat/CheckBlockStatus/{userId}/{otherUserId}` | Check if user blocked | ✅ |
+
+### 📍 **User Location APIs** `/api/UserLocation`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `POST` | `/api/UserLocation/SyncLocation` | Sync GPS location | ✅ |
+| `GET` | `/api/UserLocation/GetLocations/{userId}` | Get location history | ✅ |
+| `GET` | `/api/UserLocation/profile/{userId}` | Get user profile | ✅ |
+| `PUT` | `/api/UserLocation/EditUser/{id}` | Update user profile | ✅ |
+
+### 📊 **System Monitoring APIs** `/api/Logs`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `GET` | `/api/Logs/GetNormalLogs` | Get normal operation logs | ❌ |
+| `GET` | `/api/Logs/GetCriticalLogs` | Get error/critical logs | ❌ |
+| `GET` | `/api/Logs/GetLogsSummary` | Get logs summary | ❌ |
+| `POST` | `/api/Logs/ClearAllLogs` | Clear all logs | ❌ |
+| `GET` | `/api/Logs/TestLogging` | Test logging system | ❌ |
+
+### 🏥 **Health Check APIs**
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `GET` | `/weatherforecast` | System health check | ❌ |
+
+---
+
+## 📱 **Android Kotlin Setup**
+
+```kotlin
+interface ResellPandaApi {
+    companion object {
+        const val BASE_URL = "https://resellbook20250929183655.azurewebsites.net/"
+        
+        fun create(token: String? = null): ResellPandaApi {
+            val client = OkHttpClient.Builder()
+                .addInterceptor { chain ->
+                    val request = chain.request().newBuilder()
+                    token?.let { 
+                        request.addHeader("Authorization", "Bearer $it")
+                    }
+                    request.addHeader("Content-Type", "application/json")
+                    chain.proceed(request.build())
+                }
+                .build()
+                
+            return Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(ResellPandaApi::class.java)
+        }
+    }
+}
+```
+
+---
+
+## 📋 **Detailed API Documentation**
 
 ---
 
