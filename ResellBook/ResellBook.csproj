@@ -27,9 +27,4 @@
     <Folder Include="wwwroot\uploads\books\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\**\*.cs" />
-    <None Include="Migrations\**\*.cs" CopyToOutputDirectory="Always" />
-  </ItemGroup>
-
 </Project>

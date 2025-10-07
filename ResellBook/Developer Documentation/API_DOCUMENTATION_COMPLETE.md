@@ -4,11 +4,13 @@
 
 1. [Authentication APIs](#authentication-apis)
 2. [Books Management APIs](#books-management-apis)
-3. [User Location APIs](#user-location-apis)
-4. [User Profile APIs](#user-profile-apis)
-5. [System APIs](#system-apis)
-6. [Error Handling](#error-handling)
-7. [Android Kotlin Integration Examples](#android-kotlin-integration-examples)
+3. [Chat & Messaging APIs](#chat--messaging-apis)
+4. [User Location APIs](#user-location-apis)
+5. [User Profile APIs](#user-profile-apis)
+6. [File & Image Serving APIs](#file--image-serving-apis)
+7. [System APIs](#system-apis)
+8. [Error Handling](#error-handling)
+9. [Android Kotlin Integration Examples](#android-kotlin-integration-examples)
 
 ---
 
@@ -444,7 +446,430 @@ suspend fun getAllBooks(): Response<List<Book>>
 
 ---
 
-## 📍 **User Location APIs**
+## � **Chat & Messaging APIs**
+
+### **Base URL:** `https://resellbook20250929183655.azurewebsites.net/api/Chat`
+
+#### **1. Send Message to Book Owner**
+- **Endpoint:** `POST /api/Chat/SendMessage/{senderId}`
+- **Purpose:** Send message directly to book owner using BookId
+- **Content-Type:** `application/json`
+- **✨ Updated:** Now uses BookId instead of ReceiverId for easier integration
+
+**URL Parameters:**
+- `senderId`: ID of user sending the message (GUID)
+
+**Request Body:**
+```json
+{
+  "BookId": "123e4567-e89b-12d3-a456-426614174000",
+  "Message": "Hi! Is this book still available?"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Message sent successfully",
+  "ChatMessage": {
+    "Id": "789e4567-e89b-12d3-a456-426614174000",
+    "SenderId": "456e4567-e89b-12d3-a456-426614174000",
+    "ReceiverId": "123e4567-e89b-12d3-a456-426614174000",
+    "SenderName": "John Doe",
+    "ReceiverName": "Jane Smith",
+    "Message": "Hi! Is this book still available?",
+    "SentAt": "2025-10-04T13:45:00Z",
+    "IsRead": false,
+    "IsSentByMe": true
+  },
+  "BookContext": {
+    "BookId": "123e4567-e89b-12d3-a456-426614174000",
+    "BookName": "Advanced Mathematics",
+    "BookOwnerName": "Jane Smith",
+    "SellingPrice": 450.00
+  }
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class SendMessageRequest(
+    val BookId: String,
+    val Message: String
+)
+
+data class BookContext(
+    val BookId: String,
+    val BookName: String,
+    val BookOwnerName: String,
+    val SellingPrice: Double
+)
+
+data class ChatMessage(
+    val Id: String,
+    val SenderId: String,
+    val ReceiverId: String,
+    val SenderName: String,
+    val ReceiverName: String,
+    val Message: String,
+    val SentAt: String,
+    val IsRead: Boolean,
+    val IsSentByMe: Boolean
+)
+
+data class SendMessageResponse(
+    val Success: Boolean,
+    val Message: String,
+    val ChatMessage: ChatMessage?,
+    val BookContext: BookContext?
+)
+
+@POST("api/Chat/SendMessage/{senderId}")
+suspend fun sendMessageToBookOwner(
+    @Path("senderId") senderId: String,
+    @Body request: SendMessageRequest
+): Response<SendMessageResponse>
+```
+
+---
+
+#### **2. Get Chat List (UPDATED)**
+- **Endpoint:** `GET /api/Chat/GetChats/{userId}`
+- **Purpose:** Get all chat conversations for user with unread counts and blocking status
+- **✨ New:** Now includes `IsBlocked` and `IsBlockedBy` parameters
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Chats retrieved successfully",
+  "Chats": [
+    {
+      "UserId": "123e4567-e89b-12d3-a456-426614174000",
+      "UserName": "Jane Smith",
+      "LastMessage": "Sure, it's available!",
+      "LastMessageTime": "2025-10-04T14:30:00Z",
+      "UnreadCount": 2,
+      "IsOnline": false,
+      "IsBlocked": false,
+      "IsBlockedBy": false
+    },
+    {
+      "UserId": "456e4567-e89b-12d3-a456-426614174001",
+      "UserName": "John Blocked",
+      "LastMessage": "Last message before block",
+      "LastMessageTime": "2025-10-03T10:00:00Z",
+      "UnreadCount": 0,
+      "IsOnline": false,
+      "IsBlocked": true,
+      "IsBlockedBy": false
+    }
+  ]
+}
+```
+
+**Field Explanations:**
+- `IsBlocked`: `true` if current user has blocked this chat partner
+- `IsBlockedBy`: `true` if current user is blocked by this chat partner
+
+---
+
+#### **3. Get Chat Messages**
+- **Endpoint:** `GET /api/Chat/GetChatMessages/{userId}/{otherUserId}?page=1`
+- **Purpose:** Get message history between two users
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Messages retrieved successfully",
+  "Messages": [
+    {
+      "Id": "789e4567-e89b-12d3-a456-426614174000",
+      "SenderId": "456e4567-e89b-12d3-a456-426614174000",
+      "ReceiverId": "123e4567-e89b-12d3-a456-426614174000",
+      "SenderName": "John Doe",
+      "ReceiverName": "Jane Smith",
+      "Message": "Hi! Is this book still available?",
+      "SentAt": "2025-10-04T13:45:00Z",
+      "IsRead": true,
+      "IsSentByMe": true
+    }
+  ]
+}
+```
+
+---
+
+#### **4. Mark Messages as Read**
+- **Endpoint:** `POST /api/Chat/MarkAsRead/{userId}`
+- **Purpose:** Mark all messages from another user as read
+
+**Request Body:**
+```json
+{
+  "OtherUserId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+---
+
+#### **5. Get Unread Count**
+- **Endpoint:** `GET /api/Chat/GetUnreadCount/{userId}`
+- **Purpose:** Get total unread message count for user
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Unread count retrieved successfully",
+  "UnreadCount": 5
+}
+```
+
+---
+
+#### **6. Delete Single Message**
+- **Endpoint:** `DELETE /api/Chat/DeleteMessage/{messageId}/{userId}`
+- **Purpose:** Delete a specific message (sender only)
+
+---
+
+#### **7. Delete Chat from Your View (UPDATED)**
+- **Endpoint:** `DELETE /api/Chat/DeleteChat/{userId}/{otherUserId}`
+- **Purpose:** ✨ Delete chat from YOUR view only (not from other user's view)
+- **Note:** Uses soft deletion - messages are hidden from your view but remain for the other user
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Chat deleted from your view",
+  "DeletedMessagesCount": 25,
+  "DeletedBetween": {
+    "User1Name": "John Doe",
+    "User2Name": "Jane Smith"
+  }
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class DeleteChatResponse(
+    val Success: Boolean,
+    val Message: String,
+    val DeletedMessagesCount: Int,
+    val DeletedBetween: ChatParticipants?
+)
+
+@DELETE("api/Chat/DeleteChat/{userId}/{otherUserId}")
+suspend fun deleteChat(
+    @Path("userId") userId: String,
+    @Path("otherUserId") otherUserId: String
+): Response<DeleteChatResponse>
+```
+
+---
+
+#### **8. Block User (NEW)**
+- **Endpoint:** `POST /api/Chat/BlockUser/{userId}`
+- **Purpose:** Block a user from sending messages to you
+- **Content-Type:** `application/json`
+
+**Request Body:**
+```json
+{
+  "UserIdToBlock": "123e4567-e89b-12d3-a456-426614174000",
+  "Reason": "Spam/Inappropriate behavior" // Optional
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "User blocked successfully",
+  "BlockedUserName": "John Doe",
+  "BlockedAt": "2025-10-05T10:30:00Z"
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class BlockUserRequest(
+    val UserIdToBlock: String,
+    val Reason: String? = null
+)
+
+data class BlockUserResponse(
+    val Success: Boolean,
+    val Message: String,
+    val BlockedUserName: String?,
+    val BlockedAt: String?
+)
+
+@POST("api/Chat/BlockUser/{userId}")
+suspend fun blockUser(
+    @Path("userId") userId: String,
+    @Body request: BlockUserRequest
+): Response<BlockUserResponse>
+```
+
+---
+
+#### **9. Unblock User (NEW)**
+- **Endpoint:** `DELETE /api/Chat/UnblockUser/{userId}/{blockedUserId}`
+- **Purpose:** Unblock a previously blocked user
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "User unblocked successfully",
+  "UnblockedUserName": "John Doe"
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class UnblockUserResponse(
+    val Success: Boolean,
+    val Message: String,
+    val UnblockedUserName: String?
+)
+
+@DELETE("api/Chat/UnblockUser/{userId}/{blockedUserId}")
+suspend fun unblockUser(
+    @Path("userId") userId: String,
+    @Path("blockedUserId") blockedUserId: String
+): Response<UnblockUserResponse>
+```
+
+---
+
+#### **10. Get Blocked Users (NEW)**
+- **Endpoint:** `GET /api/Chat/GetBlockedUsers/{userId}`
+- **Purpose:** Get list of all blocked users
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Blocked users retrieved successfully",
+  "BlockedUsers": [
+    {
+      "UserId": "123e4567-e89b-12d3-a456-426614174000",
+      "UserName": "John Doe",
+      "UserEmail": "john@example.com",
+      "BlockedAt": "2025-10-05T10:30:00Z",
+      "Reason": "Spam"
+    }
+  ],
+  "TotalCount": 1
+}
+```
+
+**Android Kotlin Example:**
+```kotlin
+data class BlockedUserDto(
+    val UserId: String,
+    val UserName: String,
+    val UserEmail: String?,
+    val BlockedAt: String,
+    val Reason: String?
+)
+
+data class BlockedUsersResponse(
+    val Success: Boolean,
+    val Message: String,
+    val BlockedUsers: List<BlockedUserDto>,
+    val TotalCount: Int
+)
+
+@GET("api/Chat/GetBlockedUsers/{userId}")
+suspend fun getBlockedUsers(
+    @Path("userId") userId: String
+): Response<BlockedUsersResponse>
+```
+
+---
+
+#### **11. Check Block Status (NEW)**
+- **Endpoint:** `GET /api/Chat/CheckBlockStatus/{userId}/{otherUserId}`
+- **Purpose:** Check blocking relationship between two users
+- **Use Case:** Determine if user can send message, show block/unblock button
+
+**Success Response (200):**
+```json
+{
+  "Success": true,
+  "Message": "Block status retrieved successfully",
+  "HasBlocked": false,
+  "IsBlockedBy": true,
+  "CanSendMessage": false,
+  "OtherUserName": "John Doe"
+}
+```
+
+**Field Explanations:**
+- `HasBlocked`: `true` if current user has blocked the other user
+- `IsBlockedBy`: `true` if current user is blocked by the other user  
+- `CanSendMessage`: `true` if current user can send messages (not blocked by other user)
+
+**React/Android Example:**
+```javascript
+// React
+const checkBlockStatus = async (currentUserId, otherUserId) => {
+  const response = await fetch(`${BASE_URL}/api/Chat/CheckBlockStatus/${currentUserId}/${otherUserId}`);
+  const data = await response.json();
+  
+  if (data.Success) {
+    // Update UI based on blocking status
+    setCanSendMessage(data.CanSendMessage);
+    setHasBlocked(data.HasBlocked);
+    setIsBlockedBy(data.IsBlockedBy);
+  }
+  
+  return data;
+};
+
+// Android Kotlin
+data class BlockStatusResponse(
+    val Success: Boolean,
+    val Message: String,
+    val HasBlocked: Boolean,
+    val IsBlockedBy: Boolean,
+    val CanSendMessage: Boolean,
+    val OtherUserName: String?
+)
+
+@GET("api/Chat/CheckBlockStatus/{userId}/{otherUserId}")
+suspend fun checkBlockStatus(
+    @Path("userId") userId: String,
+    @Path("otherUserId") otherUserId: String
+): Response<BlockStatusResponse>
+```
+
+---
+
+#### **12. Get Book for Messaging Context (Helper)**
+- **Endpoint:** `GET /api/Chat/GetBookForMessage/{bookId}`
+- **Purpose:** Get book details to show messaging context
+
+**Success Response (200):**
+```json
+{
+  "BookId": "123e4567-e89b-12d3-a456-426614174000",
+  "BookName": "Advanced Mathematics",
+  "BookOwnerName": "Jane Smith",
+  "SellingPrice": 450.00
+}
+```
+
+---
+
+## �📍 **User Location APIs**
 
 ### **Base URL:** `https://resellbook20250929183655.azurewebsites.net/api/UserLocation`
 
@@ -592,6 +1017,228 @@ data class UserProfile(
 @GET("api/UserLocation/profile/{userId}")
 suspend fun getUserProfile(@Path("userId") userId: String): Response<UserProfile>
 ```
+
+---
+
+## 📁 **File & Image Serving APIs**
+
+### **Base URL for Images:** `https://resellbook20250929183655.azurewebsites.net/uploads/books/`
+
+#### **1. Access Book Images**
+- **URL Pattern:** `/uploads/books/{fileName}`
+- **Purpose:** Direct access to uploaded book images
+- **Method:** GET
+- **Authentication:** None required
+- **✨ Features:** Smart file location detection, automatic content-type handling
+
+**URL Examples:**
+```
+https://resellbook20250929183655.azurewebsites.net/uploads/books/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png
+https://resellbook20250929183655.azurewebsites.net/uploads/books/8de9098e-b267-45b5-9282-6056c1f88dc4.jpg
+```
+
+**Supported Formats:** PNG, JPG, JPEG, GIF, BMP, WEBP
+
+**Response Headers:**
+```
+Content-Type: image/png (or appropriate image type)
+Content-Length: [file-size]
+```
+
+**Error Responses:**
+- `404 Not Found`: Image file doesn't exist
+- `500 Internal Server Error`: Server error accessing file
+
+**Frontend Integration:**
+```javascript
+// Convert API response path to public URL
+function getImageUrl(apiPath) {
+    const baseUrl = "https://resellbook20250929183655.azurewebsites.net/";
+    const cleanPath = apiPath.replace(/\\/g, '/');
+    return baseUrl + cleanPath;
+}
+
+// Usage example
+const apiResponse = "uploads/books\\image-name.png";
+const publicUrl = getImageUrl(apiResponse);
+// Result: https://resellbook20250929183655.azurewebsites.net/uploads/books/image-name.png
+
+// Display in React
+<img src={publicUrl} alt="Book Image" />
+```
+
+---
+
+#### **2. Debug File Location (Development)**
+- **Endpoint:** `GET /uploads/books/debug/{fileName}`
+- **Purpose:** Debug file location and path resolution
+- **Use Case:** Troubleshoot missing images during development
+
+**Example:**
+```
+GET /uploads/books/debug/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png
+```
+
+**Success Response (200):**
+```json
+{
+  "fileName": "e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "contentRootPath": "C:\\home\\site\\wwwroot",
+  "webRootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "searchedPaths": [
+    {
+      "path": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+      "exists": true
+    },
+    {
+      "path": "C:\\home\\site\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+      "exists": false
+    }
+  ],
+  "foundAt": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png"
+}
+```
+
+---
+
+#### **3. File System Testing & Diagnostics**
+
+##### **Check All Files**
+- **Endpoint:** `GET /api/FileTest/CheckFiles`
+- **Purpose:** List all files in wwwroot and uploads directories
+- **Use Case:** Verify file uploads and directory structure
+
+**Success Response (200):**
+```json
+{
+  "contentRootPath": "C:\\home\\site\\wwwroot",
+  "webRootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "actualWwwrootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "wwwrootExists": true,
+  "uploadsPath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books",
+  "uploadsExists": true,
+  "files": [
+    "e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+    "8de9098e-b267-45b5-9282-6056c1f88dc4.jpg",
+    "another-book-image.png"
+  ],
+  "allPossiblePaths": [
+    {
+      "path": "C:\\home\\site\\wwwroot\\wwwroot",
+      "exists": true
+    },
+    {
+      "path": "C:\\home\\site\\wwwroot\\uploads\\books",
+      "exists": false
+    }
+  ]
+}
+```
+
+##### **Test Specific File**
+- **Endpoint:** `GET /api/FileTest/TestFile/{fileName}`
+- **Purpose:** Check if a specific file exists and get detailed path information
+
+**Example:**
+```
+GET /api/FileTest/TestFile/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png
+```
+
+**Success Response (200):**
+```json
+{
+  "fileName": "e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "filePath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "actualFilePath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "actualWwwrootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+  "fileExists": true,
+  "actualFileExists": true,
+  "expectedUrl": "https://resellbook20250929183655.azurewebsites.net/uploads/books/e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+  "fileSize": 245760,
+  "allTestedPaths": [
+    {
+      "wwwrootPath": "C:\\home\\site\\wwwroot\\wwwroot",
+      "testPath": "C:\\home\\site\\wwwroot\\wwwroot\\uploads\\books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+      "exists": true
+    }
+  ]
+}
+```
+
+---
+
+#### **4. File Upload Handling (Books API Integration)**
+
+When using the Books API to upload images, files are automatically stored in the `uploads/books/` directory with GUID-based filenames for uniqueness.
+
+**Storage Location:** `wwwroot/uploads/books/{guid-filename}.{extension}`
+**Public Access:** `https://resellbook20250929183655.azurewebsites.net/uploads/books/{guid-filename}.{extension}`
+
+**API Response Format:**
+```json
+{
+  "images": [
+    "uploads/books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+    "uploads/books\\8de9098e-b267-45b5-9282-6056c1f88dc4.jpg"
+  ]
+}
+```
+
+**Convert to Public URLs:**
+```javascript
+// JavaScript helper function
+function convertImagesToUrls(book) {
+  const baseUrl = "https://resellbook20250929183655.azurewebsites.net/";
+  
+  return {
+    ...book,
+    imageUrls: book.images.map(imagePath => {
+      const cleanPath = imagePath.replace(/\\/g, '/');
+      return baseUrl + cleanPath;
+    })
+  };
+}
+
+// Usage
+const bookFromAPI = {
+  id: "123",
+  name: "Math Book",
+  images: [
+    "uploads/books\\e5a14dfc-56ab-485f-9cf4-23c2e05b301c.png",
+    "uploads/books\\8de9098e-b267-45b5-9282-6056c1f88dc4.jpg"
+  ]
+};
+
+const bookWithUrls = convertImagesToUrls(bookFromAPI);
+// Result: imageUrls array contains full public URLs
+```
+
+---
+
+#### **5. Troubleshooting Image Access**
+
+**Common Issues & Solutions:**
+
+1. **404 Not Found:**
+   - Use `/api/FileTest/TestFile/{fileName}` to verify file exists
+   - Check if file was uploaded successfully using Books API
+   - Verify filename matches exactly (case-sensitive)
+
+2. **Path Format Issues:**
+   - API returns paths with backslashes: `uploads/books\\filename.png`
+   - Convert to forward slashes for URLs: `uploads/books/filename.png`
+   - Use the helper function provided above
+
+3. **File Location Debugging:**
+   - Use `/api/FileTest/CheckFiles` to see all available files
+   - Use `/uploads/books/debug/{fileName}` to see search paths
+   - Check server logs for file access attempts
+
+**Development Testing Checklist:**
+- ✅ Upload images via Books API
+- ✅ Verify files appear in `/api/FileTest/CheckFiles`
+- ✅ Test direct image URL access
+- ✅ Confirm path conversion in frontend code
 
 ---
 

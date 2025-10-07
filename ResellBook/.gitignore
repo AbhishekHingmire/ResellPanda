@@ -1,0 +1,97 @@
+# ResellBook .NET Core Project - .gitignore
+
+## Build Results
+bin/
+obj/
+publish/
+
+## User Uploads (Sensitive Data - Never Commit)
+wwwroot/uploads/
+wwwroot/BookImages/
+wwwroot/UserFiles/
+
+## Application Logs (Contains Sensitive Information)
+AppLogs/
+Logs/
+*.log
+logs/
+
+## Deployment Temporary Files
+temp-deploy-*/
+temp-download-*/
+wwwroot-backup-*/
+deploy-*.zip
+bulletproof-deploy.zip
+app-logs.zip
+*.zip
+
+## Visual Studio / VS Code
+.vscode/
+.vs/
+*.user
+*.suo
+*.cache
+*.swp
+*~
+
+## Environment-Specific Settings
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
+*.Development.json
+*.Local.json
+
+## Package Management
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Database
+*.db
+*.sqlite
+*.sqlite3
+
+## Azure & Deployment
+PublishProfiles/
+*.PublishSettings
+*.pubxml.user
+
+## Temporary Files
+*.tmp
+*.temp
+Thumbs.db
+.DS_Store
+
+## Sensitive Configuration
+connectionstrings.json
+secrets.json
+*.pfx
+*.p12
+
+## Runtime Files
+*.pid
+*.seed
+*.log.*
+
+## Backup Files
+*.backup
+*.bak
+*~
+
+# Allow These Important Files
+!deploy.ps1
+!DEPLOY_README.md
+!Developer Documentation/
+!Controllers/
+!Models/
+!Services/
+!Utils/
+!Data/
+!Migrations/
+!Helpers/
+!Properties/launchSettings.json
+!ResellBook.csproj
+!Program.cs
+!appsettings.json

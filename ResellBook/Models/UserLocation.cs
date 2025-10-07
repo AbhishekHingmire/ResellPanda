@@ -1,6 +1,7 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ResellBook.Helpers;
 
 namespace ResellBook.Models
 {
@@ -19,7 +20,7 @@ namespace ResellBook.Models
         [Required]
         public double Longitude { get; set; }
 
-        public DateTime CreateDate { get; set; } = DateTime.UtcNow;
+        public DateTime CreateDate { get; set; } = IndianTimeHelper.UtcNow;
 
         public virtual User? User { get; set; } = null!;  // Navigation property
     }

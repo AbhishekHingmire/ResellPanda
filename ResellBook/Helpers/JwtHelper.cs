@@ -18,7 +18,7 @@
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString())
                 }),
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = IndianTimeHelper.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature)

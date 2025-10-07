@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
 using ResellBook.Models;
+using ResellBook.Helpers;
+using ResellBook.Utils;
 using System.ComponentModel.DataAnnotations;
 
 [ApiController]
@@ -19,29 +21,38 @@ public class BooksController : ControllerBase
     [HttpGet("ViewMyListings/{userId}")]
     public async Task<IActionResult> ViewMyListings(Guid userId)
     {
-        
-        var books = await _context.Books
-            .Where(b => b.UserId == userId)
-            .OrderByDescending(b => b.CreatedAt)
-            .ToListAsync();
-
-       
-        var result = books.Select(b => new
+        try
         {
-            b.Id,
-            b.BookName,
-            b.AuthorOrPublication,
-            b.Category,
-            b.SubCategory,
-            b.SellingPrice,
-            Images = string.IsNullOrEmpty(b.ImagePathsJson)
-                        ? Array.Empty<string>()
-                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
-            b.IsSold,
-            b.CreatedAt
-        });
+            SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Request for userId: {userId}", userId.ToString());
+            
+            var books = await _context.Books
+                .Where(b => b.UserId == userId)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
 
-        return Ok(result);
+            var result = books.Select(b => new
+            {
+                b.Id,
+                b.BookName,
+                b.AuthorOrPublication,
+                b.Category,
+                b.SubCategory,
+                b.SellingPrice,
+                Images = string.IsNullOrEmpty(b.ImagePathsJson)
+                            ? Array.Empty<string>()
+                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
+                b.IsSold,
+                b.CreatedAt
+            });
+
+            SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Retrieved {books.Count} books", userId.ToString());
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("BooksController", "ViewMyListings", "ViewMyListings failed", ex, userId.ToString());
+            return StatusCode(500, "Failed to retrieve listings");
+        }
     }
 
 
@@ -95,43 +106,60 @@ public class BooksController : ControllerBase
     [HttpPost("ListBook")]
     public async Task<IActionResult> ListBook([FromForm] BookCreateDto dto)
     {
-        if (!await _context.Users.AnyAsync(u => u.Id == dto.UserId))
-            return NotFound(new { Message = "User not found" });
-
-        if (dto.Images == null || dto.Images.Length < 2 || dto.Images.Length > 4)
-            return BadRequest(new { Message = "You must upload between 2 and 4 images." });
-
-        var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-        var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-
-        var imagePaths = new List<string>();
-        foreach (var image in dto.Images)
+        try
         {
-            var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
-            var savePath = Path.Combine(uploadsFolder, fileName);
-            using var stream = new FileStream(savePath, FileMode.Create);
-            await image.CopyToAsync(stream);
-            imagePaths.Add(Path.Combine("uploads/books", fileName));
+            SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listing request for userId: {dto.UserId}, BookName: {dto.BookName}", dto.UserId.ToString());
+
+            if (!await _context.Users.AnyAsync(u => u.Id == dto.UserId))
+            {
+                SimpleLogger.LogCritical("BooksController", "ListBook", $"User not found: {dto.UserId}", null, dto.UserId.ToString());
+                return NotFound(new { Message = "User not found" });
+            }
+
+            if (dto.Images == null || dto.Images.Length < 2 || dto.Images.Length > 4)
+            {
+                SimpleLogger.LogCritical("BooksController", "ListBook", $"Invalid image count: {dto.Images?.Length ?? 0}", null, dto.UserId.ToString());
+                return BadRequest(new { Message = "You must upload between 2 and 4 images." });
+            }
+
+            var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var imagePaths = new List<string>();
+            foreach (var image in dto.Images)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+                var savePath = Path.Combine(uploadsFolder, fileName);
+                using var stream = new FileStream(savePath, FileMode.Create);
+                await image.CopyToAsync(stream);
+                imagePaths.Add(Path.Combine("uploads/books", fileName));
+            }
+
+            var book = new Book
+            {
+                UserId = dto.UserId,
+                BookName = dto.BookName,
+                AuthorOrPublication = dto.AuthorOrPublication,
+                Category = dto.Category,
+                SubCategory = dto.SubCategory,
+                SellingPrice = dto.SellingPrice,
+                ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(imagePaths),
+                CreatedAt = IndianTimeHelper.UtcNow
+            };
+
+            _context.Books.Add(book);
+            await _context.SaveChangesAsync();
+
+            SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listed successfully with ID: {book.Id}", dto.UserId.ToString());
+            return Ok(new { Message = "Book listed successfully", BookId = book.Id });
         }
-
-        var book = new Book
+        catch (Exception ex)
         {
-            UserId = dto.UserId,
-            BookName = dto.BookName,
-            AuthorOrPublication = dto.AuthorOrPublication,
-            Category = dto.Category,
-            SubCategory = dto.SubCategory,
-            SellingPrice = dto.SellingPrice,
-            ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(imagePaths),
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.Books.Add(book);
-        await _context.SaveChangesAsync();
-
-        return Ok(new { Message = "Book listed successfully", BookId = book.Id });
+            SimpleLogger.LogCritical("BooksController", "ListBook", "ListBook method failed", ex, dto.UserId.ToString());
+            return StatusCode(500, "Failed to list book");
+        }
     }
 
     // PUT: Edit Book
@@ -186,79 +214,92 @@ public class BooksController : ControllerBase
 [HttpGet("ViewAll/{userId}")]
 public async Task<IActionResult> ViewAll(Guid userId)
 {
-    // Get current user location
-    var currentUserLocation = await _context.UserLocations
-        .FirstOrDefaultAsync(u => u.UserId == userId);
-
-    if (currentUserLocation == null)
-        return BadRequest("User location not found.");
-
-    // Get all books
-    var booksData = await _context.Books
-        .OrderByDescending(b => b.CreatedAt)
-        .ToListAsync();
-
-    // Get unique userIds from books
-    var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
-
-    // Fetch all user locations for these userIds
-    var userLocations = await _context.UserLocations
-        .Where(u => userIds.Contains(u.UserId))
-        .ToDictionaryAsync(u => u.UserId, u => u);
-
-    var books = booksData.Select(b =>
-    {
-        double? distanceKm = null;
-        if (userLocations.ContainsKey(b.UserId))
-        {
-            var loc = userLocations[b.UserId];
-            distanceKm = CalculateDistance(
-                currentUserLocation.Latitude,
-                currentUserLocation.Longitude,
-                loc.Latitude,
-                loc.Longitude
-            );
-        }
-
-        return new
-        {
-            b.Id,
-            b.BookName,
-            b.AuthorOrPublication,
-            b.Category,
-            b.SubCategory,
-            b.SellingPrice,
-            b.IsSold,
-            Images = DeserializeImages(b.ImagePathsJson),
-            b.CreatedAt,
-            Distance = distanceKm.HasValue
-                ? (distanceKm < 1
-                    ? $"{Math.Round(distanceKm.Value * 1000)} m"
-                    : $"{Math.Round(distanceKm.Value, 2)} km")
-                : "N/A"
-        };
-    }).ToList();
-
-    return Ok(books);
-}
-
-private string[] DeserializeImages(string? json)
-{
-    if (string.IsNullOrEmpty(json))
-        return Array.Empty<string>();
-
     try
     {
-        return System.Text.Json.JsonSerializer.Deserialize<string[]>(json) ?? Array.Empty<string>();
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}", userId.ToString());
+
+        // Get current user location
+        var currentUserLocation = await _context.UserLocations
+            .FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if (currentUserLocation == null)
+        {
+            SimpleLogger.LogCritical("BooksController", "ViewAll", $"User location not found for userId: {userId}", null, userId.ToString());
+            return BadRequest("User location not found.");
+        }
+
+        // Get all books with user information
+        var booksData = await _context.Books
+            .Include(b => b.User)  // Include User data to get UserName
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
+
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {booksData.Count} books", userId.ToString());
+
+        // Get unique userIds from books
+        var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
+
+        // Fetch the most recent user location for these userIds (in case users have multiple location entries)
+        var allLocations = await _context.UserLocations
+            .Where(u => userIds.Contains(u.UserId))
+            .OrderByDescending(u => u.CreateDate)
+            .ToListAsync();
+
+        var userLocations = allLocations
+            .GroupBy(u => u.UserId)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved locations for {userLocations.Count} users", userId.ToString());
+
+        var books = booksData.Select(b =>
+        {
+            double? distanceKm = null;
+            if (userLocations.ContainsKey(b.UserId))
+            {
+                var loc = userLocations[b.UserId];
+                distanceKm = CalculateDistance(
+                    currentUserLocation.Latitude,
+                    currentUserLocation.Longitude,
+                    loc.Latitude,
+                    loc.Longitude
+                );
+            }
+
+            return new
+            {
+                b.Id,
+                b.UserId,        // Include the userId of who listed the book
+                UserName = b.User.Name,  // ✨ ADDED: Include the name of who listed the book
+                b.BookName,
+                b.AuthorOrPublication,
+                b.Category,
+                b.SubCategory,
+                b.SellingPrice,
+                b.IsSold,
+                Images = string.IsNullOrEmpty(b.ImagePathsJson)
+                            ? Array.Empty<string>()
+                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
+                b.CreatedAt,
+                Distance = distanceKm.HasValue
+                    ? (distanceKm < 1
+                        ? $"{Math.Round(distanceKm.Value * 1000)} m"
+                        : $"{Math.Round(distanceKm.Value, 2)} km")
+                    : "N/A"
+            };
+        }).ToList();
+
+        SimpleLogger.LogNormal("BooksController", "ViewAll", $"Processed {books.Count} books successfully", userId.ToString());
+        return Ok(books);
     }
-    catch
+    catch (Exception ex)
     {
-        return Array.Empty<string>();
+        SimpleLogger.LogCritical("BooksController", "ViewAll", "ViewAll method failed", ex, userId.ToString());
+        return StatusCode(500, "Failed to retrieve books");
     }
 }
 
-// Haversine formula to calculate distance (in km)
-private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    // Haversine formula to calculate distance (in km)
+    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
 {
     const double R = 6371; // Radius of Earth in km
     var dLat = ToRadians(lat2 - lat1);
