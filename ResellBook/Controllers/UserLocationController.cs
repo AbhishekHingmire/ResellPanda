@@ -5,16 +5,16 @@ using ResellBook.Models;
 using ResellBook.Helpers;
 using System.ComponentModel.DataAnnotations;
 
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserLocationController : ControllerBase
-    {
-        private readonly AppDbContext _context;
+[ApiController]
+[Route("api/[controller]")]
+public class UserLocationController : ControllerBase
+{
+    private readonly AppDbContext _context;
 
-        public UserLocationController(AppDbContext context)
-        {
-            _context = context;
-        }
+    public UserLocationController(AppDbContext context)
+    {
+        _context = context;
+    }
 
     // POST: api/UserLocation/SyncLocation
     [HttpPost("SyncLocation")]
@@ -49,35 +49,38 @@ using System.ComponentModel.DataAnnotations;
 
     // GET: api/UserLocation/GetLocations/{userId}
     [HttpGet("GetLocations/{userId}")]
-        public IActionResult GetLocations(Guid userId)
+    public IActionResult GetLocations(Guid userId)
+    {
+        var locations = _context.UserLocations
+            .Where(l => l.UserId == userId)
+            .OrderByDescending(l => l.CreateDate)
+            .ToList();
+
+        if (!locations.Any())
+            return NotFound(new { Message = "No locations found for this user" });
+
+        return Ok(locations);
+    }
+    [HttpGet("profile/{userId}")]
+    public async Task<IActionResult> GetProfile(Guid userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+            return NotFound("User not found.");
+        var listingcount = await _context.Books.CountAsync(b => b.UserId == userId);
+        var MarkAsSoldCount = await _context.Books.CountAsync(b => b.UserId == userId && b.IsSold);
+        var profile = new
         {
-            var locations = _context.UserLocations
-                .Where(l => l.UserId == userId)
-                .OrderByDescending(l => l.CreateDate)
-                .ToList();
+            user.Id,
+            user.Name,
+            user.Email,
+            user.Phone,
+            ListingCount = listingcount == 0 ? 0 : listingcount,
+            MarkAsSoldCount = MarkAsSoldCount == 0 ? 0 : MarkAsSoldCount,
+            user.IsEmailVerified
+        };
 
-            if (!locations.Any())
-                return NotFound(new { Message = "No locations found for this user" });
-
-            return Ok(locations);
-        }
-        [HttpGet("profile/{userId}")]
-        public async Task<IActionResult> GetProfile(Guid userId)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
-                return NotFound("User not found.");
-
-            var profile = new
-            {
-                user.Id,
-                user.Name,
-                user.Email,
-                user.Phone,
-                user.IsEmailVerified
-            };
-
-            return Ok(profile);
+        return Ok(profile);
     }
     [HttpPut("EditUser/{id}")]
     public async Task<IActionResult> EditUser(Guid id, [FromBody] EditUserDto dto)
