@@ -215,8 +215,7 @@ public class BooksController : ControllerBase
         }
     }
 
-// PUT: Edit Book
-[HttpPut("EditListing/{id}")]
+    [HttpPut("EditListing/{id}")]
     public async Task<IActionResult> EditListing(Guid id, [FromForm] BookEditDto dto)
     {
         var book = await _context.Books.FindAsync(id);
@@ -240,7 +239,7 @@ public class BooksController : ControllerBase
         if (dto.ExistingImages != null)
             currentImages = currentImages.Where(x => dto.ExistingImages.Contains(x)).ToList();
 
-        // Add new images
+        // Add new images with compression
         if (dto.NewImages != null && dto.NewImages.Length > 0)
         {
             var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
@@ -250,11 +249,26 @@ public class BooksController : ControllerBase
 
             foreach (var image in dto.NewImages)
             {
-                var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
-                var savePath = Path.Combine(uploadsFolder, fileName);
-                using var stream = new FileStream(savePath, FileMode.Create);
-                await image.CopyToAsync(stream);
+                using var img = await Image.LoadAsync(image.OpenReadStream()); // using SixLabors.ImageSharp
+                int quality = 75;
+                var options = new JpegEncoder { Quality = quality };
 
+                using var ms = new MemoryStream();
+                await img.SaveAsJpegAsync(ms, options);
+
+                // reduce size until it fits target range
+                while (ms.Length > 150 * 1024 && quality > 10)
+                {
+                    ms.SetLength(0);
+                    quality -= 5;
+                    options = new JpegEncoder { Quality = quality };
+                    await img.SaveAsJpegAsync(ms, options);
+                }
+
+                var fileName = Guid.NewGuid() + ".jpg";
+                var savePath = Path.Combine(uploadsFolder, fileName);
+
+                await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
                 currentImages.Add(Path.Combine("uploads/books", fileName));
             }
         }
