@@ -230,33 +230,50 @@ public class BooksController : ControllerBase
         book.SubCategory = string.IsNullOrWhiteSpace(dto.SubCategory) ? book.SubCategory : dto.SubCategory;
         book.SellingPrice = dto.SellingPrice.HasValue ? dto.SellingPrice.Value : book.SellingPrice;
 
-        // Deserialize existing images
-        var currentImages = string.IsNullOrEmpty(book.ImagePathsJson)
+        // Deserialize existing images for this book only
+        var existingImages = string.IsNullOrEmpty(book.ImagePathsJson)
             ? new List<string>()
             : System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson)!;
 
-        // Keep only selected existing images
-        if (dto.ExistingImages != null)
-            currentImages = currentImages.Where(x => dto.ExistingImages.Contains(x)).ToList();
+        var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
-        // Add new images with compression
+        // Delete existing images of this specific book
+        foreach (var imagePath in existingImages)
+        {
+            var fullPath = Path.Combine(wwwRoot, imagePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            if (System.IO.File.Exists(fullPath))
+            {
+                try
+                {
+                    System.IO.File.Delete(fullPath);
+                }
+                catch (Exception ex)
+                {
+                    // Log error if delete fails, but continue
+                    Console.WriteLine($"Error deleting file {fullPath}: {ex.Message}");
+                }
+            }
+        }
+
+        // Prepare to add new images
+        var updatedImages = new List<string>();
+
         if (dto.NewImages != null && dto.NewImages.Length > 0)
         {
-            var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
             foreach (var image in dto.NewImages)
             {
-                using var img = await Image.LoadAsync(image.OpenReadStream()); // using SixLabors.ImageSharp
+                using var img = await Image.LoadAsync(image.OpenReadStream()); // SixLabors.ImageSharp
                 int quality = 75;
                 var options = new JpegEncoder { Quality = quality };
 
                 using var ms = new MemoryStream();
                 await img.SaveAsJpegAsync(ms, options);
 
-                // reduce size until it fits target range
+                // reduce size until under 150 KB
                 while (ms.Length > 150 * 1024 && quality > 10)
                 {
                     ms.SetLength(0);
@@ -269,15 +286,17 @@ public class BooksController : ControllerBase
                 var savePath = Path.Combine(uploadsFolder, fileName);
 
                 await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
-                currentImages.Add(Path.Combine("uploads/books", fileName));
+                updatedImages.Add(Path.Combine("uploads/books", fileName));
             }
         }
 
-        book.ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(currentImages);
+        // Update DB with new image list
+        book.ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(updatedImages);
 
         await _context.SaveChangesAsync();
         return Ok(new { Message = "Book updated successfully" });
     }
+
     [HttpGet("ViewAll/{userId}")]
     public async Task<IActionResult> ViewAll(Guid userId, int page = 1, int pageSize = 50)
     {
