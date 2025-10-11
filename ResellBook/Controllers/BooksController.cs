@@ -24,7 +24,7 @@ public class BooksController : ControllerBase
         _env = env;
     }
     [HttpGet("ViewMyListings/{userId}")]
-   
+
     public async Task<IActionResult> ViewMyListings(Guid userId)
     {
         try
@@ -171,16 +171,16 @@ public class BooksController : ControllerBase
                 using var imageStream = image.OpenReadStream();
                 using var img = await Image.LoadAsync(imageStream);
 
-                // Compress image to target 100 KB - 150 KB
+                // Compress image to target ≤ 90 KB
                 var quality = 75;
-                var options = new JpegEncoder { Quality = quality }; // Capital Q
+                var options = new JpegEncoder { Quality = quality };
                 using var ms = new MemoryStream();
                 await img.SaveAsJpegAsync(ms, options);
-                while (ms.Length > 150 * 1024 && quality > 10)
+                while (ms.Length > 90 * 1024 && quality > 10)
                 {
                     ms.SetLength(0);
-                    quality = quality - 5;
-                    options = new JpegEncoder { Quality = quality }; // create a new JpegEncoder with the updated quality
+                    quality -= 5;
+                    options = new JpegEncoder { Quality = quality };
                     await img.SaveAsJpegAsync(ms, options);
                 }
 
@@ -267,14 +267,13 @@ public class BooksController : ControllerBase
             foreach (var image in dto.NewImages)
             {
                 using var img = await Image.LoadAsync(image.OpenReadStream()); // SixLabors.ImageSharp
-                int quality = 75;
-                var options = new JpegEncoder { Quality = quality };
 
+                // Compress image to target ≤ 90 KB
+                var quality = 75;
+                var options = new JpegEncoder { Quality = quality };
                 using var ms = new MemoryStream();
                 await img.SaveAsJpegAsync(ms, options);
-
-                // reduce size until under 150 KB
-                while (ms.Length > 150 * 1024 && quality > 10)
+                while (ms.Length > 90 * 1024 && quality > 10)
                 {
                     ms.SetLength(0);
                     quality -= 5;
@@ -569,7 +568,7 @@ public class BookEditDto
     public string? Category { get; set; }
     public string? SubCategory { get; set; }
     public decimal? SellingPrice { get; set; }
-    public  string? Description { get; set; }
+    public string? Description { get; set; }
     public IFormFile[]? NewImages { get; set; }
     public string[]? ExistingImages { get; set; }
 }
