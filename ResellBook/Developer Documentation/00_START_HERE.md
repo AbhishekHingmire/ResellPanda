@@ -6,14 +6,26 @@ This documentation is designed for developers building Android/mobile applicatio
 
 ---
 
+## 🎓 **Learning Path for Beginners**
+
+### **📚 START HERE if you're new to web development:**
+**[🧠 Foundations & Core Concepts](00_FOUNDATIONS_AND_CONCEPTS.md)** - **MUST READ FIRST**
+- Complete explanation of web APIs, databases, cloud computing, and security
+- Written for college students with basic programming knowledge
+- Covers "why" and "how" everything works from the ground up
+- **Time:** 2-3 hours to understand everything from zero to professional level
+
+---
+
 ## 📚 **Quick Navigation**
 
 ### **🔥 For New Developers - Start Here:**
-1. **[📱 Android Integration Guide](01_ANDROID_INTEGRATION_GUIDE.md)** - Complete setup
-2. **[🔐 Authentication APIs](02_AUTHENTICATION_API.md)** - User login/signup
-3. **[📚 Books Management APIs](03_BOOKS_API.md)** - Core functionality
-4. **[📍 Location & Profile APIs](04_LOCATION_PROFILE_API.md)** - User data
-5. **[🚀 Deployment Guide](05_DEPLOYMENT_GUIDE.md)** - Deploy to Azure
+1. **[🧠 Foundations & Core Concepts](00_FOUNDATIONS_AND_CONCEPTS.md)** - **Essential background knowledge**
+2. **[📱 Android Integration Guide](01_ANDROID_INTEGRATION_GUIDE.md)** - Complete setup
+3. **[🔐 Authentication APIs](02_AUTHENTICATION_API.md)** - User login/signup
+4. **[📚 Books Management APIs](03_BOOKS_API.md)** - Core functionality
+5. **[📍 Location & Profile APIs](04_LOCATION_PROFILE_API.md)** - User data
+6. **[🚀 Deployment Guide](05_DEPLOYMENT_GUIDE.md)** - Deploy to Azure
 
 ### **🔍 For API Reference:**
 - **[📋 Complete API Reference](API_REFERENCE_COMPLETE.md)** - All endpoints in one place
@@ -22,6 +34,12 @@ This documentation is designed for developers building Android/mobile applicatio
 ### **🆘 For Troubleshooting:**
 - **[🔧 Database Migration Guide](DATABASE_MIGRATION_GUIDE.md)** - **CRITICAL** for model changes
 - **[⚠️ Common Issues & Solutions](TROUBLESHOOTING_GUIDE.md)** - Quick fixes
+
+### **🏗️ For Advanced Learning:**
+- **[📁 Project Structure Deep Dive](PROJECT_STRUCTURE.md)** - Complete .NET architecture explanation
+- **[🚀 Complete Deployment Guide](COMPLETE_DEPLOYMENT_GUIDE.md)** - Production Azure deployment
+- **[🤖 Automation Scripts Guide](AUTOMATION_SCRIPTS_GUIDE.md)** - DevOps automation
+- **[📋 Master Index](MASTER_INDEX.md)** - Complete documentation catalog
 
 ---
 
