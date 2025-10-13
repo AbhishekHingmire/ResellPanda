@@ -1,0 +1,67 @@
+05-10-2025 09:35:15 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:35:16 PM | BooksController | ViewAll | Retrieved 4 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:36:15 PM | LogsController | GetLogsSummary | Fetching logs summary | UserId: N/A
+05-10-2025 09:37:47 PM | LogsController | TestLogging | Test normal log entry created | UserId: N/A
+05-10-2025 09:39:02 PM | LogsController | TestLogging | Test normal log entry created | UserId: N/A
+05-10-2025 09:39:06 PM | LogsController | TestLogging | Test normal log entry created | UserId: N/A
+05-10-2025 09:39:12 PM | LogsController | GetLogsSummary | Fetching logs summary | UserId: N/A
+05-10-2025 09:39:27 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:39:28 PM | BooksController | ViewAll | Retrieved 4 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:39:33 PM | LogsController | TestLogging | Test normal log entry created | UserId: N/A
+05-10-2025 09:39:38 PM | LogsController | GetNormalLogs | Fetching 5 normal logs | UserId: N/A
+05-10-2025 09:39:58 PM | LogsController | GetCriticalLogs | Fetching 3 critical logs | UserId: N/A
+05-10-2025 09:41:04 PM | LogsController | GetNormalLogs | Fetching 3 normal logs | UserId: N/A
+05-10-2025 09:41:31 PM | LogsController | GetCriticalLogs | Fetching 3 critical logs | UserId: N/A
+05-10-2025 09:41:36 PM | LogsController | GetCriticalLogs | Fetching 5 critical logs | UserId: N/A
+05-10-2025 09:41:54 PM | LogsController | GetCriticalLogs | Fetching 100 critical logs | UserId: N/A
+05-10-2025 09:42:59 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:42:59 PM | BooksController | ViewAll | Retrieved 4 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:43:23 PM | LogsController | GetCriticalLogs | Fetching 5 critical logs | UserId: N/A
+05-10-2025 09:43:28 PM | LogsController | GetCriticalLogs | Fetching 100 critical logs | UserId: N/A
+05-10-2025 09:46:36 PM | LogsController | GetNormalLogs | Fetching 3 normal logs | UserId: N/A
+05-10-2025 09:46:51 PM | LogsController | GetCriticalLogs | Fetching 500 critical logs | UserId: N/A
+05-10-2025 09:47:18 PM | LogsController | GetNormalLogs | Fetching 10 normal logs | UserId: N/A
+05-10-2025 09:47:55 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:47:55 PM | BooksController | ViewAll | Retrieved 4 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:48:07 PM | LogsController | GetNormalLogs | Fetching 5 normal logs | UserId: N/A
+05-10-2025 09:48:38 PM | LogsController | GetCriticalLogs | Fetching 3 critical logs | UserId: N/A
+05-10-2025 09:49:33 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:49:34 PM | BooksController | ViewAll | Retrieved 4 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:49:35 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+05-10-2025 09:49:35 PM | BooksController | ViewAll | Processed 4 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+06/10/2025 12:17:33 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:17:35 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:18:06 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:18:21 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:19:34 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:19:39 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:23:46 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:23:47 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:23:53 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 12:23:53 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:30:08 PM | BooksController | ViewMyListings | Request for userId: 6c65c745-3465-4f4d-a21b-0951b024eee3 | UserId: 6c65c745-3465-4f4d-a21b-0951b024eee3
+06/10/2025 01:30:09 PM | BooksController | ViewMyListings | Retrieved 0 books | UserId: 6c65c745-3465-4f4d-a21b-0951b024eee3
+06/10/2025 01:30:57 PM | BooksController | ViewMyListings | Request for userId: 6c65c745-3465-4f4d-a21b-0951b024eee3 | UserId: 6c65c745-3465-4f4d-a21b-0951b024eee3
+06/10/2025 01:31:29 PM | BooksController | ViewMyListings | Retrieved 0 books | UserId: 6c65c745-3465-4f4d-a21b-0951b024eee3
+06/10/2025 01:31:36 PM | BooksController | ViewMyListings | Request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:31:36 PM | BooksController | ViewMyListings | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:31:51 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:31:51 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:33:33 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:33:33 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:33:47 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:33:47 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:35:09 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:35:10 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:35:23 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:35:24 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:37:03 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:37:05 PM | BooksController | ViewAll | Retrieved 3 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:37:07 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:37:10 PM | BooksController | ViewAll | Processed 3 books successfully | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:45:41 PM | AuthController | Login | Login attempt for email: ranasingh06779@gmail.com | UserId: N/A
+06/10/2025 01:45:43 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+06/10/2025 01:52:05 PM | AuthController | Login | Login attempt for email: ranasingh06779@gmail.com | UserId: N/A
+06/10/2025 01:52:07 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+07/10/2025 11:40:06 AM | BooksController | ListBook | Book listing request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, BookName: Test Kb | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+07/10/2025 11:40:08 AM | BooksController | ListBook | Book listed successfully with ID: a6e6e73e-7bca-49dd-833f-73631f9bd618 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0

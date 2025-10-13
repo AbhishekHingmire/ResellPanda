@@ -1,10 +1,12 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
 using ResellBook.Helpers;
 using ResellBook.Models;
 using ResellBook.Services;
+using ResellBook.Utils;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -43,12 +45,12 @@ public class AuthController : ControllerBase
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             IsEmailVerified = false
         };
-
+        SimpleLogger.LogNormal("AuthController", "Signup", $"Signup Attempted");
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
         Console.WriteLine($"New user created: {user.Email}, ID: {user.Id}");
-
+        SimpleLogger.LogNormal("AuthController", "Signup", $"Account Created");
         // Generate verification OTP
         await CreateAndSendOtp(user, VerificationType.EmailVerification);
 
@@ -95,7 +97,7 @@ public class AuthController : ControllerBase
         Console.WriteLine($"Found {allVerifications.Count} active verifications for user {user.Email}:");
         foreach (var v in allVerifications)
         {
-            Console.WriteLine($"- OTP: {v.Code}, Expiry: {v.Expiry}, IsExpired: {v.Expiry < DateTime.UtcNow}");
+            Console.WriteLine($"- OTP: {v.Code}, Expiry: {IndianTimeHelper.ToIndianFormat(v.Expiry)}, IsExpired: {IndianTimeHelper.IsExpired(v.Expiry)}");
         }
 
         var verification = await _context.UserVerifications
@@ -110,9 +112,9 @@ public class AuthController : ControllerBase
             return BadRequest("Invalid OTP.");
         }
 
-        if (verification.Expiry < DateTime.UtcNow)
+        if (IndianTimeHelper.IsExpired(verification.Expiry))
         {
-            Console.WriteLine($"OTP expired. Expiry: {verification.Expiry}, Current: {DateTime.UtcNow}");
+            Console.WriteLine($"OTP expired. Expiry: {IndianTimeHelper.ToIndianFormat(verification.Expiry)}, Current: {IndianTimeHelper.ToIndianFormat(IndianTimeHelper.UtcNow)}");
             return BadRequest("Expired OTP.");
         }
 
@@ -126,16 +128,37 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ LOGIN -------------------
+    
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return BadRequest("Invalid credentials.");
-        if (!user.IsEmailVerified) return BadRequest("Email not verified.");
+        try
+        {
+            SimpleLogger.LogNormal("AuthController", "Login", $"Login attempt for email: {request.Email}");
 
-        var token = JwtHelper.GenerateToken(user.Email, user.Id);
-        return Ok(new { Token = token });
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                SimpleLogger.LogCritical("AuthController", "Login", $"Failed login attempt for email: {request.Email}");
+                return BadRequest("Invalid credentials.");
+            }
+            
+            if (!user.IsEmailVerified) 
+            {
+                SimpleLogger.LogCritical("AuthController", "Login", $"Unverified email login attempt: {request.Email}", null, user.Id.ToString());
+                return BadRequest("Email not verified.");
+            }
+
+            var token = JwtHelper.GenerateToken(user.Email, user.Id);
+            SimpleLogger.LogNormal("AuthController", "Login", "Login successful", user.Id.ToString());
+            
+            return Ok(new { Token = token });
+        }
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("AuthController", "Login", "Login method error", ex);
+            return StatusCode(500, "Login failed");
+        }
     }
 
     // ------------------ FORGOT PASSWORD -------------------
@@ -171,7 +194,7 @@ public class AuthController : ControllerBase
         Console.WriteLine($"Found {allVerifications.Count} active reset verifications for user {user.Email}:");
         foreach (var v in allVerifications)
         {
-            Console.WriteLine($"- OTP: {v.Code}, Expiry: {v.Expiry}, IsExpired: {v.Expiry < DateTime.UtcNow}");
+            Console.WriteLine($"- OTP: {v.Code}, Expiry: {IndianTimeHelper.ToIndianFormat(v.Expiry)}, IsExpired: {IndianTimeHelper.IsExpired(v.Expiry)}");
         }
 
         var verification = await _context.UserVerifications
@@ -186,9 +209,9 @@ public class AuthController : ControllerBase
             return BadRequest("Invalid OTP.");
         }
 
-        if (verification.Expiry < DateTime.UtcNow)
+        if (IndianTimeHelper.IsExpired(verification.Expiry))
         {
-            Console.WriteLine($"Reset OTP expired. Expiry: {verification.Expiry}, Current: {DateTime.UtcNow}");
+            Console.WriteLine($"Reset OTP expired. Expiry: {IndianTimeHelper.ToIndianFormat(verification.Expiry)}, Current: {IndianTimeHelper.ToIndianFormat(IndianTimeHelper.UtcNow)}");
             return BadRequest("Expired OTP.");
         }
 
@@ -248,7 +271,7 @@ public class AuthController : ControllerBase
             UserId = user.Id,
             Code = otp,
             Type = type,
-            Expiry = DateTime.UtcNow.AddMinutes(10),
+            Expiry = IndianTimeHelper.AddMinutesToNow(10),
             IsUsed = false
         };
 

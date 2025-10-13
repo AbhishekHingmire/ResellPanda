@@ -42,10 +42,18 @@ namespace ResellBook.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ImagePathsJson")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsSold")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("SellingPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SubCategory")
@@ -82,9 +90,101 @@ namespace ResellBook.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ResellBook.Models.UserBlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("BlockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("BlockedUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlockerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockedUserId")
+                        .HasDatabaseName("IX_UserBlocks_BlockedUser");
+
+                    b.HasIndex("BlockerId")
+                        .HasDatabaseName("IX_UserBlocks_Blocker");
+
+                    b.HasIndex("BlockerId", "BlockedUserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserBlocks_BlockerBlocked");
+
+                    b.ToTable("UserBlocks");
+                });
+
+            modelBuilder.Entity("ResellBook.Models.UserChat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("DeletedByReceiver")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DeletedByReceiverAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("DeletedBySender")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DeletedBySenderAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ReceiverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SentAt")
+                        .HasDatabaseName("IX_UserChats_SentAt");
+
+                    b.HasIndex("ReceiverId", "IsRead")
+                        .HasDatabaseName("IX_UserChats_ReceiverUnread");
+
+                    b.HasIndex("SenderId", "ReceiverId")
+                        .HasDatabaseName("IX_UserChats_SenderReceiver");
+
+                    b.ToTable("UserChats");
                 });
 
             modelBuilder.Entity("ResellBook.Models.UserLocation", b =>
@@ -150,6 +250,44 @@ namespace ResellBook.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ResellBook.Models.UserBlock", b =>
+                {
+                    b.HasOne("ResellBook.Models.User", "BlockedUser")
+                        .WithMany()
+                        .HasForeignKey("BlockedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ResellBook.Models.User", "Blocker")
+                        .WithMany()
+                        .HasForeignKey("BlockerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BlockedUser");
+
+                    b.Navigation("Blocker");
+                });
+
+            modelBuilder.Entity("ResellBook.Models.UserChat", b =>
+                {
+                    b.HasOne("ResellBook.Models.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ResellBook.Models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("ResellBook.Models.UserLocation", b =>

@@ -222,6 +222,98 @@
         }
       }
     },
+    "/api/Books/ViewMyListings/{userId}": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Books/MarkAsSold/{bookId}": {
+      "patch": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Books/MarkAsUnSold/{bookId}": {
+      "patch": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Books/Delete/{bookId}": {
+      "delete": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Books/ListBook": {
       "post": {
         "tags": [
@@ -234,6 +326,7 @@
                 "required": [
                   "BookName",
                   "Category",
+                  "Description",
                   "Images",
                   "SellingPrice",
                   "UserId"
@@ -251,6 +344,9 @@
                     "type": "string"
                   },
                   "Category": {
+                    "type": "string"
+                  },
+                  "Description": {
                     "type": "string"
                   },
                   "SubCategory": {
@@ -280,6 +376,9 @@
                   "style": "form"
                 },
                 "Category": {
+                  "style": "form"
+                },
+                "Description": {
                   "style": "form"
                 },
                 "SubCategory": {
@@ -340,6 +439,9 @@
                     "type": "number",
                     "format": "double"
                   },
+                  "Description": {
+                    "type": "string"
+                  },
                   "NewImages": {
                     "type": "array",
                     "items": {
@@ -371,6 +473,9 @@
                 "SellingPrice": {
                   "style": "form"
                 },
+                "Description": {
+                  "style": "form"
+                },
                 "NewImages": {
                   "style": "form"
                 },
@@ -388,10 +493,762 @@
         }
       }
     },
-    "/api/Books/ViewAll": {
+    "/api/Books/ViewAll/{userId}": {
       "get": {
         "tags": [
           "Books"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Books/GetCityName": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "name": "latitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Chat/SendMessage/{senderId}": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "senderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chat/GetChats/{userId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chat/GetChatMessages/{userId}/{otherUserId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "otherUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chat/MarkAsRead/{userId}": {
+      "put": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkAsReadDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkAsReadDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkAsReadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Chat/GetUnreadCount/{userId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Chat/DeleteMessage/{messageId}/{userId}": {
+      "delete": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Chat/DeleteChat/{userId}/{otherUserId}": {
+      "delete": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "otherUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteChatResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteChatResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteChatResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chat/BlockUser/{userId}": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockUserDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockUserDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockUserResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockUserResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chat/UnblockUser/{userId}/{blockedUserId}": {
+      "delete": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "blockedUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnblockUserResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnblockUserResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnblockUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chat/GetBlockedUsers/{userId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockedUsersResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockedUsersResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockedUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chat/CheckBlockStatus/{userId}/{otherUserId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "otherUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/uploads/books/{fileName}": {
+      "get": {
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/uploads/books/debug/{fileName}": {
+      "get": {
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/FileTest/CheckFiles": {
+      "get": {
+        "tags": [
+          "FileTest"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/FileTest/TestFile/{fileName}": {
+      "get": {
+        "tags": [
+          "FileTest"
+        ],
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Logs/GetNormalLogs": {
+      "get": {
+        "tags": [
+          "Logs"
+        ],
+        "parameters": [
+          {
+            "name": "maxLines",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Logs/GetCriticalLogs": {
+      "get": {
+        "tags": [
+          "Logs"
+        ],
+        "parameters": [
+          {
+            "name": "maxLines",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Logs/GetLogsSummary": {
+      "get": {
+        "tags": [
+          "Logs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Logs/ClearAllLogs": {
+      "post": {
+        "tags": [
+          "Logs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Logs/TestLogging": {
+      "get": {
+        "tags": [
+          "Logs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Test/ping": {
+      "get": {
+        "tags": [
+          "Test"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Test/check-logs-folder": {
+      "get": {
+        "tags": [
+          "Test"
         ],
         "responses": {
           "200": {
@@ -476,10 +1333,439 @@
           }
         }
       }
+    },
+    "/api/UserLocation/EditUser/{id}": {
+      "put": {
+        "tags": [
+          "UserLocation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUserDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUserDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/UserSearch/LogSearch": {
+      "post": {
+        "tags": [
+          "UserSearch"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSearchDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSearchDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSearchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/UserSearch/GetAllSearches": {
+      "get": {
+        "tags": [
+          "UserSearch"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/WeatherForecast": {
+      "get": {
+        "tags": [
+          "WeatherForecast"
+        ],
+        "operationId": "GetWeatherForecast",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BlockStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasBlocked": {
+            "type": "boolean"
+          },
+          "isBlockedBy": {
+            "type": "boolean"
+          },
+          "canSendMessage": {
+            "type": "boolean"
+          },
+          "otherUserName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BlockUserDto": {
+        "required": [
+          "userIdToBlock"
+        ],
+        "type": "object",
+        "properties": {
+          "userIdToBlock": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BlockUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockedUserName": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BlockedUserDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "userEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BlockedUsersResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockedUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlockedUserDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatListDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastMessageTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "isBlocked": {
+            "type": "boolean"
+          },
+          "isBlockedBy": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "chats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatListDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatMessageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "senderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiverId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "senderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isSentByMe": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatParticipants": {
+        "type": "object",
+        "properties": {
+          "user1Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "user2Name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeleteChatResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "deletedMessagesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deletedBetween": {
+            "$ref": "#/components/schemas/ChatParticipants"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EditUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {
@@ -490,6 +1776,19 @@
           "password": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MarkAsReadDto": {
+        "required": [
+          "otherUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "otherUserId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "additionalProperties": false
@@ -508,6 +1807,41 @@
         },
         "additionalProperties": false
       },
+      "SendMessageDto": {
+        "required": [
+          "message",
+          "receiverId"
+        ],
+        "type": "object",
+        "properties": {
+          "receiverId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "message": {
+            "maxLength": 5000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SendMessageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "chatMessage": {
+            "$ref": "#/components/schemas/ChatMessageDto"
+          }
+        },
+        "additionalProperties": false
+      },
       "SignupRequest": {
         "type": "object",
         "properties": {
@@ -520,6 +1854,23 @@
             "nullable": true
           },
           "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnblockUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "unblockedUserName": {
             "type": "string",
             "nullable": true
           }
@@ -549,6 +1900,10 @@
           "passwordHash": {
             "minLength": 1,
             "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
           },
           "isEmailVerified": {
             "type": "boolean"
@@ -590,6 +1945,25 @@
         },
         "additionalProperties": false
       },
+      "UserSearchDto": {
+        "required": [
+          "searchTerm",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "searchTerm": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "VerifyEmailRequest": {
         "type": "object",
         "properties": {
@@ -598,6 +1972,29 @@
             "nullable": true
           },
           "code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "WeatherForecast": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "temperatureC": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "temperatureF": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "summary": {
             "type": "string",
             "nullable": true
           }
