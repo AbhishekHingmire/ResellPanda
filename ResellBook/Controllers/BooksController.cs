@@ -246,7 +246,6 @@ public class BooksController : ControllerBase
         if (dto.ExistingImages != null && dto.ExistingImages.Length > 0)
         {
             updatedImages.AddRange(dto.ExistingImages);
-
             // Delete only images that are NOT in ExistingImages
             var imagesToDelete = existingImagesInDb.Except(dto.ExistingImages).ToList();
             foreach (var imgPath in imagesToDelete)
