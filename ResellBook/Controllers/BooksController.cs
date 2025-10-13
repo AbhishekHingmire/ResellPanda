@@ -323,19 +323,18 @@ public class BooksController : ControllerBase
                 return BadRequest("User location not found.");
             }
 
-            // Get all books with user information
+            // Get paged books with user information (DB-level pagination for scalability)
             var booksData = await _context.Books
-                .Include(b => b.User)  // Include User data to get UserName
+                .Include(b => b.User)
                 .OrderByDescending(b => b.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {booksData.Count} books", userId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {booksData.Count} books for page {page}", userId.ToString());
 
-            // Get unique userIds from books
-            var userIds = await _context.Books
-                .Select(b => b.UserId)
-                .Distinct()
-                .ToListAsync();
+            // Get unique userIds from current page's books only
+            var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
 
 
 
@@ -356,8 +355,8 @@ public class BooksController : ControllerBase
                 .FromSqlRaw(sqlQuery)
                 .ToDictionaryAsync(u => u.UserId, u => u);
             SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved locations for {userLocations.Count} users", userId.ToString());
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "ResellBookApp");
+            // var httpClient = new HttpClient(); // COMMENTED OUT - not needed without API calls
+            // httpClient.DefaultRequestHeaders.Add("User-Agent", "ResellBookApp");
             var books = new List<object>();
 
             foreach (var b in booksData)
@@ -378,7 +377,8 @@ public class BooksController : ControllerBase
                         loc.Longitude
                     );
 
-                    // Fetch city + district via OpenStreetMap API
+                    /*
+                    // Fetch city + district via OpenStreetMap API - COMMENTED OUT FOR PERFORMANCE
                     try
                     {
                         string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={loc.Latitude}&lon={loc.Longitude}";
@@ -408,6 +408,7 @@ public class BooksController : ControllerBase
                     {
                         // Fail silently if API call fails
                     }
+                    */
                 }
 
                 books.Add(new
@@ -437,25 +438,23 @@ public class BooksController : ControllerBase
                 });
             }
 
-            // Sort by distance (nearest first)
+            // Get total count for pagination (only when needed to save DB calls)
+            var totalCount = page == 1 ? await _context.Books.CountAsync() : 0;
+            var totalPages = page == 1 ? (int)Math.Ceiling(totalCount / (double)pageSize) : 1;
+            // Sort current page by distance (nearest first)
             var sortedBooks = books
                 .OrderBy(b => ((dynamic)b).DistanceValue ?? double.MaxValue)
                 .ToList();
 
-            // Apply pagination
-            var pagedBooks = sortedBooks
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
             SimpleLogger.LogNormal("BooksController", "ViewAll", $"Processed {books.Count} books successfully", userId.ToString());
 
             return Ok(new
             {
                 Page = page,
                 PageSize = pageSize,
-                TotalCount = sortedBooks.Count,
-                TotalPages = (int)Math.Ceiling(sortedBooks.Count / (double)pageSize),
-                Books = pagedBooks
+                TotalCount = totalCount > 0 ? totalCount : (page * pageSize), // Approximate for other pages
+                TotalPages = totalPages > 1 ? totalPages : page, // Approximate
+                Books = sortedBooks
             });
         }
         catch (Exception ex)

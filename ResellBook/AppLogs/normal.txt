@@ -65,3 +65,71 @@
 06/10/2025 01:52:07 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
 07/10/2025 11:40:06 AM | BooksController | ListBook | Book listing request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, BookName: Test Kb | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
 07/10/2025 11:40:08 AM | BooksController | ListBook | Book listed successfully with ID: a6e6e73e-7bca-49dd-833f-73631f9bd618 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+13-10-2025 10:38:45 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:38:47 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:38:48 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:38:48 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:39:35 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:39:36 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:39:36 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:39:36 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:40:54 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:40:55 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:40:56 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:40:56 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:40:59 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:00 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:01 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:01 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:04 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:06 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:06 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:06 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:08 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:09 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:10 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:10 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:12 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:13 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:13 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:13 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:15 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:16 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:16 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:16 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:18 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:19 PM | BooksController | ViewAll | Retrieved 17 books | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:19 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:41:19 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:43:56 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:43:58 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:43:58 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:43:59 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:02 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:03 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:03 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:03 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:06 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:06 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:07 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:07 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:08 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:09 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:10 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:10 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:11 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:12 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:12 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:13 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:14 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:15 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:15 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:15 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:16 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:17 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:17 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:18 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:19 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:20 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:20 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+13-10-2025 10:44:20 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
