@@ -703,6 +703,40 @@ dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
 
+#### **Issue 6: Nested Publish Folders (MSB3030 Error)**
+```
+Error MSB3030: Could not copy the file "C:\Repos\ResellPanda\ResellBook\publish\publish\publish\publish\publish\publish\ResellBook.runtimeconfig.json" because it was not found.
+```
+**Root Cause:** 
+- `dotnet publish -o publish` creates output **inside** existing `publish` folder
+- Multiple deployments without cleanup create nested directories: `publish/publish/publish/...`
+- PowerShell preserves directory structure unlike some build systems
+
+**Solution:**
+```powershell
+# Clean publish directory before building (added to deploy.ps1)
+if (Test-Path "publish") {
+    Write-Host "🧹 Cleaning previous publish directory..." -ForegroundColor Yellow
+    Remove-Item "publish" -Recurse -Force
+}
+
+# Then publish normally
+dotnet publish -c Release -o publish
+```
+
+**Prevention:**
+- Always clean publish directory before deployment
+- Use unique output directories for each build
+- Add cleanup step to deployment scripts
+
+**Technical Details:**
+- **Issue Date:** October 13, 2025
+- **Affected Script:** `deploy.ps1` (build step)
+- **Impact:** Deployment failures with nested folder paths
+- **Resolution:** Added directory cleanup before `dotnet publish`
+- **Testing:** Verified deployment succeeds after fix
+- **Prevention:** Always clean publish directory before deployment
+
 ### 🔧 **Diagnostic Commands**
 ```powershell
 # Check all Azure resources
