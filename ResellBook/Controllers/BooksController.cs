@@ -230,40 +230,50 @@ public class BooksController : ControllerBase
         book.SubCategory = string.IsNullOrWhiteSpace(dto.SubCategory) ? book.SubCategory : dto.SubCategory;
         book.SellingPrice = dto.SellingPrice.HasValue ? dto.SellingPrice.Value : book.SellingPrice;
 
-        // Deserialize existing images for this book only
-        var existingImages = string.IsNullOrEmpty(book.ImagePathsJson)
+        // Deserialize existing images from DB
+        var existingImagesInDb = string.IsNullOrEmpty(book.ImagePathsJson)
             ? new List<string>()
             : System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson)!;
 
         var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
 
-        // Delete existing images of this specific book
-        foreach (var imagePath in existingImages)
+        var updatedImages = new List<string>();
+
+        // ✅ 1. Keep only the images user wants to retain
+        if (dto.ExistingImages != null && dto.ExistingImages.Length > 0)
         {
-            var fullPath = Path.Combine(wwwRoot, imagePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-            if (System.IO.File.Exists(fullPath))
+            updatedImages.AddRange(dto.ExistingImages);
+
+            // Delete only images that are NOT in ExistingImages
+            var imagesToDelete = existingImagesInDb.Except(dto.ExistingImages).ToList();
+            foreach (var imgPath in imagesToDelete)
             {
-                try
+                var fullPath = Path.Combine(wwwRoot, imgPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                if (System.IO.File.Exists(fullPath))
                 {
-                    System.IO.File.Delete(fullPath);
-                }
-                catch (Exception ex)
-                {
-                    // Log error if delete fails, but continue
-                    Console.WriteLine($"Error deleting file {fullPath}: {ex.Message}");
+                    try
+                    {
+                        System.IO.File.Delete(fullPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error deleting file {fullPath}: {ex.Message}");
+                    }
                 }
             }
         }
+        else
+        {
+            // If ExistingImages not sent → keep all DB images as default
+            updatedImages.AddRange(existingImagesInDb);
+        }
 
-        // Prepare to add new images
-        var updatedImages = new List<string>();
-
+        // ✅ 2. Add new images if uploaded
         if (dto.NewImages != null && dto.NewImages.Length > 0)
         {
-            var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
             foreach (var image in dto.NewImages)
             {
                 using var img = await Image.LoadAsync(image.OpenReadStream()); // SixLabors.ImageSharp
@@ -283,18 +293,19 @@ public class BooksController : ControllerBase
 
                 var fileName = Guid.NewGuid() + ".jpg";
                 var savePath = Path.Combine(uploadsFolder, fileName);
-
                 await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
+
                 updatedImages.Add(Path.Combine("uploads/books", fileName));
             }
         }
 
-        // Update DB with new image list
+        // ✅ 3. Update database
         book.ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(updatedImages);
 
         await _context.SaveChangesAsync();
         return Ok(new { Message = "Book updated successfully" });
     }
+
 
     [HttpGet("ViewAll/{userId}")]
     public async Task<IActionResult> ViewAll(Guid userId, int page = 1, int pageSize = 50)
