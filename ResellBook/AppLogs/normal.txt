@@ -65,3 +65,31 @@
 06/10/2025 01:52:07 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
 07/10/2025 11:40:06 AM | BooksController | ListBook | Book listing request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, BookName: Test Kb | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
 07/10/2025 11:40:08 AM | BooksController | ListBook | Book listed successfully with ID: a6e6e73e-7bca-49dd-833f-73631f9bd618 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:11:26 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search:  | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:11:54 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search:  | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:13:56 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search:  | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:13:57 PM | BooksController | ViewAll | Retrieved 4 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:13:57 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:11 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: d | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:11 PM | BooksController | ViewAll | Retrieved 0 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:18 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: demo | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:18 PM | BooksController | ViewAll | Retrieved 3 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:18 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:33 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: dem | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:33 PM | BooksController | ViewAll | Retrieved 2 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:33 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:44 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: dm | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:44 PM | BooksController | ViewAll | Retrieved 0 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:14:58 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: dm | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:15:59 PM | BooksController | ViewAll | Retrieved 0 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:17:02 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: dm | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:17:34 PM | BooksController | ViewAll | Retrieved 0 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:07 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search:  | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:07 PM | BooksController | ViewAll | Retrieved 4 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:08 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:16 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: d | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:16 PM | BooksController | ViewAll | Retrieved 3 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:16 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:35 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: b | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:35 PM | BooksController | ViewAll | Retrieved 1 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:27:35 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0

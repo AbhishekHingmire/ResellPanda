@@ -16,7 +16,7 @@ namespace ResellBook.Models
         public bool IsSold { get; set; } = false;
         public string? ImagePathsJson { get; set; } // Store multiple image paths as JSON
         public DateTime CreatedAt { get; set; } = IndianTimeHelper.UtcNow;
-
+        public int Views { get; set; } = 0;
         public virtual User User { get; set; } = null!;
     }
 }
