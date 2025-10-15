@@ -93,3 +93,15 @@
 15/10/2025 12:27:35 PM | BooksController | ViewAll | ViewAll request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0, search: b | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
 15/10/2025 12:27:35 PM | BooksController | ViewAll | Retrieved 1 books after search filter | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
 15/10/2025 12:27:35 PM | BooksController | ViewAll | Retrieved locations for 1 users | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:35:26 PM | AuthController | Login | Login attempt for email: Ranasingh06779@gmail.com | UserId: N/A
+15/10/2025 12:35:28 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:51:59 PM | AuthController | Login | Login attempt for email: ranasingh06779@gmail.com | UserId: N/A
+15/10/2025 12:52:01 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:59:19 PM | AuthController | Login | Login attempt for email: ranasingh06779@gmail.com | UserId: N/A
+15/10/2025 12:59:21 PM | AuthController | Login | Login successful | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 12:59:42 PM | BooksController | ViewMyListings | Request for userId: a6e6e73e-7bca-49dd-833f-73631f9bd618 | UserId: a6e6e73e-7bca-49dd-833f-73631f9bd618
+15/10/2025 12:59:42 PM | BooksController | ViewMyListings | Retrieved 0 books | UserId: a6e6e73e-7bca-49dd-833f-73631f9bd618
+15/10/2025 01:00:20 PM | BooksController | ViewMyListings | Request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 01:00:20 PM | BooksController | ViewMyListings | Retrieved 4 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 01:00:55 PM | BooksController | ViewMyListings | Request for userId: 5f1c11a4-cb82-4415-a791-2234df9d15d0 | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0
+15/10/2025 01:00:55 PM | BooksController | ViewMyListings | Retrieved 4 books | UserId: 5f1c11a4-cb82-4415-a791-2234df9d15d0

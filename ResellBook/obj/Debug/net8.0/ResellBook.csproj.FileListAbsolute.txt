@@ -993,6 +993,7 @@ C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\BCrypt.Net-
 C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
 C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\Humanizer.dll
 C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\MailKit.dll
+C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\ranas\Source\Repos\ResellPandaq\ResellBook\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll

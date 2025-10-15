@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ResellBook.Data;
 using ResellBook.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register EmailService
 builder.Services.AddScoped<EmailService>();
+// Add Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -77,6 +102,7 @@ catch (Exception ex)
     // Don't throw - allow app to start even if migration fails
 }
 // Configure the HTTP request pipeline.
+// Middleware pipeline (ORDER MATTERS!)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -89,16 +115,17 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
-// Enable CORS
-app.UseCors("AllowVercel");
-
-app.UseRouting();
 app.UseStaticFiles();
 
-app.MapControllers();
+app.UseRouting();
 
-var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
-startupLogger.LogInformation("Application starting up...");
+// Enable CORS (optional, but usually before auth)
+app.UseCors("AllowVercel");
+
+// ? Must come AFTER routing, BEFORE endpoints
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();

@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
-using ResellBook.Models;
 using ResellBook.Helpers;
+using ResellBook.Models;
 
 namespace ResellBook.Controllers
 {
@@ -26,6 +27,7 @@ namespace ResellBook.Controllers
         /// <param name="dto">Message details</param>
         /// <returns>Message sent confirmation</returns>
         [HttpPost("SendMessage/{senderId}")]
+        [Authorize]
         public async Task<ActionResult<SendMessageResponse>> SendMessage(Guid senderId, [FromBody] SendMessageDto dto)
         {
             try
@@ -119,6 +121,7 @@ namespace ResellBook.Controllers
         /// <param name="userId">User ID</param>
         /// <returns>List of chats with unread counts</returns>
         [HttpGet("GetChats/{userId}")]
+        [Authorize]
         public async Task<ActionResult<ChatListResponse>> GetChats(Guid userId)
         {
             try
@@ -220,6 +223,7 @@ namespace ResellBook.Controllers
         /// <param name="pageSize">Messages per page (default 50)</param>
         /// <returns>Chat messages between the users</returns>
         [HttpGet("GetChatMessages/{userId}/{otherUserId}")]
+        [Authorize]
         public async Task<ActionResult<ChatResponse>> GetChatMessages(
             Guid userId, 
             Guid otherUserId, 
@@ -295,6 +299,7 @@ namespace ResellBook.Controllers
         /// <param name="dto">Other user details</param>
         /// <returns>Success confirmation</returns>
         [HttpPut("MarkAsRead/{userId}")]
+        [Authorize]
         public async Task<ActionResult> MarkAsRead(Guid userId, [FromBody] MarkAsReadDto dto)
         {
             try
@@ -342,6 +347,7 @@ namespace ResellBook.Controllers
         /// <param name="userId">User ID</param>
         /// <returns>Total unread message count</returns>
         [HttpGet("GetUnreadCount/{userId}")]
+        [Authorize]
         public async Task<ActionResult> GetUnreadCount(Guid userId)
         {
             try
@@ -371,6 +377,7 @@ namespace ResellBook.Controllers
         /// <param name="userId">User ID requesting deletion</param>
         /// <returns>Deletion confirmation</returns>
         [HttpDelete("DeleteMessage/{messageId}/{userId}")]
+        [Authorize]
         public async Task<ActionResult> DeleteMessage(Guid messageId, Guid userId)
         {
             try
@@ -406,6 +413,7 @@ namespace ResellBook.Controllers
         /// <param name="otherUserId">Other user ID</param>
         /// <returns>Deletion confirmation</returns>
         [HttpDelete("DeleteChat/{userId}/{otherUserId}")]
+        [Authorize]
         public async Task<ActionResult<DeleteChatResponse>> DeleteChat(Guid userId, Guid otherUserId)
         {
             try
@@ -482,6 +490,7 @@ namespace ResellBook.Controllers
         /// <param name="dto">Block request details</param>
         /// <returns>Block confirmation</returns>
         [HttpPost("BlockUser/{userId}")]
+        [Authorize]
         public async Task<ActionResult<BlockUserResponse>> BlockUser(Guid userId, [FromBody] BlockUserDto dto)
         {
             try
@@ -552,6 +561,7 @@ namespace ResellBook.Controllers
         /// <param name="blockedUserId">User ID to unblock</param>
         /// <returns>Unblock confirmation</returns>
         [HttpDelete("UnblockUser/{userId}/{blockedUserId}")]
+        [Authorize]
         public async Task<ActionResult<UnblockUserResponse>> UnblockUser(Guid userId, Guid blockedUserId)
         {
             try
@@ -606,6 +616,7 @@ namespace ResellBook.Controllers
         /// <param name="userId">Current user ID</param>
         /// <returns>List of blocked users</returns>
         [HttpGet("GetBlockedUsers/{userId}")]
+        [Authorize]
         public async Task<ActionResult<BlockedUsersResponse>> GetBlockedUsers(Guid userId)
         {
             try
@@ -656,6 +667,7 @@ namespace ResellBook.Controllers
         /// <param name="otherUserId">Other user ID to check</param>
         /// <returns>Blocking status information</returns>
         [HttpGet("CheckBlockStatus/{userId}/{otherUserId}")]
+        [Authorize]
         public async Task<ActionResult<BlockStatusResponse>> CheckBlockStatus(Guid userId, Guid otherUserId)
         {
             try

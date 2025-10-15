@@ -2,23 +2,32 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ResellBook.Data;
 using ResellBook.Helpers;
 using ResellBook.Models;
 using ResellBook.Services;
 using ResellBook.Utils;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly EmailService _emailService;
-
-    public AuthController(AppDbContext context, EmailService emailService)
+    private readonly IConfiguration _config;
+    public AuthController(AppDbContext context, EmailService emailService, IConfiguration config)
     {
         _context = context;
         _emailService = emailService;
+        _config=config;
     }
 
     // ------------------ SIGNUP -------------------
@@ -148,11 +157,34 @@ public class AuthController : ControllerBase
                 SimpleLogger.LogCritical("AuthController", "Login", $"Unverified email login attempt: {request.Email}", null, user.Id.ToString());
                 return BadRequest("Email not verified.");
             }
-
-            var token = JwtHelper.GenerateToken(user.Email, user.Id);
-            SimpleLogger.LogNormal("AuthController", "Login", "Login successful", user.Id.ToString());
             
-            return Ok(new { Token = token });
+
+            // Inside your login method
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: creds
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            SimpleLogger.LogNormal("AuthController", "Login", "Login successful", user.Id.ToString());
+            return Ok(new { Token = tokenString });
+
+        
+            
+         
         }
         catch (Exception ex)
         {
@@ -223,6 +255,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ RESET PASSWORD -------------------
+    [Authorize]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {

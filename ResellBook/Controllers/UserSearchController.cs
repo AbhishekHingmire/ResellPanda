@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ResellBook.Utils;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
-using ResellBook.Utils;
 
 namespace ResellBook.Controllers
 {
@@ -23,7 +24,7 @@ namespace ResellBook.Controllers
             if (!Directory.Exists(logDir))
                 Directory.CreateDirectory(logDir);
         }
-
+        [Authorize]
         [HttpPost("LogSearch")]
         public IActionResult LogSearch([FromBody] UserSearchDto dto)
         {
@@ -51,7 +52,7 @@ namespace ResellBook.Controllers
                 return StatusCode(500, "Failed to log search");
             }
         }
-
+        [Authorize]
         [HttpGet("GetAllSearches")]
         public IActionResult GetAllSearches([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
         {

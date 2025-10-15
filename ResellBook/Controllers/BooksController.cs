@@ -24,7 +24,7 @@ public class BooksController : ControllerBase
         _env = env;
     }
     [HttpGet("ViewMyListings/{userId}")]
-
+    [Authorize]
     public async Task<IActionResult> ViewMyListings(Guid userId)
     {
         try
@@ -62,7 +62,7 @@ public class BooksController : ControllerBase
         }
     }
 
-
+    [Authorize]
     [HttpPatch("MarkAsSold/{bookId}")]
     public async Task<IActionResult> MarkAsSold(Guid bookId)
     {
@@ -79,6 +79,7 @@ public class BooksController : ControllerBase
         SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book marked as sold successfully: {bookId}", bookId.ToString());
         return Ok(new { Message = "Book marked as sold successfully." });
     }
+    [Authorize]
     [HttpPatch("MarkAsUnSold/{bookId}")]
     public async Task<IActionResult> MarkAsUnSold(Guid bookId)
     {
@@ -96,6 +97,7 @@ public class BooksController : ControllerBase
         return Ok(new { Message = "Book marked as Unsold successfully." });
     }
     // DELETE: api/Books/Delete/{bookId}
+    [Authorize]
     [HttpDelete("Delete/{bookId}")]
     public async Task<IActionResult> Delete(Guid bookId)
     {
@@ -128,7 +130,7 @@ public class BooksController : ControllerBase
     }
     // POST: List Book
 
-
+    [Authorize]
     [HttpPost("ListBook")]
     public async Task<IActionResult> ListBook([FromForm] BookCreateDto dto)
     {
@@ -214,7 +216,7 @@ public class BooksController : ControllerBase
             return StatusCode(500, "Failed to list book");
         }
     }
-
+    [Authorize]
     [HttpPut("EditListing/{id}")]
     public async Task<IActionResult> EditListing(Guid id, [FromForm] BookEditDto dto)
     {
@@ -305,7 +307,7 @@ public class BooksController : ControllerBase
         return Ok(new { Message = "Book updated successfully" });
     }
 
-
+    [Authorize]
     [HttpGet("ViewAll/{userId}")]
     public async Task<IActionResult> ViewAll(Guid userId, string? search = null, int page = 1, int pageSize = 50)
     {
@@ -471,7 +473,7 @@ public class BooksController : ControllerBase
             return StatusCode(500, "Failed to retrieve books");
         }
     }
-
+    [Authorize]
     [HttpPost("UserClick/{bookId}")]
     public async Task<IActionResult> UserClick(Guid bookId)
     {
@@ -505,7 +507,7 @@ public class BooksController : ControllerBase
 
 
 
-
+    [Authorize]
     [HttpGet("GetCityName")]
     public async Task<IActionResult> GetCityName(double latitude, double longitude)
     {

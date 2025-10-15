@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ResellBook.Controllers
@@ -19,6 +20,7 @@ namespace ResellBook.Controllers
         /// This ensures your frontend URLs continue to work exactly as before
         /// </summary>
         [HttpGet("/uploads/books/{fileName}")]
+        [Authorize]
         public ActionResult ServeBookImage(string fileName)
         {
             try
@@ -83,6 +85,7 @@ namespace ResellBook.Controllers
         /// Debug endpoint to show all possible file locations
         /// </summary>
         [HttpGet("/uploads/books/debug/{fileName}")]
+        [Authorize]
         public ActionResult DebugFileLocations(string fileName)
         {
             var contentRootPath = _environment.ContentRootPath;

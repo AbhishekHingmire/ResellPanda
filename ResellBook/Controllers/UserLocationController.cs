@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResellBook.Data;
-using ResellBook.Models;
 using ResellBook.Helpers;
+using ResellBook.Models;
 using System.ComponentModel.DataAnnotations;
 
 [ApiController]
@@ -18,6 +19,7 @@ public class UserLocationController : ControllerBase
 
     // POST: api/UserLocation/SyncLocation
     [HttpPost("SyncLocation")]
+    [Authorize]
     public IActionResult SyncLocation([FromBody] UserLocation request)
     {
         if (!_context.Users.Any(u => u.Id == request.UserId))
@@ -49,6 +51,7 @@ public class UserLocationController : ControllerBase
 
     // GET: api/UserLocation/GetLocations/{userId}
     [HttpGet("GetLocations/{userId}")]
+    [Authorize]
     public IActionResult GetLocations(Guid userId)
     {
         var locations = _context.UserLocations
@@ -62,6 +65,7 @@ public class UserLocationController : ControllerBase
         return Ok(locations);
     }
     [HttpGet("profile/{userId}")]
+    [Authorize]
     public async Task<IActionResult> GetProfile(Guid userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -83,6 +87,7 @@ public class UserLocationController : ControllerBase
         return Ok(profile);
     }
     [HttpPut("EditUser/{id}")]
+    [Authorize]
     public async Task<IActionResult> EditUser(Guid id, [FromBody] EditUserDto dto)
     {
         var user = await _context.Users.FindAsync(id);
