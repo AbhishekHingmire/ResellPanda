@@ -2,11 +2,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ResellBook.Data;
 using ResellBook.Helpers;
 using ResellBook.Models;
 using ResellBook.Services;
 using ResellBook.Utils;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -14,14 +18,16 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly EmailService _emailService;
-
-    public AuthController(AppDbContext context, EmailService emailService)
+    private readonly IConfiguration _config;
+    public AuthController(AppDbContext context, EmailService emailService, IConfiguration config)
     {
         _context = context;
         _emailService = emailService;
+        _config = config;
     }
 
     // ------------------ SIGNUP -------------------
+    [AllowAnonymous]
     [HttpPost("signup")]
     public async Task<IActionResult> Signup([FromBody] SignupRequest request)
     {
@@ -58,6 +64,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ RESEND OTP -------------------
+    [AllowAnonymous]
     [HttpPost("resend-otp")]
     public async Task<IActionResult> ResendOtp([FromBody] string email)
     {
@@ -75,6 +82,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ VERIFY EMAIL -------------------
+    [AllowAnonymous]
     [HttpPost("verify-email")]
     public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
     {
@@ -128,7 +136,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ LOGIN -------------------
-    
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -142,17 +150,40 @@ public class AuthController : ControllerBase
                 SimpleLogger.LogCritical("AuthController", "Login", $"Failed login attempt for email: {request.Email}");
                 return BadRequest("Invalid credentials.");
             }
-            
-            if (!user.IsEmailVerified) 
+
+            if (!user.IsEmailVerified)
             {
                 SimpleLogger.LogCritical("AuthController", "Login", $"Unverified email login attempt: {request.Email}", null, user.Id.ToString());
                 return BadRequest("Email not verified.");
             }
 
-            var token = JwtHelper.GenerateToken(user.Email, user.Id);
+
+            // Inside your login method
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: creds
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
             SimpleLogger.LogNormal("AuthController", "Login", "Login successful", user.Id.ToString());
-            
-            return Ok(new { Token = token });
+            return Ok(new { Token = tokenString });
+
+
+
+
         }
         catch (Exception ex)
         {
@@ -162,6 +193,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ FORGOT PASSWORD -------------------
+    [AllowAnonymous]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] string email)
     {
@@ -173,6 +205,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ VERIFY RESET OTP -------------------
+    [AllowAnonymous]
     [HttpPost("verify-reset-otp")]
     public async Task<IActionResult> VerifyResetOtp([FromBody] VerifyEmailRequest request)
     {
@@ -223,6 +256,7 @@ public class AuthController : ControllerBase
     }
 
     // ------------------ RESET PASSWORD -------------------
+    [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {

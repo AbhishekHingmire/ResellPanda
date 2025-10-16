@@ -289,6 +289,22 @@
   },
   {
     "ContainingType": "BooksController",
+    "Method": "UserClick",
+    "RelativePath": "api/Books/UserClick/{bookId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BooksController",
     "Method": "ViewAll",
     "RelativePath": "api/Books/ViewAll/{userId}",
     "HttpMethod": "GET",
@@ -299,6 +315,11 @@
         "Name": "userId",
         "Type": "System.Guid",
         "IsRequired": true
+      },
+      {
+        "Name": "search",
+        "Type": "System.String",
+        "IsRequired": false
       },
       {
         "Name": "page",
