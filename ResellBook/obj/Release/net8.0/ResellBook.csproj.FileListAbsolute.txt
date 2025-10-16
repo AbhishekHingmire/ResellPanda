@@ -156,3 +156,4 @@ C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\ResellBook.staticwebassets.ru
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\SixLabors.Fonts.dll
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\SixLabors.ImageSharp.dll
 C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\SixLabors.ImageSharp.Drawing.dll
+C:\Repos\ResellPanda\ResellBook\bin\Release\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

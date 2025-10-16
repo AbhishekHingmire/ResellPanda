@@ -79,7 +79,8 @@ public class BooksController : ControllerBase
                             ? Array.Empty<string>()
                             : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
                 b.IsSold,
-                b.CreatedAt
+                b.CreatedAt,
+                b.Views
             });
 
             SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Retrieved {books.Count} books", userId.ToString());
@@ -421,32 +422,32 @@ public class BooksController : ControllerBase
                         loc.Longitude
                     );
 
-                    try
-                    {
-                        string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={loc.Latitude}&lon={loc.Longitude}";
-                        var response = await httpClient.GetAsync(url);
+                    // try
+                    // {
+                    //     string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={loc.Latitude}&lon={loc.Longitude}";
+                    //     var response = await httpClient.GetAsync(url);
 
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var json = await response.Content.ReadAsStringAsync();
-                            using (JsonDocument doc = JsonDocument.Parse(json))
-                            {
-                                if (doc.RootElement.TryGetProperty("address", out JsonElement address))
-                                {
-                                    if (address.TryGetProperty("city", out var city))
-                                        cityName = city.GetString();
-                                    else if (address.TryGetProperty("town", out var town))
-                                        cityName = town.GetString();
-                                    else if (address.TryGetProperty("village", out var village))
-                                        cityName = village.GetString();
+                    //     if (response.IsSuccessStatusCode)
+                    //     {
+                    //         var json = await response.Content.ReadAsStringAsync();
+                    //         using (JsonDocument doc = JsonDocument.Parse(json))
+                    //         {
+                    //             if (doc.RootElement.TryGetProperty("address", out JsonElement address))
+                    //             {
+                    //                 if (address.TryGetProperty("city", out var city))
+                    //                     cityName = city.GetString();
+                    //                 else if (address.TryGetProperty("town", out var town))
+                    //                     cityName = town.GetString();
+                    //                 else if (address.TryGetProperty("village", out var village))
+                    //                     cityName = village.GetString();
 
-                                    if (address.TryGetProperty("state_district", out var district))
-                                        districtName = district.GetString();
-                                }
-                            }
-                        }
-                    }
-                    catch { }
+                    //                 if (address.TryGetProperty("state_district", out var district))
+                    //                     districtName = district.GetString();
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    // catch { }
                 }
 
                 books.Add(new
@@ -507,50 +508,13 @@ public class BooksController : ControllerBase
     [HttpGet("GetCityName")]
     public async Task<IActionResult> GetCityName(double latitude, double longitude)
     {
-        using (var httpClient = new HttpClient())
+        // REMOVED: OpenStreetMap API call for performance - was causing slow responses
+        // Return placeholder values to maintain API compatibility
+        return Ok(new
         {
-            string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={latitude}&lon={longitude}";
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "ResellBookApp");
-
-            var response = await httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
-                return BadRequest("Unable to fetch city or district name.");
-
-            var json = await response.Content.ReadAsStringAsync();
-
-            string cityName = null;
-            string districtName = null;
-
-            using (JsonDocument doc = JsonDocument.Parse(json))
-            {
-                var root = doc.RootElement;
-
-                if (root.TryGetProperty("address", out JsonElement address))
-                {
-                    // Get city / town / village
-                    if (address.TryGetProperty("city", out JsonElement city))
-                        cityName = city.GetString();
-                    else if (address.TryGetProperty("town", out JsonElement town))
-                        cityName = town.GetString();
-                    else if (address.TryGetProperty("village", out JsonElement village))
-                        cityName = village.GetString();
-
-                    // Get district (state_district)
-                    if (address.TryGetProperty("state_district", out JsonElement district))
-                        districtName = district.GetString();
-                }
-            }
-
-            // Combine both into a readable response
-            if (string.IsNullOrEmpty(cityName) && string.IsNullOrEmpty(districtName))
-                return BadRequest("City or district not found.");
-
-            return Ok(new
-            {
-                City = cityName ?? "N/A",
-                District = districtName ?? "N/A"
-            });
-        }
+            City = "N/A",
+            District = "N/A"
+        });
     }
 
 

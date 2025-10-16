@@ -9,6 +9,7 @@ C:\Repos\ResellPanda\ResellBook\publish\Azure.Identity.dll
 C:\Repos\ResellPanda\ResellBook\publish\BCrypt.Net-Next.dll
 C:\Repos\ResellPanda\ResellBook\publish\BouncyCastle.Cryptography.dll
 C:\Repos\ResellPanda\ResellBook\publish\MailKit.dll
+C:\Repos\ResellPanda\ResellBook\publish\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Repos\ResellPanda\ResellBook\publish\Microsoft.AspNetCore.OpenApi.dll
 C:\Repos\ResellPanda\ResellBook\publish\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Repos\ResellPanda\ResellBook\publish\Microsoft.Data.SqlClient.dll
