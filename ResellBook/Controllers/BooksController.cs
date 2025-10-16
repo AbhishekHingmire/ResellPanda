@@ -23,6 +23,36 @@ public class BooksController : ControllerBase
         _context = context;
         _env = env;
     }
+    [HttpPost("UserClick/{bookId}")]
+    public async Task<IActionResult> UserClick(Guid bookId)
+    {
+        try
+        {
+            int updatedRows = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE Books SET Views = Views + 1 WHERE Id = {bookId}"
+            );
+
+            if (updatedRows == 0)
+                return NotFound(new { Message = "Book not found" });
+
+            var totalViews = await _context.Books
+                .Where(b => b.Id == bookId)
+                .Select(b => b.Views)
+                .FirstOrDefaultAsync();
+
+            return Ok(new
+            {
+                Message = "Book view updated successfully",
+                BookId = bookId,
+                TotalViews = totalViews
+            });
+        }
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("BooksController", "UserClick", "UserClick failed", ex, bookId.ToString());
+            return StatusCode(500, "Failed to update book view count.");
+        }
+    }
     [HttpGet("ViewMyListings/{userId}")]
 
     public async Task<IActionResult> ViewMyListings(Guid userId)
@@ -306,14 +336,14 @@ public class BooksController : ControllerBase
     }
 
 
+    [Authorize]
     [HttpGet("ViewAll/{userId}")]
-    public async Task<IActionResult> ViewAll(Guid userId, int page = 1, int pageSize = 50)
+    public async Task<IActionResult> ViewAll(Guid userId, string? search = null, int page = 1, int pageSize = 50)
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}", userId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}, search: {search}", userId.ToString());
 
-            // Get current user location
             var currentUserLocation = await _context.UserLocations
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -323,40 +353,55 @@ public class BooksController : ControllerBase
                 return BadRequest("User location not found.");
             }
 
-            // Get paged books with user information (DB-level pagination for scalability)
-            var booksData = await _context.Books
+            // Base query
+            var booksQuery = _context.Books
                 .Include(b => b.User)
                 .OrderByDescending(b => b.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+                .AsQueryable();
 
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {booksData.Count} books for page {page}", userId.ToString());
+            // 🔍 Basic Partial Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower().Trim();
 
-            // Get unique userIds from current page's books only
+                booksQuery = booksQuery.Where(b =>
+                    (b.BookName != null && b.BookName.ToLower().Contains(search)) ||
+                    (b.AuthorOrPublication != null && b.AuthorOrPublication.ToLower().Contains(search)) ||
+                    (b.Category != null && b.Category.ToLower().Contains(search)) ||
+                    (b.SubCategory != null && b.SubCategory.ToLower().Contains(search)) ||
+                    (b.Description != null && b.Description.ToLower().Contains(search))
+                );
+            }
+
+            var booksData = await booksQuery.ToListAsync();
+
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {booksData.Count} books after search filter", userId.ToString());
+
+            // Get unique userIds from books
             var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
-
-
 
             // Create a comma-separated string of user IDs with single quotes
             var idList = string.Join(",", userIds.Select(id => $"'{id}'"));
 
             var sqlQuery = $@"
-    SELECT t1.*
-    FROM (
-        SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
-        FROM UserLocations
-        WHERE UserId IN ({idList})
-    ) as t1
-    WHERE t1.rn = 1;
-";
+        SELECT t1.*
+        FROM (
+            SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
+            FROM UserLocations
+            WHERE UserId IN ({idList})
+        ) as t1
+        WHERE t1.rn = 1;
+    ";
 
             var userLocations = await _context.UserLocations
                 .FromSqlRaw(sqlQuery)
                 .ToDictionaryAsync(u => u.UserId, u => u);
+
             SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved locations for {userLocations.Count} users", userId.ToString());
-            // var httpClient = new HttpClient(); // COMMENTED OUT - not needed without API calls
-            // httpClient.DefaultRequestHeaders.Add("User-Agent", "ResellBookApp");
+
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "ResellBookApp");
+
             var books = new List<object>();
 
             foreach (var b in booksData)
@@ -369,7 +414,6 @@ public class BooksController : ControllerBase
                 {
                     var loc = userLocations[b.UserId];
 
-                    // Calculate distance
                     distanceKm = CalculateDistance(
                         currentUserLocation.Latitude,
                         currentUserLocation.Longitude,
@@ -377,8 +421,6 @@ public class BooksController : ControllerBase
                         loc.Longitude
                     );
 
-                    /*
-                    // Fetch city + district via OpenStreetMap API - COMMENTED OUT FOR PERFORMANCE
                     try
                     {
                         string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={loc.Latitude}&lon={loc.Longitude}";
@@ -404,18 +446,14 @@ public class BooksController : ControllerBase
                             }
                         }
                     }
-                    catch
-                    {
-                        // Fail silently if API call fails
-                    }
-                    */
+                    catch { }
                 }
 
                 books.Add(new
                 {
                     b.Id,
-                    b.UserId,        // Include the userId of who listed the book
-                    UserName = b.User.Name,  // ✨ ADDED: Include the name of who listed the book
+                    b.UserId,
+                    UserName = b.User.Name,
                     b.BookName,
                     b.AuthorOrPublication,
                     b.Description,
@@ -424,8 +462,8 @@ public class BooksController : ControllerBase
                     b.SellingPrice,
                     b.IsSold,
                     Images = string.IsNullOrEmpty(b.ImagePathsJson)
-                            ? Array.Empty<string>()
-                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
+                        ? Array.Empty<string>()
+                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
                     b.CreatedAt,
                     City = cityName,
                     District = districtName,
@@ -438,23 +476,24 @@ public class BooksController : ControllerBase
                 });
             }
 
-            // Get total count for pagination (only when needed to save DB calls)
-            var totalCount = page == 1 ? await _context.Books.CountAsync() : 0;
-            var totalPages = page == 1 ? (int)Math.Ceiling(totalCount / (double)pageSize) : 1;
-            // Sort current page by distance (nearest first)
+            // Sort by distance
             var sortedBooks = books
                 .OrderBy(b => ((dynamic)b).DistanceValue ?? double.MaxValue)
                 .ToList();
 
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Processed {books.Count} books successfully", userId.ToString());
+            // Pagination
+            var pagedBooks = sortedBooks
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             return Ok(new
             {
                 Page = page,
                 PageSize = pageSize,
-                TotalCount = totalCount > 0 ? totalCount : (page * pageSize), // Approximate for other pages
-                TotalPages = totalPages > 1 ? totalPages : page, // Approximate
-                Books = sortedBooks
+                TotalCount = sortedBooks.Count,
+                TotalPages = (int)Math.Ceiling(sortedBooks.Count / (double)pageSize),
+                Books = pagedBooks
             });
         }
         catch (Exception ex)

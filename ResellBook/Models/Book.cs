@@ -15,6 +15,7 @@ namespace ResellBook.Models
         [Required] public decimal SellingPrice { get; set; }
         public bool IsSold { get; set; } = false;
         public string? ImagePathsJson { get; set; } // Store multiple image paths as JSON
+        public int Views { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = IndianTimeHelper.UtcNow;
 
         public virtual User User { get; set; } = null!;

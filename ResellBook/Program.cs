@@ -1,6 +1,10 @@
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ResellBook.Data;
 using ResellBook.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +20,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register EmailService
 builder.Services.AddScoped<EmailService>();
+// Add Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -35,23 +61,23 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Apply database migrations with enhanced error handling
-try 
+try
 {
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        
+
         logger.LogInformation("Starting database migration check...");
-        
+
         if (dbContext.Database.IsSqlServer())
         {
             logger.LogInformation("SQL Server detected, checking database connection...");
-            
+
             // Test connection first
             var canConnect = dbContext.Database.CanConnect();
             logger.LogInformation($"Database connection test: {canConnect}");
-            
+
             if (canConnect)
             {
                 logger.LogInformation("Connection successful, applying migrations...");
@@ -89,16 +115,20 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
-// Enable CORS
-app.UseCors("AllowVercel");
-
-app.UseRouting();
 app.UseStaticFiles();
 
-app.MapControllers();
+app.UseRouting();
+
+// Enable CORS (optional, but usually before auth)
+app.UseCors("AllowVercel");
+
+// ? Must come AFTER routing, BEFORE endpoints
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers().RequireAuthorization();
 
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
 startupLogger.LogInformation("Application starting up...");
 
 app.Run();
+
