@@ -364,7 +364,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}, search: {search}", userId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId},", userId.ToString());
 
             var currentUserLocation = await _context.UserLocations
                 .FirstOrDefaultAsync(u => u.UserId == userId);
