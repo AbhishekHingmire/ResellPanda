@@ -5,12 +5,13 @@ using ResellBook.Data;
 using ResellBook.Helpers;
 using ResellBook.Models;
 using ResellBook.Utils;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Text.Json;
 [ApiController]
 [Route("api/[controller]")]
 public class BooksController : ControllerBase
@@ -159,6 +160,26 @@ public class BooksController : ControllerBase
     }
     // POST: List Book
 
+    [HttpPut("Boosting/{UserId}/{bookId}/{DistanceBoostingUpto}")]
+    public async Task<IActionResult> Boost(Guid UserId, Guid bookId, int DistanceBoostingUpto)
+    {
+        var book = await _context.Books.FindAsync(bookId);
+        if (book == null)
+        {
+            SimpleLogger.LogNormal("BooksController", "Boost", $"Book not found: {bookId}", bookId.ToString());
+            return NotFound(new { Message = "Book not found" });
+        }
+
+        // Update book
+        book.IsBoosted = true;
+        book.DistanceBoostingUpto = DistanceBoostingUpto;
+        book.ListingLastDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+
+        await _context.SaveChangesAsync();
+
+        SimpleLogger.LogNormal("BooksController", "Boost", $"Book Boosted successfully: {bookId}", bookId.ToString());
+        return Ok(new { Message = "Book Boosted successfully." });
+    }
 
     [HttpPost("ListBook")]
     public async Task<IActionResult> ListBook([FromForm] BookCreateDto dto)
@@ -181,10 +202,10 @@ public class BooksController : ControllerBase
                 return NotFound(new { Message = "User not found" });
             }
 
-            if (dto.Images == null || dto.Images.Length < 2 || dto.Images.Length > 4)
+            if (dto.Images == null || dto.Images.Length < 1 || dto.Images.Length > 4)
             {
                 SimpleLogger.LogCritical("BooksController", "ListBook", $"Invalid image count: {dto.Images?.Length ?? 0}", null, dto.UserId.ToString());
-                return BadRequest(new { Message = "You must upload between 2 and 4 images." });
+                return BadRequest(new { Message = "You must upload between 1 and 4 images." });
             }
 
             var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
@@ -339,11 +360,11 @@ public class BooksController : ControllerBase
 
     [Authorize]
     [HttpGet("ViewAll/{userId}")]
-    public async Task<IActionResult> ViewAll(Guid userId, string? search = null, int page = 1, int pageSize = 50)
+    public async Task<IActionResult> ViewAll(Guid userId,int page = 1, int pageSize = 50)
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}, search: {search}", userId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId},", userId.ToString());
 
             var currentUserLocation = await _context.UserLocations
                 .FirstOrDefaultAsync(u => u.UserId == userId);
@@ -360,19 +381,7 @@ public class BooksController : ControllerBase
                 .OrderByDescending(b => b.CreatedAt)
                 .AsQueryable();
 
-            // 🔍 Basic Partial Search
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                search = search.ToLower().Trim();
-
-                booksQuery = booksQuery.Where(b =>
-                    (b.BookName != null && b.BookName.ToLower().Contains(search)) ||
-                    (b.AuthorOrPublication != null && b.AuthorOrPublication.ToLower().Contains(search)) ||
-                    (b.Category != null && b.Category.ToLower().Contains(search)) ||
-                    (b.SubCategory != null && b.SubCategory.ToLower().Contains(search)) ||
-                    (b.Description != null && b.Description.ToLower().Contains(search))
-                );
-            }
+         
 
             var booksData = await booksQuery.ToListAsync();
 

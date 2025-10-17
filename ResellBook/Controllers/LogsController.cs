@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ResellBook.Utils;
 
@@ -7,6 +8,7 @@ namespace ResellBook.Controllers
     [Route("api/[controller]")]
     public class LogsController : ControllerBase
     {
+        [AllowAnonymous]
         [HttpGet("GetNormalLogs")]
         public IActionResult GetNormalLogs([FromQuery] int maxLines = 100)
         {
@@ -36,7 +38,7 @@ namespace ResellBook.Controllers
                 });
             }
         }
-
+        [AllowAnonymous]
         [HttpGet("GetCriticalLogs")]
         public IActionResult GetCriticalLogs([FromQuery] int maxLines = 100)
         {
@@ -66,7 +68,7 @@ namespace ResellBook.Controllers
                 });
             }
         }
-
+        [AllowAnonymous]
         [HttpGet("GetLogsSummary")]
         public IActionResult GetLogsSummary()
         {
@@ -101,7 +103,7 @@ namespace ResellBook.Controllers
                 });
             }
         }
-
+        [AllowAnonymous]
         [HttpPost("ClearAllLogs")]
         public IActionResult ClearAllLogs()
         {
@@ -128,7 +130,7 @@ namespace ResellBook.Controllers
                 });
             }
         }
-
+        [AllowAnonymous]
         [HttpGet("TestLogging")]
         public IActionResult TestLogging()
         {

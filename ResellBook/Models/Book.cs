@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Org.BouncyCastle.Pqc.Crypto.Lms;
 using ResellBook.Helpers;
 
 namespace ResellBook.Models
@@ -16,6 +17,9 @@ namespace ResellBook.Models
         public bool IsSold { get; set; } = false;
         public string? ImagePathsJson { get; set; } // Store multiple image paths as JSON
         public int Views { get; set; } = 0;
+        public bool? IsBoosted { get; set; } = false;
+        public int? DistanceBoostingUpto { get; set; }
+        public DateOnly? ListingLastDate { get; set; }
         public DateTime CreatedAt { get; set; } = IndianTimeHelper.UtcNow;
 
         public virtual User User { get; set; } = null!;
