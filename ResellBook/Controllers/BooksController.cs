@@ -81,7 +81,8 @@ public class BooksController : ControllerBase
                             : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
                 b.IsSold,
                 b.CreatedAt,
-                b.Views
+                b.Views,
+                b.IsBoosted
             });
 
             SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Retrieved {books.Count} books", userId.ToString());
@@ -471,6 +472,7 @@ public class BooksController : ControllerBase
                     b.SubCategory,
                     b.SellingPrice,
                     b.IsSold,
+                    b.IsBoosted,
                     Images = string.IsNullOrEmpty(b.ImagePathsJson)
                         ? Array.Empty<string>()
                         : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
