@@ -1437,3 +1437,4 @@ C:\Users\ranas\Source\Repos\ResellPandaas\ResellBook\obj\Debug\net8.0\refint\Res
 C:\Users\ranas\Source\Repos\ResellPandaas\ResellBook\obj\Debug\net8.0\ResellBook.pdb
 C:\Users\ranas\Source\Repos\ResellPandaas\ResellBook\obj\Debug\net8.0\ResellBook.genruntimeconfig.cache
 C:\Users\ranas\Source\Repos\ResellPandaas\ResellBook\obj\Debug\net8.0\ref\ResellBook.dll
+C:\Repos\ResellPanda\ResellBook\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

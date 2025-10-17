@@ -376,13 +376,12 @@ public class BooksController : ControllerBase
                 return BadRequest("User location not found.");
             }
 
-            // Base query
+            // Base query - exclude sold books
             var booksQuery = _context.Books
                 .Include(b => b.User)
+                .Where(b => !b.IsSold)
                 .OrderByDescending(b => b.CreatedAt)
                 .AsQueryable();
-
-         
 
             var booksData = await booksQuery.ToListAsync();
 
@@ -401,8 +400,7 @@ public class BooksController : ControllerBase
             FROM UserLocations
             WHERE UserId IN ({idList})
         ) as t1
-        WHERE t1.rn = 1;
-    ";
+        WHERE t1.rn = 1;";
 
             var userLocations = await _context.UserLocations
                 .FromSqlRaw(sqlQuery)
@@ -410,10 +408,115 @@ public class BooksController : ControllerBase
 
             SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved locations for {userLocations.Count} users", userId.ToString());
 
+            // ========== NEW: FEATURED BOOKS LOGIC (OPTIMISTIC QUERIES) ==========
+            var featuredBooks = new List<object>();
+            try
+            {
+                // OPTIMISTIC QUERY: Get boosted books with user data in single query, filter by validity
+                var currentDate = DateOnly.FromDateTime(DateTime.Now);
+                var boostedBooksQuery = _context.Books
+                    .Include(b => b.User)
+                    .Where(b => b.IsBoosted == true &&
+                               b.ListingLastDate >= currentDate &&
+                               !b.IsSold &&
+                               b.DistanceBoostingUpto.HasValue);
+
+                // Get all boosted books data efficiently
+                var boostedBooks = await boostedBooksQuery.ToListAsync();
+                SimpleLogger.LogNormal("BooksController", "ViewAll", $"Found {boostedBooks.Count} valid boosted books", userId.ToString());
+
+                if (boostedBooks.Any())
+                {
+                    // OPTIMISTIC: Get locations only for boosted book users
+                    var boostedUserIds = boostedBooks.Select(b => b.UserId).Distinct().ToList();
+                    var boostedUserLocations = await _context.UserLocations
+                        .FromSqlInterpolated($@"
+                            SELECT t1.*
+                            FROM (
+                                SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
+                                FROM UserLocations
+                                WHERE UserId IN ({string.Join(",", boostedUserIds.Select(id => $"'{id}'"))})
+                            ) as t1
+                            WHERE t1.rn = 1")
+                        .ToDictionaryAsync(u => u.UserId, u => u);
+
+                    // OPTIMISTIC: Calculate distances and scores in memory (fast)
+                    var eligibleBoostedBooks = boostedBooks
+                        .Where(book => boostedUserLocations.ContainsKey(book.UserId))
+                        .Select(book =>
+                        {
+                            var bookLocation = boostedUserLocations[book.UserId];
+                            var distance = CalculateDistance(
+                                currentUserLocation.Latitude,
+                                currentUserLocation.Longitude,
+                                bookLocation.Latitude,
+                                bookLocation.Longitude
+                            );
+
+                            // Only include if within boosting radius
+                            if (distance <= book.DistanceBoostingUpto.Value)
+                            {
+                                // OPTIMISTIC SCORING: Calculate score efficiently in memory
+                                var daysSinceCreated = (DateTime.Now - book.CreatedAt).TotalDays;
+                                var recencyScore = Math.Max(0, 30 - daysSinceCreated) / 30.0; // Favor < 30 days
+                                var distanceScore = Math.Max(0, 1 - (distance / book.DistanceBoostingUpto.Value));
+                                var randomFactor = new Random(book.Id.GetHashCode()).NextDouble() * 0.3;
+
+                                var score = (distanceScore * 0.5) + (recencyScore * 0.3) + (randomFactor * 0.2);
+
+                                return (book, distance, score);
+                            }
+                            return (book: (Book)null, distance: 0.0, score: 0.0);
+                        })
+                        .Where(x => x.book != null)
+                        .OrderByDescending(x => x.score)
+                        .Take(2) // OPTIMISTIC: Take only top 2
+                        .ToList();
+
+                    SimpleLogger.LogNormal("BooksController", "ViewAll", $"Selected {eligibleBoostedBooks.Count} featured books", userId.ToString());
+
+                    // OPTIMISTIC: Build featured books response efficiently
+                    foreach (var (book, distance, score) in eligibleBoostedBooks)
+                    {
+                        featuredBooks.Add(new
+                        {
+                            book.Id,
+                            book.UserId,
+                            UserName = book.User.Name,
+                            book.BookName,
+                            book.AuthorOrPublication,
+                            book.Description,
+                            book.Category,
+                            book.SubCategory,
+                            book.SellingPrice,
+                            book.IsSold,
+                            book.IsBoosted,
+                            Images = string.IsNullOrEmpty(book.ImagePathsJson)
+                                ? Array.Empty<string>()
+                                : System.Text.Json.JsonSerializer.Deserialize<string[]>(book.ImagePathsJson) ?? Array.Empty<string>(),
+                            book.CreatedAt,
+                            City = "N/A",
+                            District = "N/A",
+                            DistanceValue = distance,
+                            Distance = distance < 1
+                                ? $"{Math.Round(distance * 1000)} m"
+                                : $"{Math.Round(distance, 2)} km",
+                            IsFeatured = true
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SimpleLogger.LogCritical("BooksController", "ViewAll", $"Featured books logic failed: {ex.Message}", ex, userId.ToString());
+                // Continue with regular books if featured logic fails
+            }
+            // ========== END: FEATURED BOOKS LOGIC ==========
+
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("User-Agent", "ResellBookApp");
 
-            var books = new List<object>();
+            var regularBooks = new List<object>();
 
             foreach (var b in booksData)
             {
@@ -431,36 +534,9 @@ public class BooksController : ControllerBase
                         loc.Latitude,
                         loc.Longitude
                     );
-
-                    // try
-                    // {
-                    //     string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={loc.Latitude}&lon={loc.Longitude}";
-                    //     var response = await httpClient.GetAsync(url);
-
-                    //     if (response.IsSuccessStatusCode)
-                    //     {
-                    //         var json = await response.Content.ReadAsStringAsync();
-                    //         using (JsonDocument doc = JsonDocument.Parse(json))
-                    //         {
-                    //             if (doc.RootElement.TryGetProperty("address", out JsonElement address))
-                    //             {
-                    //                 if (address.TryGetProperty("city", out var city))
-                    //                     cityName = city.GetString();
-                    //                 else if (address.TryGetProperty("town", out var town))
-                    //                     cityName = town.GetString();
-                    //                 else if (address.TryGetProperty("village", out var village))
-                    //                     cityName = village.GetString();
-
-                    //                 if (address.TryGetProperty("state_district", out var district))
-                    //                     districtName = district.GetString();
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    // catch { }
                 }
 
-                books.Add(new
+                regularBooks.Add(new
                 {
                     b.Id,
                     b.UserId,
@@ -484,16 +560,21 @@ public class BooksController : ControllerBase
                         ? (distanceKm < 1
                             ? $"{Math.Round(distanceKm.Value * 1000)} m"
                             : $"{Math.Round(distanceKm.Value, 2)} km")
-                        : "N/A"
+                        : "N/A",
+                    IsFeatured = false // Regular books are not featured
                 });
             }
 
-            // Sort by distance
-            var sortedBooks = books
-                .OrderBy(b => ((dynamic)b).DistanceValue ?? double.MaxValue)
+            // Combine featured books at top + regular books
+            var allBooks = featuredBooks.Concat(regularBooks).ToList();
+
+            // Sort regular books by distance (featured stay at top)
+            var sortedBooks = allBooks
+                .OrderBy(b => ((dynamic)b).IsFeatured == true ? 0 : 1) // Featured first
+                .ThenBy(b => ((dynamic)b).DistanceValue ?? double.MaxValue) // Then by distance
                 .ToList();
 
-            // Pagination
+            // Apply pagination to combined results
             var pagedBooks = sortedBooks
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -505,7 +586,8 @@ public class BooksController : ControllerBase
                 PageSize = pageSize,
                 TotalCount = sortedBooks.Count,
                 TotalPages = (int)Math.Ceiling(sortedBooks.Count / (double)pageSize),
-                Books = pagedBooks
+                Books = pagedBooks,
+                FeaturedCount = featuredBooks.Count
             });
         }
         catch (Exception ex)

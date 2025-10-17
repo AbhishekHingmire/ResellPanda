@@ -349,6 +349,14 @@ Please run 'az login' to setup account.
 
 ## 📝 Change Log
 
+### **Version 2.2 - October 17, 2025**
+- ✅ Added featured books system with fair selection algorithm
+- ✅ Implemented optimistic queries for boosted books (DB efficiency)
+- ✅ Added distance-based boosting (10-50km radius)
+- ✅ Score-based algorithm: distance (50%), recency (30%), randomness (20%)
+- ✅ Maximum 2 featured books at top of results
+- ✅ Separate logic block preserves existing ViewAll performance
+
 ### **Version 2.1 - October 17, 2025**
 - ✅ Added cleanup for `bin\publish` directory to prevent nested folder issues
 - ✅ Enhanced documentation with detailed folder structure explanations
