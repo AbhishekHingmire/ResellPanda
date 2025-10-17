@@ -113,6 +113,32 @@
   },
   {
     "ContainingType": "BooksController",
+    "Method": "Boost",
+    "RelativePath": "api/Books/Boosting/{UserId}/{bookId}/{DistanceBoostingUpto}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UserId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "bookId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "DistanceBoostingUpto",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BooksController",
     "Method": "Delete",
     "RelativePath": "api/Books/Delete/{bookId}",
     "HttpMethod": "DELETE",
@@ -315,11 +341,6 @@
         "Name": "userId",
         "Type": "System.Guid",
         "IsRequired": true
-      },
-      {
-        "Name": "search",
-        "Type": "System.String",
-        "IsRequired": false
       },
       {
         "Name": "page",
