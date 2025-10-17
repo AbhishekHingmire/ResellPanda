@@ -72,10 +72,14 @@ try {
 # Step 4: Build application
 Write-Host "🔨 STEP 2: Building application..." -ForegroundColor Cyan
 try {
-    # Clean previous publish directory to prevent nested folder issues
+    # Clean previous publish directories to prevent nested folder issues
     if (Test-Path "publish") {
-        Write-Host "🧹 Cleaning previous publish directory..." -ForegroundColor Yellow
+        Write-Host "🧹 Cleaning project publish directory..." -ForegroundColor Yellow
         Remove-Item "publish" -Recurse -Force
+    }
+    if (Test-Path "bin\publish") {
+        Write-Host "🧹 Cleaning bin publish directory..." -ForegroundColor Yellow
+        Remove-Item "bin\publish" -Recurse -Force
     }
     
     $buildResult = dotnet publish -c Release -o publish 2>&1

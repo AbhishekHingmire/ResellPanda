@@ -94,9 +94,14 @@ $backupFolder = "wwwroot-backup-$timestamp"
 
 ### **Step 3: Application Build**
 ```powershell
-# Clean previous publish directory
+# Clean previous publish directories to prevent nested folder issues
 if (Test-Path "publish") {
+    Write-Host "🧹 Cleaning project publish directory..." -ForegroundColor Yellow
     Remove-Item "publish" -Recurse -Force
+}
+if (Test-Path "bin\publish") {
+    Write-Host "🧹 Cleaning bin publish directory..." -ForegroundColor Yellow
+    Remove-Item "bin\publish" -Recurse -Force
 }
 # Build application
 dotnet publish -c Release -o publish
@@ -105,7 +110,7 @@ dotnet publish -c Release -o publish
 **Source Files:** All project files in current directory  
 **Build Configuration:** Release mode  
 **Output Location:** `./publish/` (relative to script location)  
-**Key Feature:** Automatic cleanup prevents nested folder issues
+**Key Feature:** Automatic cleanup of both project and bin publish directories prevents nested folder issues
 
 ### **Step 4: Safe Deployment Package Creation**
 ```powershell
@@ -343,6 +348,11 @@ Please run 'az login' to setup account.
 ---
 
 ## 📝 Change Log
+
+### **Version 2.1 - October 17, 2025**
+- ✅ Added cleanup for `bin\publish` directory to prevent nested folder issues
+- ✅ Enhanced documentation with detailed folder structure explanations
+- ✅ Improved troubleshooting section for publish folder problems
 
 ### **Version 2 - October 13, 2025**
 - ✅ Added automatic `publish` folder cleanup to prevent MSB3030 errors
