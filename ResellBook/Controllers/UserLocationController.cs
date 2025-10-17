@@ -68,6 +68,9 @@ public class UserLocationController : ControllerBase
         if (user == null)
             return NotFound("User not found.");
         var listingcount = await _context.Books.CountAsync(b => b.UserId == userId);
+        var totalViews = await _context.Books
+            .Where(b => b.UserId == userId)
+            .SumAsync(b => (int?)b.Views) ?? 0;
         var MarkAsSoldCount = await _context.Books.CountAsync(b => b.UserId == userId && b.IsSold);
         var profile = new
         {
@@ -75,6 +78,7 @@ public class UserLocationController : ControllerBase
             user.Name,
             user.Email,
             user.Phone,
+            totalViews= totalViews == 0 ? 0 : totalViews,
             ListingCount = listingcount == 0 ? 0 : listingcount,
             MarkAsSoldCount = MarkAsSoldCount == 0 ? 0 : MarkAsSoldCount,
             user.IsEmailVerified
