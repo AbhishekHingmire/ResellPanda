@@ -4275,23 +4275,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ABHISHEK.HINGMIRE\\.nuget\\packages\\": {},
+    "C:\\Users\\ranas\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Repos\\ResellPanda\\ResellBook\\ResellBook.csproj",
+      "projectUniqueName": "C:\\Users\\ranas\\Source\\Repos\\ResellPandasd\\ResellBook\\ResellBook.csproj",
       "projectName": "ResellBook",
-      "projectPath": "C:\\Repos\\ResellPanda\\ResellBook\\ResellBook.csproj",
-      "packagesPath": "C:\\Users\\ABHISHEK.HINGMIRE\\.nuget\\packages\\",
-      "outputPath": "C:\\Repos\\ResellPanda\\ResellBook\\obj\\",
+      "projectPath": "C:\\Users\\ranas\\Source\\Repos\\ResellPandasd\\ResellBook\\ResellBook.csproj",
+      "packagesPath": "C:\\Users\\ranas\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\ranas\\Source\\Repos\\ResellPandasd\\ResellBook\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\ABHISHEK.HINGMIRE\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ranas\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4299,9 +4299,8 @@
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files\\dotnet\\library-packs": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://wkaxcess.pkgs.visualstudio.com/012183aa-ad17-44cb-aeab-d675e3d36524/_packaging/WK.Observability/nuget/v3/index.json": {}
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
@@ -4319,7 +4318,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -4399,16 +4398,8 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://wkaxcess.pkgs.visualstudio.com/012183aa-ad17-44cb-aeab-d675e3d36524/_packaging/WK.Observability/nuget/v3/index.json."
-    }
-  ]
+  }
 }
