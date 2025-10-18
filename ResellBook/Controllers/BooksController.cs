@@ -25,6 +25,7 @@ public class BooksController : ControllerBase
         _env = env;
     }
     [Authorize]
+    [Authorize]
     [HttpPost("UserClick/{bookId}")]
     public async Task<IActionResult> UserClick(Guid bookId)
     {
@@ -32,12 +33,12 @@ public class BooksController : ControllerBase
         {
             // Get logged-in user ID from JWT token
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var loggedInUserId))
                 return Unauthorized(new { Message = "Invalid or missing user token." });
 
-            var loggedInUserId = Guid.Parse(userIdClaim);
+            SimpleLogger.LogNormal("BooksController", "UserClick", $"Click request for bookId: {bookId}", loggedInUserId.ToString());
 
-            // Fetch the book details
+            // Single query to get book and check ownership
             var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == bookId);
             if (book == null)
                 return NotFound(new { Message = "Book not found" });
@@ -53,15 +54,28 @@ public class BooksController : ControllerBase
                 });
             }
 
-            // Increment the view count for other users
-            int updatedRows = await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"UPDATE Books SET Views = Views + 1 WHERE Id = {bookId}"
+            // Increment the view count using raw SQL for atomic operation
+            var updateResult = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE Books SET Views = Views + 1 WHERE Id = {bookId} AND UserId != {loggedInUserId}"
             );
 
+            if (updateResult == 0)
+            {
+                return Ok(new
+                {
+                    Message = "View not counted (owner or book not found)",
+                    BookId = bookId,
+                    TotalViews = book.Views
+                });
+            }
+
+            // Get updated view count
             var totalViews = await _context.Books
                 .Where(b => b.Id == bookId)
                 .Select(b => b.Views)
                 .FirstOrDefaultAsync();
+
+            SimpleLogger.LogNormal("BooksController", "UserClick", $"View updated successfully for bookId: {bookId}", loggedInUserId.ToString());
 
             return Ok(new
             {
@@ -85,10 +99,26 @@ public class BooksController : ControllerBase
             SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Request for userId: {userId}", userId.ToString());
 
             var books = await _context.Books
-                .Where(b => b.UserId == userId)
+                .Where(b => b.UserId == userId && !b.IsSold)
                 .OrderByDescending(b => b.CreatedAt)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.BookName,
+                    b.AuthorOrPublication,
+                    b.Category,
+                    b.Description,
+                    b.SubCategory,
+                    b.SellingPrice,
+                    ImagePathsJson = b.ImagePathsJson,
+                    b.IsSold,
+                    b.CreatedAt,
+                    b.Views,
+                    b.IsBoosted
+                })
                 .ToListAsync();
 
+            // Process images after materialization (not in expression tree)
             var result = books.Select(b => new
             {
                 b.Id,
@@ -99,8 +129,8 @@ public class BooksController : ControllerBase
                 b.SubCategory,
                 b.SellingPrice,
                 Images = string.IsNullOrEmpty(b.ImagePathsJson)
-                            ? Array.Empty<string>()
-                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
+                            ? new string[0]
+                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? new string[0],
                 b.IsSold,
                 b.CreatedAt,
                 b.Views,
@@ -121,87 +151,180 @@ public class BooksController : ControllerBase
     [HttpPatch("MarkAsSold/{bookId}")]
     public async Task<IActionResult> MarkAsSold(Guid bookId)
     {
-        SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Request for bookId: {bookId}", bookId.ToString());
-        var book = await _context.Books.FindAsync(bookId);
-        if (book == null)
-            return NotFound(new { Message = "Book not found" });
-        SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"BookId not found: {bookId}", bookId.ToString());
-        if (book.IsSold)
-            return BadRequest(new { Message = "This book is already marked as sold." });
+        try
+        {
+            SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Request for bookId: {bookId}", bookId.ToString());
 
-        book.IsSold = true;
-        await _context.SaveChangesAsync();
-        SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book marked as sold successfully: {bookId}", bookId.ToString());
-        return Ok(new { Message = "Book marked as sold successfully." });
+            var book = await _context.Books.FindAsync(bookId);
+            if (book == null)
+            {
+                SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book not found: {bookId}", bookId.ToString());
+                return NotFound(new { Message = "Book not found" });
+            }
+
+            if (book.IsSold)
+            {
+                return BadRequest(new { Message = "This book is already marked as sold." });
+            }
+
+            book.IsSold = true;
+            await _context.SaveChangesAsync();
+
+            SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book marked as sold successfully: {bookId}", bookId.ToString());
+            return Ok(new { Message = "Book marked as sold successfully." });
+        }
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("BooksController", "MarkAsSold", "MarkAsSold failed", ex, bookId.ToString());
+            return StatusCode(500, "Failed to mark book as sold");
+        }
     }
+
     [HttpPatch("MarkAsUnSold/{bookId}")]
     public async Task<IActionResult> MarkAsUnSold(Guid bookId)
     {
-        SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Request for bookId: {bookId}", bookId.ToString());
-        var book = await _context.Books.FindAsync(bookId);
-        if (book == null)
-            return NotFound(new { Message = "Book not found" });
-        SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"BookId not found: {bookId}", bookId.ToString());
-        if (book.IsSold == false)
-            return BadRequest(new { Message = "This book is already marked as Unsold." });
+        try
+        {
+            SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Request for bookId: {bookId}", bookId.ToString());
 
-        book.IsSold = false;
-        await _context.SaveChangesAsync();
-        SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book marked as Unsoldsold successfully: {bookId}", bookId.ToString());
-        return Ok(new { Message = "Book marked as Unsold successfully." });
+            var book = await _context.Books.FindAsync(bookId);
+            if (book == null)
+            {
+                SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book not found: {bookId}", bookId.ToString());
+                return NotFound(new { Message = "Book not found" });
+            }
+
+            if (!book.IsSold)
+            {
+                return BadRequest(new { Message = "This book is already marked as unsold." });
+            }
+
+            book.IsSold = false;
+            await _context.SaveChangesAsync();
+
+            SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book marked as unsold successfully: {bookId}", bookId.ToString());
+            return Ok(new { Message = "Book marked as unsold successfully." });
+        }
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("BooksController", "MarkAsUnSold", "MarkAsUnSold failed", ex, bookId.ToString());
+            return StatusCode(500, "Failed to mark book as unsold");
+        }
     }
     // DELETE: api/Books/Delete/{bookId}
     [HttpDelete("Delete/{bookId}")]
     public async Task<IActionResult> Delete(Guid bookId)
     {
-        var book = await _context.Books.FindAsync(bookId);
-        if (book == null)
-            return NotFound(new { Message = "Book not found" });
-
-        // Remove images from server if exist
-        if (!string.IsNullOrEmpty(book.ImagePathsJson))
+        try
         {
-            var images = System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson);
-            if (images != null)
+            SimpleLogger.LogNormal("BooksController", "Delete", $"Delete request for bookId: {bookId}", bookId.ToString());
+
+            var book = await _context.Books.FindAsync(bookId);
+            if (book == null)
             {
-                var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                foreach (var img in images)
+                SimpleLogger.LogNormal("BooksController", "Delete", $"Book not found: {bookId}", bookId.ToString());
+                return NotFound(new { Message = "Book not found" });
+            }
+
+            // Remove images from server if exist
+            if (!string.IsNullOrEmpty(book.ImagePathsJson))
+            {
+                try
                 {
-                    var filePath = Path.Combine(wwwRoot, img);
-                    if (System.IO.File.Exists(filePath))
+                    var images = System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson);
+                    if (images != null && images.Count > 0)
                     {
-                        System.IO.File.Delete(filePath);
+                        var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                        var deletedCount = 0;
+
+                        foreach (var img in images)
+                        {
+                            var filePath = Path.Combine(wwwRoot, img.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                            if (System.IO.File.Exists(filePath))
+                            {
+                                try
+                                {
+                                    System.IO.File.Delete(filePath);
+                                    deletedCount++;
+                                }
+                                catch (Exception ex)
+                                {
+                                    SimpleLogger.LogCritical("BooksController", "Delete", $"Failed to delete image: {filePath}", ex, bookId.ToString());
+                                }
+                            }
+                        }
+
+                        SimpleLogger.LogNormal("BooksController", "Delete", $"Deleted {deletedCount} images for bookId: {bookId}", bookId.ToString());
                     }
                 }
+                catch (Exception ex)
+                {
+                    SimpleLogger.LogCritical("BooksController", "Delete", $"Failed to deserialize image paths for bookId: {bookId}", ex, bookId.ToString());
+                    // Continue with deletion even if image cleanup fails
+                }
             }
+
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+
+            SimpleLogger.LogNormal("BooksController", "Delete", $"Book deleted successfully: {bookId}", bookId.ToString());
+            return Ok(new { Message = "Book deleted successfully" });
         }
-
-        _context.Books.Remove(book);
-        await _context.SaveChangesAsync();
-
-        return Ok(new { Message = "Book deleted successfully" });
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("BooksController", "Delete", "Delete failed", ex, bookId.ToString());
+            return StatusCode(500, "Failed to delete book");
+        }
     }
     // POST: List Book
 
     [HttpPut("Boosting/{UserId}/{bookId}/{DistanceBoostingUpto}")]
     public async Task<IActionResult> Boost(Guid UserId, Guid bookId, int DistanceBoostingUpto)
     {
-        var book = await _context.Books.FindAsync(bookId);
-        if (book == null)
+        try
         {
-            SimpleLogger.LogNormal("BooksController", "Boost", $"Book not found: {bookId}", bookId.ToString());
-            return NotFound(new { Message = "Book not found" });
+            SimpleLogger.LogNormal("BooksController", "Boost", $"Boost request for bookId: {bookId}, userId: {UserId}, distance: {DistanceBoostingUpto}", UserId.ToString());
+
+            // Validate distance range (reasonable bounds)
+            if (DistanceBoostingUpto < 1 || DistanceBoostingUpto > 500)
+            {
+                return BadRequest(new { Message = "Boosting distance must be between 1 and 500 km." });
+            }
+
+            var book = await _context.Books.FindAsync(bookId);
+            if (book == null)
+            {
+                SimpleLogger.LogNormal("BooksController", "Boost", $"Book not found: {bookId}", UserId.ToString());
+                return NotFound(new { Message = "Book not found" });
+            }
+
+            // Check if user owns the book
+            if (book.UserId != UserId)
+            {
+                return Unauthorized(new { Message = "You can only boost your own books." });
+            }
+
+            // Check if book is already sold
+            if (book.IsSold)
+            {
+                return BadRequest(new { Message = "Cannot boost a sold book." });
+            }
+
+            // Update book boosting details
+            book.IsBoosted = true;
+            book.DistanceBoostingUpto = DistanceBoostingUpto;
+            book.ListingLastDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+
+            await _context.SaveChangesAsync();
+
+            SimpleLogger.LogNormal("BooksController", "Boost", $"Book boosted successfully: {bookId}", UserId.ToString());
+            return Ok(new { Message = "Book boosted successfully." });
         }
-
-        // Update book
-        book.IsBoosted = true;
-        book.DistanceBoostingUpto = DistanceBoostingUpto;
-        book.ListingLastDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
-
-        await _context.SaveChangesAsync();
-
-        SimpleLogger.LogNormal("BooksController", "Boost", $"Book Boosted successfully: {bookId}", bookId.ToString());
-        return Ok(new { Message = "Book Boosted successfully." });
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("BooksController", "Boost", "Boost failed", ex, UserId.ToString());
+            return StatusCode(500, "Failed to boost book");
+        }
     }
 
     [HttpPost("ListBook")]
@@ -209,69 +332,105 @@ public class BooksController : ControllerBase
     {
         try
         {
+            // Validate user location first
             var currentUserLocation = await _context.UserLocations
                 .FirstOrDefaultAsync(u => u.UserId == dto.UserId);
 
             if (currentUserLocation == null)
             {
                 SimpleLogger.LogCritical("BooksController", "ListBook", $"User location not found for userId: {dto.UserId}", null, dto.UserId.ToString());
-                return BadRequest("User location not found.");
+                return BadRequest("User location not found. Please update your location first.");
             }
+
             SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listing request for userId: {dto.UserId}, BookName: {dto.BookName}", dto.UserId.ToString());
 
+            // Validate user exists
             if (!await _context.Users.AnyAsync(u => u.Id == dto.UserId))
             {
                 SimpleLogger.LogCritical("BooksController", "ListBook", $"User not found: {dto.UserId}", null, dto.UserId.ToString());
                 return NotFound(new { Message = "User not found" });
             }
 
+            // Validate image count
             if (dto.Images == null || dto.Images.Length < 1 || dto.Images.Length > 4)
             {
                 SimpleLogger.LogCritical("BooksController", "ListBook", $"Invalid image count: {dto.Images?.Length ?? 0}", null, dto.UserId.ToString());
                 return BadRequest(new { Message = "You must upload between 1 and 4 images." });
             }
 
+            // Validate selling price
+            if (dto.SellingPrice <= 0 || dto.SellingPrice > 100000)
+            {
+                return BadRequest(new { Message = "Selling price must be between 1 and 100,000." });
+            }
+
             var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
+            Directory.CreateDirectory(uploadsFolder); // Ensure directory exists
 
             var imagePaths = new List<string>();
 
+            // Process images with better error handling
             foreach (var image in dto.Images)
             {
-                var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
-                var savePath = Path.Combine(uploadsFolder, fileName);
-
-                using var imageStream = image.OpenReadStream();
-                using var img = await Image.LoadAsync(imageStream);
-
-                // Compress image to target ≤ 90 KB
-                var quality = 75;
-                var options = new JpegEncoder { Quality = quality };
-                using var ms = new MemoryStream();
-                await img.SaveAsJpegAsync(ms, options);
-                while (ms.Length > 90 * 1024 && quality > 10)
+                if (image.Length == 0)
                 {
-                    ms.SetLength(0);
-                    quality -= 5;
-                    options = new JpegEncoder { Quality = quality };
-                    await img.SaveAsJpegAsync(ms, options);
+                    return BadRequest(new { Message = "One or more images are empty." });
                 }
 
-                // Save final image
-                await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
-                imagePaths.Add(Path.Combine("uploads/books", fileName));
+                if (image.Length > 5 * 1024 * 1024) // 5MB limit
+                {
+                    return BadRequest(new { Message = "Image size must be less than 5MB." });
+                }
+
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                var extension = Path.GetExtension(image.FileName).ToLower();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return BadRequest(new { Message = "Only JPG, PNG, and WebP images are allowed." });
+                }
+
+                var fileName = Guid.NewGuid() + ".jpg"; // Always save as JPG
+                var savePath = Path.Combine(uploadsFolder, fileName);
+
+                try
+                {
+                    using var imageStream = image.OpenReadStream();
+                    using var img = await Image.LoadAsync(imageStream);
+
+                    // Compress image to target ≤ 90 KB
+                    var quality = 75;
+                    var options = new JpegEncoder { Quality = quality };
+                    using var ms = new MemoryStream();
+
+                    await img.SaveAsJpegAsync(ms, options);
+                    while (ms.Length > 90 * 1024 && quality > 10)
+                    {
+                        ms.SetLength(0);
+                        quality -= 5;
+                        options = new JpegEncoder { Quality = quality };
+                        await img.SaveAsJpegAsync(ms, options);
+                    }
+
+                    // Save final image
+                    await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
+                    imagePaths.Add(Path.Combine("uploads/books", fileName));
+                }
+                catch (Exception ex)
+                {
+                    SimpleLogger.LogCritical("BooksController", "ListBook", $"Image processing failed for {image.FileName}", ex, dto.UserId.ToString());
+                    return StatusCode(500, "Failed to process images");
+                }
             }
 
             var book = new Book
             {
                 UserId = dto.UserId,
-                BookName = dto.BookName,
-                AuthorOrPublication = dto.AuthorOrPublication,
-                Description = dto.Description,
-                Category = dto.Category,
-                SubCategory = dto.SubCategory,
+                BookName = dto.BookName.Trim(),
+                AuthorOrPublication = string.IsNullOrWhiteSpace(dto.AuthorOrPublication) ? null : dto.AuthorOrPublication.Trim(),
+                Description = dto.Description.Trim(),
+                Category = dto.Category.Trim(),
+                SubCategory = string.IsNullOrWhiteSpace(dto.SubCategory) ? null : dto.SubCategory.Trim(),
                 SellingPrice = dto.SellingPrice,
                 ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(imagePaths),
                 CreatedAt = IndianTimeHelper.UtcNow
@@ -293,91 +452,161 @@ public class BooksController : ControllerBase
     [HttpPut("EditListing/{id}")]
     public async Task<IActionResult> EditListing(Guid id, [FromForm] BookEditDto dto)
     {
-        var book = await _context.Books.FindAsync(id);
-        if (book == null)
-            return NotFound(new { Message = "Book not found" });
-
-        // Update basic fields
-        book.BookName = string.IsNullOrWhiteSpace(dto.BookName) ? book.BookName : dto.BookName;
-        book.AuthorOrPublication = string.IsNullOrWhiteSpace(dto.AuthorOrPublication) ? book.AuthorOrPublication : dto.AuthorOrPublication;
-        book.Category = string.IsNullOrWhiteSpace(dto.Category) ? book.Category : dto.Category;
-        book.Description = string.IsNullOrWhiteSpace(dto.Description) ? book.Description : dto.Description;
-        book.SubCategory = string.IsNullOrWhiteSpace(dto.SubCategory) ? book.SubCategory : dto.SubCategory;
-        book.SellingPrice = dto.SellingPrice.HasValue ? dto.SellingPrice.Value : book.SellingPrice;
-
-        // Deserialize existing images from DB
-        var existingImagesInDb = string.IsNullOrEmpty(book.ImagePathsJson)
-            ? new List<string>()
-            : System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson)!;
-
-        var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-        var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-
-        var updatedImages = new List<string>();
-
-        // ✅ 1. Keep only the images user wants to retain
-        if (dto.ExistingImages != null && dto.ExistingImages.Length > 0)
+        try
         {
-            updatedImages.AddRange(dto.ExistingImages);
-            // Delete only images that are NOT in ExistingImages
-            var imagesToDelete = existingImagesInDb.Except(dto.ExistingImages).ToList();
-            foreach (var imgPath in imagesToDelete)
+            SimpleLogger.LogNormal("BooksController", "EditListing", $"Edit request for bookId: {id}", id.ToString());
+
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
             {
-                var fullPath = Path.Combine(wwwRoot, imgPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                if (System.IO.File.Exists(fullPath))
+                SimpleLogger.LogNormal("BooksController", "EditListing", $"Book not found: {id}", id.ToString());
+                return NotFound(new { Message = "Book not found" });
+            }
+
+            // Validate selling price if provided
+            if (dto.SellingPrice.HasValue && (dto.SellingPrice.Value <= 0 || dto.SellingPrice.Value > 100000))
+            {
+                return BadRequest(new { Message = "Selling price must be between 1 and 100,000." });
+            }
+
+            // Update basic fields (only if provided and not empty)
+            if (!string.IsNullOrWhiteSpace(dto.BookName))
+                book.BookName = dto.BookName.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.AuthorOrPublication))
+                book.AuthorOrPublication = dto.AuthorOrPublication.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Category))
+                book.Category = dto.Category.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Description))
+                book.Description = dto.Description.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.SubCategory))
+                book.SubCategory = dto.SubCategory.Trim();
+            if (dto.SellingPrice.HasValue)
+                book.SellingPrice = dto.SellingPrice.Value;
+
+            var wwwRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var uploadsFolder = Path.Combine(wwwRoot, "uploads/books");
+            Directory.CreateDirectory(uploadsFolder); // Ensure directory exists
+
+            // Deserialize existing images from DB
+            var existingImagesInDb = string.IsNullOrEmpty(book.ImagePathsJson)
+                ? new List<string>()
+                : System.Text.Json.JsonSerializer.Deserialize<List<string>>(book.ImagePathsJson) ?? new List<string>();
+
+            var updatedImages = new List<string>();
+
+            // ✅ 1. Keep only the images user wants to retain
+            if (dto.ExistingImages != null && dto.ExistingImages.Length > 0)
+            {
+                // Validate that existing images are actually in the DB
+                var validExistingImages = dto.ExistingImages
+                    .Where(img => existingImagesInDb.Contains(img))
+                    .ToList();
+
+                updatedImages.AddRange(validExistingImages);
+
+                // Delete only images that are NOT in ExistingImages
+                var imagesToDelete = existingImagesInDb.Except(validExistingImages).ToList();
+                foreach (var imgPath in imagesToDelete)
                 {
+                    var fullPath = Path.Combine(wwwRoot, imgPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                    if (System.IO.File.Exists(fullPath))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(fullPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            SimpleLogger.LogCritical("BooksController", "EditListing", $"Failed to delete image: {fullPath}", ex, id.ToString());
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // If ExistingImages not sent → keep all DB images as default
+                updatedImages.AddRange(existingImagesInDb);
+            }
+
+            // ✅ 2. Add new images if uploaded
+            if (dto.NewImages != null && dto.NewImages.Length > 0)
+            {
+                // Validate total image count
+                var totalImages = updatedImages.Count + dto.NewImages.Length;
+                if (totalImages < 1 || totalImages > 4)
+                {
+                    return BadRequest(new { Message = "Total images must be between 1 and 4." });
+                }
+
+                foreach (var image in dto.NewImages)
+                {
+                    if (image.Length == 0)
+                    {
+                        return BadRequest(new { Message = "One or more new images are empty." });
+                    }
+
+                    if (image.Length > 5 * 1024 * 1024) // 5MB limit
+                    {
+                        return BadRequest(new { Message = "New image size must be less than 5MB." });
+                    }
+
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                    var extension = Path.GetExtension(image.FileName).ToLower();
+                    if (!allowedExtensions.Contains(extension))
+                    {
+                        return BadRequest(new { Message = "Only JPG, PNG, and WebP images are allowed." });
+                    }
+
                     try
                     {
-                        System.IO.File.Delete(fullPath);
+                        using var img = await Image.LoadAsync(image.OpenReadStream());
+
+                        // Compress image to target ≤ 90 KB
+                        var quality = 75;
+                        var options = new JpegEncoder { Quality = quality };
+                        using var ms = new MemoryStream();
+                        await img.SaveAsJpegAsync(ms, options);
+                        while (ms.Length > 90 * 1024 && quality > 10)
+                        {
+                            ms.SetLength(0);
+                            quality -= 5;
+                            options = new JpegEncoder { Quality = quality };
+                            await img.SaveAsJpegAsync(ms, options);
+                        }
+
+                        var fileName = Guid.NewGuid() + ".jpg";
+                        var savePath = Path.Combine(uploadsFolder, fileName);
+                        await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
+
+                        updatedImages.Add(Path.Combine("uploads/books", fileName));
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error deleting file {fullPath}: {ex.Message}");
+                        SimpleLogger.LogCritical("BooksController", "EditListing", $"Image processing failed for {image.FileName}", ex, id.ToString());
+                        return StatusCode(500, "Failed to process new images");
                     }
                 }
             }
-        }
-        else
-        {
-            // If ExistingImages not sent → keep all DB images as default
-            updatedImages.AddRange(existingImagesInDb);
-        }
 
-        // ✅ 2. Add new images if uploaded
-        if (dto.NewImages != null && dto.NewImages.Length > 0)
-        {
-            foreach (var image in dto.NewImages)
+            // Validate final image count
+            if (updatedImages.Count < 1 || updatedImages.Count > 4)
             {
-                using var img = await Image.LoadAsync(image.OpenReadStream()); // SixLabors.ImageSharp
-
-                // Compress image to target ≤ 90 KB
-                var quality = 75;
-                var options = new JpegEncoder { Quality = quality };
-                using var ms = new MemoryStream();
-                await img.SaveAsJpegAsync(ms, options);
-                while (ms.Length > 90 * 1024 && quality > 10)
-                {
-                    ms.SetLength(0);
-                    quality -= 5;
-                    options = new JpegEncoder { Quality = quality };
-                    await img.SaveAsJpegAsync(ms, options);
-                }
-
-                var fileName = Guid.NewGuid() + ".jpg";
-                var savePath = Path.Combine(uploadsFolder, fileName);
-                await System.IO.File.WriteAllBytesAsync(savePath, ms.ToArray());
-
-                updatedImages.Add(Path.Combine("uploads/books", fileName));
+                return BadRequest(new { Message = "Final image count must be between 1 and 4." });
             }
+
+            // ✅ 3. Update database
+            book.ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(updatedImages);
+
+            await _context.SaveChangesAsync();
+
+            SimpleLogger.LogNormal("BooksController", "EditListing", $"Book updated successfully: {id}", id.ToString());
+            return Ok(new { Message = "Book updated successfully" });
         }
-
-        // ✅ 3. Update database
-        book.ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(updatedImages);
-
-        await _context.SaveChangesAsync();
-        return Ok(new { Message = "Book updated successfully" });
+        catch (Exception ex)
+        {
+            SimpleLogger.LogCritical("BooksController", "EditListing", "EditListing failed", ex, id.ToString());
+            return StatusCode(500, "Failed to update book");
+        }
     }
 
     [Authorize]
@@ -386,7 +615,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}", userId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}, page: {page}, pageSize: {pageSize}", userId.ToString());
 
             var currentUserLocation = await _context.UserLocations
                 .FirstOrDefaultAsync(u => u.UserId == userId);
@@ -397,171 +626,127 @@ public class BooksController : ControllerBase
                 return BadRequest("User location not found.");
             }
 
-            // Base query
-            var booksQuery = _context.Books
-                .Include(b => b.User)
-                .OrderByDescending(b => b.CreatedAt)
-                .AsQueryable();
+            // Calculate how many books we need: enough for current page + buffer for accurate sorting
+            var booksNeeded = (page * pageSize) + (pageSize * 3); // Extra buffer for better distance sorting
+            var batchSize = 500; // Small batches to minimize memory usage
 
-            // Retrieve all books
-            var allBooks = await booksQuery.ToListAsync();
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {allBooks.Count} books after search filter", userId.ToString());
-
-            // --- 🔹 Random Boosted Listing Logic (OLX-style) ---
-            var boostedPool = allBooks
-             .Where(b => b.IsBoosted == true && !b.IsSold)
-             .OrderByDescending(b => b.CreatedAt).ToList();
-
-            var normalBooks = allBooks.Where(b => b.IsBoosted != true || b.IsSold).ToList();
-
-            var random = new Random();
-
-            // Shuffle boosted and limit to ~10 items per API call
-            var boostedBooks = boostedPool.OrderBy(x => random.Next()).Take(10).ToList();
-
-            var mixedBooksData = new List<Book>();
-            int boostedIndex = 0;
-
-            for (int i = 0; i < normalBooks.Count; i++)
-            {
-                mixedBooksData.Add(normalBooks[i]);
-
-                // Around 15–20% chance to insert a boosted book
-                if (boostedIndex < boostedBooks.Count && random.NextDouble() < 0.18)
-                {
-                    mixedBooksData.Add(boostedBooks[boostedIndex]);
-                    boostedIndex++;
-                }
-            }
-
-            // If boosted books remain, randomly insert them at end positions
-            while (boostedIndex < boostedBooks.Count)
-            {
-                int insertPos = random.Next(0, mixedBooksData.Count + 1);
-                mixedBooksData.Insert(insertPos, boostedBooks[boostedIndex]);
-                boostedIndex++;
-            }
-
-            // Final books list for processing
-            var booksData = mixedBooksData;
-
-            // --- 🔹 Get User Locations for Distance Calculation ---
-            var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
-            var idList = string.Join(",", userIds.Select(id => $"'{id}'"));
-
-            var sqlQuery = $@"
-            SELECT t1.*
-            FROM (
-                SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
-                FROM UserLocations
-                WHERE UserId IN ({idList})
-            ) as t1
-            WHERE t1.rn = 1;
-        ";
-
-            var userLocations = await _context.UserLocations
-                .FromSqlRaw(sqlQuery)
+            // Get all user locations once (needed for distance calculations)
+            var allUserLocations = await _context.UserLocations
+                .FromSqlRaw(@"
+                    SELECT t1.*
+                    FROM (
+                        SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
+                        FROM UserLocations
+                    ) as t1
+                    WHERE t1.rn = 1")
                 .ToDictionaryAsync(u => u.UserId, u => u);
 
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved locations for {userLocations.Count} users", userId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Loaded {allUserLocations.Count} user locations", userId.ToString());
 
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "ResellBookApp");
+            // Efficient approach: Load books in batches and keep track of nearest ones
+            var nearestBooks = new List<(Book book, double? distance)>();
+            var skipCount = 0;
+            var totalProcessed = 0;
 
-            var books = new List<object>();
-
-            foreach (var b in booksData)
+            // Keep loading batches until we have enough books or run out
+            while (nearestBooks.Count < booksNeeded && totalProcessed < 10000) // Safety limit
             {
-                double? distanceKm = null;
-                string cityName = "N/A";
-                string districtName = "N/A";
+                var batch = await _context.Books
+                    .Include(b => b.User)
+                    .Where(b => !b.IsSold)
+                    .OrderByDescending(b => b.CreatedAt) // Most recent first
+                    .Skip(skipCount)
+                    .Take(batchSize)
+                    .ToListAsync();
 
-                if (userLocations.ContainsKey(b.UserId))
+                if (batch.Count == 0) break; // No more books
+
+                // Process this batch and calculate distances
+                foreach (var book in batch)
                 {
-                    var loc = userLocations[b.UserId];
+                    double? distance = null;
+                    if (allUserLocations.ContainsKey(book.UserId))
+                    {
+                        var loc = allUserLocations[book.UserId];
+                        distance = CalculateDistance(
+                            currentUserLocation.Latitude,
+                            currentUserLocation.Longitude,
+                            loc.Latitude,
+                            loc.Longitude);
+                    }
 
-                    distanceKm = CalculateDistance(
-                        currentUserLocation.Latitude,
-                        currentUserLocation.Longitude,
-                        loc.Latitude,
-                        loc.Longitude
-                    );
-
-                    // try
-                    // {
-                    //     string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={loc.Latitude}&lon={loc.Longitude}";
-                    //     var response = await httpClient.GetAsync(url);
-
-                    //     if (response.IsSuccessStatusCode)
-                    //     {
-                    //         var json = await response.Content.ReadAsStringAsync();
-                    //         using (JsonDocument doc = JsonDocument.Parse(json))
-                    //         {
-                    //             if (doc.RootElement.TryGetProperty("address", out JsonElement address))
-                    //             {
-                    //                 if (address.TryGetProperty("city", out var city))
-                    //                     cityName = city.GetString();
-                    //                 else if (address.TryGetProperty("town", out var town))
-                    //                     cityName = town.GetString();
-                    //                 else if (address.TryGetProperty("village", out var village))
-                    //                     cityName = village.GetString();
-
-                    //                 if (address.TryGetProperty("state_district", out var district))
-                    //                     districtName = district.GetString();
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    // catch { }
+                    nearestBooks.Add((book, distance));
+                    totalProcessed++;
                 }
 
+                skipCount += batch.Count;
+
+                // Sort periodically to keep only the nearest books
+                if (nearestBooks.Count >= booksNeeded * 2)
+                {
+                    nearestBooks = nearestBooks
+                        .OrderBy(b => b.distance ?? double.MaxValue)
+                        .Take(booksNeeded)
+                        .ToList();
+                }
+            }
+
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Processed {totalProcessed} books, kept {nearestBooks.Count} nearest", userId.ToString());
+
+            // Final sort by distance
+            var sortedBooks = nearestBooks
+                .OrderBy(b => b.distance ?? double.MaxValue)
+                .ToList();
+
+            // Apply pagination
+            var paginatedBooks = sortedBooks
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Convert to final format
+            var books = new List<object>();
+            foreach (var (book, distance) in paginatedBooks)
+            {
                 books.Add(new
                 {
-                    b.Id,
-                    b.UserId,
-                    UserName = b.User.Name,
-                    b.User.Phone,
-                    b.BookName,
-                    b.AuthorOrPublication,
-                    b.Description,
-                    b.Category,
-                    b.SubCategory,
-                    b.SellingPrice,
-                    b.IsSold,
-                    b.IsBoosted,
-                    Images = string.IsNullOrEmpty(b.ImagePathsJson)
+                    book.Id,
+                    book.UserId,
+                    UserName = book.User.Name,
+                    book.User.Phone,
+                    book.BookName,
+                    book.AuthorOrPublication,
+                    book.Description,
+                    book.Category,
+                    book.SubCategory,
+                    book.SellingPrice,
+                    book.IsSold,
+                    book.IsBoosted,
+                    Images = string.IsNullOrEmpty(book.ImagePathsJson)
                         ? Array.Empty<string>()
-                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
-                    b.CreatedAt,
-                    City = cityName,
-                    District = districtName,
-                    DistanceValue = distanceKm,
-                    Distance = distanceKm.HasValue
-                        ? (distanceKm < 1
-                            ? $"{Math.Round(distanceKm.Value * 1000)} m"
-                            : $"{Math.Round(distanceKm.Value, 2)} km")
+                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(book.ImagePathsJson) ?? Array.Empty<string>(),
+                    book.CreatedAt,
+                    City = "N/A",
+                    District = "N/A",
+                    DistanceValue = distance,
+                    Distance = distance.HasValue
+                        ? (distance < 1
+                            ? $"{Math.Round(distance.Value * 1000)} m"
+                            : $"{Math.Round(distance.Value, 2)} km")
                         : "N/A"
                 });
             }
 
-            // Sort by distance (so nearby appear first, still keeping boosted mixed)
-            var sortedBooks = books
-                .OrderBy(b => ((dynamic)b).DistanceValue ?? double.MaxValue)
-                .ToList();
-
-            // --- 🔹 Pagination ---
-            var pagedBooks = sortedBooks
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            // Get total count for pagination metadata
+            var totalBooks = await _context.Books.CountAsync(b => !b.IsSold);
 
             return Ok(new
             {
                 Page = page,
                 PageSize = pageSize,
-                TotalCount = sortedBooks.Count,
-                TotalPages = (int)Math.Ceiling(sortedBooks.Count / (double)pageSize),
-                Books = pagedBooks
+                TotalCount = totalBooks,
+                TotalPages = (int)Math.Ceiling(totalBooks / (double)pageSize),
+                Books = books
             });
         }
         catch (Exception ex)

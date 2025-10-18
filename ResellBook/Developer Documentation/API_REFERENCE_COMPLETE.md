@@ -32,6 +32,9 @@ Content-Type: application/json
 | `POST` | `/api/Books/ListBook` | Create new book listing (with Description) | ✅ |
 | `PUT` | `/api/Books/EditListing/{id}` | Edit existing listing | ✅ |
 | `GET` | `/api/Books/ViewAll/{userId}` | Browse all available books | ✅ |
+| `POST` | `/api/Books/UserClick/{bookId}` | Track user clicks on book listings | ✅ |
+| `POST` | `/api/Books/Boosting/{bookId}` | Boost book listing visibility | ✅ |
+| `GET` | `/api/Books/GetCityName/{userId}` | Get user's city name from location | ✅ |
 
 ### 💬 **Chat & Messaging APIs** `/api/Chat`
 
@@ -74,6 +77,27 @@ Content-Type: application/json
 |--------|----------|---------|---------------|
 | `POST` | `/api/UserSearch/LogSearch` | Log user search activity | ✅ |
 | `GET` | `/api/UserSearch/GetAllSearches` | Get paginated search logs (ascending) | ✅ |
+
+### 📁 **File Serving APIs**
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `GET` | `/uploads/books/{fileName}` | Serve book images | ❌ |
+| `GET` | `/uploads/books/debug/{fileName}` | Serve debug book images | ❌ |
+
+### 🧪 **File Test APIs** `/api/FileTest`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `GET` | `/api/FileTest/CheckFiles` | Check file system status | ❌ |
+| `GET` | `/api/FileTest/TestFile/{fileName}` | Test file serving | ❌ |
+
+### 🧪 **Test APIs** `/api/Test`
+
+| Method | Endpoint | Purpose | Auth Required |
+|--------|----------|---------|---------------|
+| `GET` | `/api/Test/ping` | Simple ping test | ❌ |
+| `GET` | `/api/Test/check-logs-folder` | Check logs folder access | ❌ |
 
 ### 🏥 **Health Check APIs**
 

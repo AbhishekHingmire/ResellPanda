@@ -21,10 +21,39 @@ namespace ResellBook.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure decimal precision for Book.SellingPrice
-            modelBuilder.Entity<Book>()
-                .Property(b => b.SellingPrice)
-                .HasPrecision(18, 2); // 18 total digits, 2 decimal places
+            // Configure Book entity
+            modelBuilder.Entity<Book>(entity =>
+            {
+                // Indexes for ViewAll API performance
+                entity.HasIndex(b => b.IsSold)
+                      .HasDatabaseName("IX_Books_IsSold");
+
+                entity.HasIndex(b => b.CreatedAt)
+                      .HasDatabaseName("IX_Books_CreatedAt");
+
+                entity.HasIndex(b => b.UserId)
+                      .HasDatabaseName("IX_Books_UserId");
+
+                entity.HasIndex(b => new { b.IsBoosted, b.ListingLastDate })
+                      .HasDatabaseName("IX_Books_IsBoosted_ListingLastDate")
+                      .HasFilter("[IsBoosted] = 1");
+
+                // Composite index for common queries
+                entity.HasIndex(b => new { b.IsSold, b.CreatedAt })
+                      .HasDatabaseName("IX_Books_IsSold_CreatedAt");
+            });
+
+            // Configure UserLocation entity
+            modelBuilder.Entity<UserLocation>(entity =>
+            {
+                // Index for latest location queries
+                entity.HasIndex(ul => new { ul.UserId, ul.CreateDate })
+                      .HasDatabaseName("IX_UserLocations_UserId_CreateDate");
+
+                // Index for faster user location lookups
+                entity.HasIndex(ul => ul.UserId)
+                      .HasDatabaseName("IX_UserLocations_UserId");
+            });
 
             // Configure UserChat relationships
             modelBuilder.Entity<UserChat>(entity =>
