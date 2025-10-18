@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using ResellBook.Data;
 using ResellBook.Helpers;
 using ResellBook.Models;
@@ -18,11 +19,13 @@ public class BooksController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IWebHostEnvironment _env;
+    private readonly IMemoryCache _cache;
 
-    public BooksController(AppDbContext context, IWebHostEnvironment env)
+    public BooksController(AppDbContext context, IWebHostEnvironment env, IMemoryCache cache)
     {
         _context = context;
         _env = env;
+        _cache = cache;
     }
     [Authorize]
     [Authorize]
@@ -630,16 +633,20 @@ public class BooksController : ControllerBase
             var booksNeeded = (page * pageSize) + (pageSize * 3); // Extra buffer for better distance sorting
             var batchSize = 500; // Small batches to minimize memory usage
 
-            // Get all user locations once (needed for distance calculations)
-            var allUserLocations = await _context.UserLocations
-                .FromSqlRaw(@"
-                    SELECT t1.*
-                    FROM (
-                        SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
-                        FROM UserLocations
-                    ) as t1
-                    WHERE t1.rn = 1")
-                .ToDictionaryAsync(u => u.UserId, u => u);
+            // Get all user locations once (needed for distance calculations) - with caching
+            var allUserLocations = await _cache.GetOrCreateAsync("AllUserLocations", async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10); // Cache for 10 minutes
+                return await _context.UserLocations
+                    .FromSqlRaw(@"
+                        SELECT t1.*
+                        FROM (
+                            SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
+                            FROM UserLocations
+                        ) as t1
+                        WHERE t1.rn = 1")
+                    .ToDictionaryAsync(u => u.UserId, u => u);
+            });
 
             SimpleLogger.LogNormal("BooksController", "ViewAll", $"Loaded {allUserLocations.Count} user locations", userId.ToString());
 

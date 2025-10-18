@@ -20,6 +20,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register EmailService
 builder.Services.AddScoped<EmailService>();
+
+// Add Memory Cache for performance optimization
+builder.Services.AddMemoryCache();
+
+// Add Response Caching
+builder.Services.AddResponseCaching();
 // Add Authentication
 builder.Services.AddAuthentication(options =>
 {
@@ -57,6 +63,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add response compression for cost savings
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.MimeTypes = new[] { "text/plain", "text/css", "application/javascript", "text/html", "application/xml", "text/xml", "application/json", "text/json" };
+});
 
 var app = builder.Build();
 
@@ -115,7 +128,20 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseResponseCompression(); // Enable response compression
+
+// Enable response caching
+app.UseResponseCaching();
+
+// Optimize static files with caching headers
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Cache static files for 1 hour
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=3600");
+    }
+});
 
 app.UseRouting();
 
