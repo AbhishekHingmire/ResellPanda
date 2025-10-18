@@ -24,17 +24,39 @@ public class BooksController : ControllerBase
         _context = context;
         _env = env;
     }
+    [Authorize]
     [HttpPost("UserClick/{bookId}")]
     public async Task<IActionResult> UserClick(Guid bookId)
     {
         try
         {
+            // Get logged-in user ID from JWT token
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { Message = "Invalid or missing user token." });
+
+            var loggedInUserId = Guid.Parse(userIdClaim);
+
+            // Fetch the book details
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == bookId);
+            if (book == null)
+                return NotFound(new { Message = "Book not found" });
+
+            // Check if the user is the owner of the book
+            if (book.UserId == loggedInUserId)
+            {
+                return Ok(new
+                {
+                    Message = "Owner's view not counted",
+                    BookId = bookId,
+                    TotalViews = book.Views
+                });
+            }
+
+            // Increment the view count for other users
             int updatedRows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"UPDATE Books SET Views = Views + 1 WHERE Id = {bookId}"
             );
-
-            if (updatedRows == 0)
-                return NotFound(new { Message = "Book not found" });
 
             var totalViews = await _context.Books
                 .Where(b => b.Id == bookId)
@@ -54,6 +76,7 @@ public class BooksController : ControllerBase
             return StatusCode(500, "Failed to update book view count.");
         }
     }
+
     [HttpGet("ViewMyListings/{userId}")]
 
     public async Task<IActionResult> ViewMyListings(Guid userId)
@@ -358,14 +381,13 @@ public class BooksController : ControllerBase
         return Ok(new { Message = "Book updated successfully" });
     }
 
-
     [Authorize]
     [HttpGet("ViewAll/{userId}")]
-    public async Task<IActionResult> ViewAll(Guid userId,int page = 1, int pageSize = 50)
+    public async Task<IActionResult> ViewAll(Guid userId, int page = 1, int pageSize = 50)
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId},", userId.ToString());
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}", userId.ToString());
 
             var currentUserLocation = await _context.UserLocations
                 .FirstOrDefaultAsync(u => u.UserId == userId);
@@ -382,27 +404,61 @@ public class BooksController : ControllerBase
                 .OrderByDescending(b => b.CreatedAt)
                 .AsQueryable();
 
-         
+            // Retrieve all books
+            var allBooks = await booksQuery.ToListAsync();
+            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {allBooks.Count} books after search filter", userId.ToString());
 
-            var booksData = await booksQuery.ToListAsync();
+            // --- 🔹 Random Boosted Listing Logic (OLX-style) ---
+            var boostedPool = allBooks
+             .Where(b => b.IsBoosted == true && !b.IsSold)
+             .OrderByDescending(b => b.CreatedAt).ToList();
 
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Retrieved {booksData.Count} books after search filter", userId.ToString());
+            var normalBooks = allBooks.Where(b => b.IsBoosted != true || b.IsSold).ToList();
 
-            // Get unique userIds from books
+            var random = new Random();
+
+            // Shuffle boosted and limit to ~10 items per API call
+            var boostedBooks = boostedPool.OrderBy(x => random.Next()).Take(10).ToList();
+
+            var mixedBooksData = new List<Book>();
+            int boostedIndex = 0;
+
+            for (int i = 0; i < normalBooks.Count; i++)
+            {
+                mixedBooksData.Add(normalBooks[i]);
+
+                // Around 15–20% chance to insert a boosted book
+                if (boostedIndex < boostedBooks.Count && random.NextDouble() < 0.18)
+                {
+                    mixedBooksData.Add(boostedBooks[boostedIndex]);
+                    boostedIndex++;
+                }
+            }
+
+            // If boosted books remain, randomly insert them at end positions
+            while (boostedIndex < boostedBooks.Count)
+            {
+                int insertPos = random.Next(0, mixedBooksData.Count + 1);
+                mixedBooksData.Insert(insertPos, boostedBooks[boostedIndex]);
+                boostedIndex++;
+            }
+
+            // Final books list for processing
+            var booksData = mixedBooksData;
+
+            // --- 🔹 Get User Locations for Distance Calculation ---
             var userIds = booksData.Select(b => b.UserId).Distinct().ToList();
-
-            // Create a comma-separated string of user IDs with single quotes
             var idList = string.Join(",", userIds.Select(id => $"'{id}'"));
 
             var sqlQuery = $@"
-        SELECT t1.*
-        FROM (
-            SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
-            FROM UserLocations
-            WHERE UserId IN ({idList})
-        ) as t1
-        WHERE t1.rn = 1;
-    ";
+            SELECT t1.*
+            FROM (
+                SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
+                FROM UserLocations
+                WHERE UserId IN ({idList})
+            ) as t1
+            WHERE t1.rn = 1;
+        ";
 
             var userLocations = await _context.UserLocations
                 .FromSqlRaw(sqlQuery)
@@ -488,12 +544,12 @@ public class BooksController : ControllerBase
                 });
             }
 
-            // Sort by distance
+            // Sort by distance (so nearby appear first, still keeping boosted mixed)
             var sortedBooks = books
                 .OrderBy(b => ((dynamic)b).DistanceValue ?? double.MaxValue)
                 .ToList();
 
-            // Pagination
+            // --- 🔹 Pagination ---
             var pagedBooks = sortedBooks
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -514,6 +570,7 @@ public class BooksController : ControllerBase
             return StatusCode(500, "Failed to retrieve books");
         }
     }
+
 
 
     [HttpGet("GetCityName")]
