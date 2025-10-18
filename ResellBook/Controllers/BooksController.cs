@@ -520,6 +520,7 @@ public class BooksController : ControllerBase
                     b.Id,
                     b.UserId,
                     UserName = b.User.Name,
+                    b.User.Phone,
                     b.BookName,
                     b.AuthorOrPublication,
                     b.Description,
