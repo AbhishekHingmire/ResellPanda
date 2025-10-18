@@ -78,7 +78,6 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet("ViewMyListings/{userId}")]
-
     public async Task<IActionResult> ViewMyListings(Guid userId)
     {
         try
