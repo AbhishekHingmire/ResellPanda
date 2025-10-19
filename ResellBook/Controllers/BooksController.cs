@@ -101,7 +101,7 @@ public class BooksController : ControllerBase
             SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Request for userId: {userId}", userId.ToString());
 
             var books = await _context.Books
-                .Where(b => b.UserId == userId && !b.IsSold)
+                .Where(b => b.UserId == userId /*&& !b.IsSold*/)
                 .Select(b => new
                 {
                     b.Id,
