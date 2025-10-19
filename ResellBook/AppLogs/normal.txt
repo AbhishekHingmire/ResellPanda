@@ -133,3 +133,168 @@
 13-10-2025 10:44:20 PM | BooksController | ViewAll | Retrieved 17 books for page 1 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
 13-10-2025 10:44:20 PM | BooksController | ViewAll | Retrieved locations for 4 users | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
 13-10-2025 10:44:20 PM | BooksController | ViewAll | Processed 17 books successfully | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:23 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:25 PM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:34 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:34 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:38 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:38 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:40 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:41 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:42 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:42 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:43 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:43 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:44 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:44 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:45 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:48:46 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:26 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:28 PM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:30 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:31 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:33 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:33 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:35 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:35 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:36 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:36 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:41 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:42 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:45 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:45 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:46 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:47 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:48 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:48 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:49 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:49 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:50 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:49:50 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:54:42 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:54:44 PM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:08 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 5 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:08 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:15 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 6 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:17 PM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:22 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 4 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:23 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:30 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 8 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:30 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:36 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:55:36 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:13 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:16 PM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:19 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:19 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:21 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:22 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:23 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:23 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:24 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:25 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:25 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:26 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:26 PM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+19-10-2025 11:58:27 PM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:42 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:45 AM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:56 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:56 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:58 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:58 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:59 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:05:59 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:06:00 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 10 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:06:01 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:07:00 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:07:02 AM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:07:12 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:07:12 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:07:16 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:07:16 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:18 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:21 AM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:25 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:25 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:30 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:30 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:33 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:33 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:35 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:35 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:36 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:36 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:37 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:37 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:38 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:14:39 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:18:05 AM | BooksController | ViewAll | ViewAll request for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298, page: 1, pageSize: 50 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:18:07 AM | BooksController | ViewAll | Found 45 books within 600km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:24:17 AM | BooksController | ViewAll | Found 325 books within 3100km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:24:44 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:24:47 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:39 AM | BooksController | ViewAll | Found 8 books within 10km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:50 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:52 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:53 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:54 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:55 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:56 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:57 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:58 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:42:59 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:00 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:01 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:02 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:03 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:04 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:05 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:06 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:07 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:08 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:09 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:11 AM | BooksController | ViewAll | Found 8 books within 10km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:12 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:13 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:14 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:15 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:16 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:17 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:32 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:34 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:36 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:37 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:38 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:39 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:40 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:41 AM | BooksController | ViewAll | Found 8 books within 10km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:43 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:44 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:43:45 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:49:46 AM | BooksController | ViewAll | Found 8 books within 10km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:49:58 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:49:59 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:50:00 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:50:06 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:50:35 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:50:37 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:27 AM | BooksController | ViewAll | Found 8 books within 10km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:35 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:36 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:37 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:38 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:43 AM | BooksController | ViewAll | Found 8 books within 20km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:46 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:49 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:50 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:52:58 AM | BooksController | ViewAll | Found 8 books within 30km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:01 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:02 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:12 AM | BooksController | ViewAll | Found 9 books within 70km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:15 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:21 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:29 AM | BooksController | ViewAll | Found 12 books within 1500km | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:37 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:39 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298
+20-10-2025 12:53:40 AM | BooksController | ViewAll | Short cache hit for userId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298

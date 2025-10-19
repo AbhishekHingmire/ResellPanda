@@ -8,7 +8,6 @@ using ResellBook.Models;
 using ResellBook.Utils;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
@@ -103,7 +102,6 @@ public class BooksController : ControllerBase
 
             var books = await _context.Books
                 .Where(b => b.UserId == userId && !b.IsSold)
-                .OrderByDescending(b => b.CreatedAt)
                 .Select(b => new
                 {
                     b.Id,
@@ -614,12 +612,10 @@ public class BooksController : ControllerBase
 
     [Authorize]
     [HttpGet("ViewAll/{userId}")]
-    public async Task<IActionResult> ViewAll(Guid userId, int page = 1, int pageSize = 50)
+    public async Task<IActionResult> ViewAll(Guid userId, int distance = 50, int page = 1, int pageSize = 50)
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"ViewAll request for userId: {userId}, page: {page}, pageSize: {pageSize}", userId.ToString());
-
             var currentUserLocation = await _context.UserLocations
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -629,123 +625,136 @@ public class BooksController : ControllerBase
                 return BadRequest("User location not found.");
             }
 
-            // Calculate how many books we need: enough for current page + buffer for accurate sorting
-            var booksNeeded = (page * pageSize) + (pageSize * 3); // Extra buffer for better distance sorting
-            var batchSize = 500; // Small batches to minimize memory usage
-
-            // Get all user locations once (needed for distance calculations) - with caching
-            var allUserLocations = await _cache.GetOrCreateAsync("AllUserLocations", async entry =>
+            // Check short-term cache for pagination (30 seconds)
+            var cacheKey = $"ViewAll_{userId}_{distance}";
+            List<object>? books = null;
+            if (_cache.TryGetValue(cacheKey, out List<object>? cachedBooks))
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10); // Cache for 10 minutes
-                return await _context.UserLocations
-                    .FromSqlRaw(@"
-                        SELECT t1.*
-                        FROM (
-                            SELECT *, ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY CreateDate DESC) as rn
-                            FROM UserLocations
-                        ) as t1
-                        WHERE t1.rn = 1")
-                    .ToDictionaryAsync(u => u.UserId, u => u);
-            });
-
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Loaded {allUserLocations.Count} user locations", userId.ToString());
-
-            // Efficient approach: Load books in batches and keep track of nearest ones
-            var nearestBooks = new List<(Book book, double? distance)>();
-            var skipCount = 0;
-            var totalProcessed = 0;
-
-            // Keep loading batches until we have enough books or run out
-            while (nearestBooks.Count < booksNeeded && totalProcessed < 10000) // Safety limit
+                SimpleLogger.LogNormal("BooksController", "ViewAll", $"Short cache hit for userId: {userId}", userId.ToString());
+                books = cachedBooks;
+            }
+            else
             {
-                var batch = await _context.Books
-                    .Include(b => b.User)
-                    .Where(b => !b.IsSold)
-                    .OrderByDescending(b => b.CreatedAt) // Most recent first
-                    .Skip(skipCount)
-                    .Take(batchSize)
-                    .ToListAsync();
+                // Use fixed radius from parameter
+                var currentRadius = (double)distance;
+                List<dynamic> nearbyBooks = new List<dynamic>();
 
-                if (batch.Count == 0) break; // No more books
+                const double kmPerDegreeLat = 111.0;
+                var kmPerDegreeLon = 111.0 * Math.Cos(ToRadians(currentUserLocation.Latitude));
 
-                // Process this batch and calculate distances
-                foreach (var book in batch)
+                var latOffset = currentRadius / kmPerDegreeLat;
+                var lonOffset = currentRadius / kmPerDegreeLon;
+
+                var minLat = currentUserLocation.Latitude - latOffset;
+                var maxLat = currentUserLocation.Latitude + latOffset;
+                var minLon = currentUserLocation.Longitude - lonOffset;
+                var maxLon = currentUserLocation.Longitude + lonOffset;
+
+                var query = from b in _context.Books
+                            join ul in _context.UserLocations on b.UserId equals ul.UserId
+                            where !b.IsSold &&
+                                  ul.Latitude >= minLat && ul.Latitude <= maxLat &&
+                                  ul.Longitude >= minLon && ul.Longitude <= maxLon
+                            select new
+                            {
+                                Book = b,
+                                UserLocation = ul,
+                                UserName = b.User.Name,
+                                UserPhone = b.User.Phone
+                            };
+
+                nearbyBooks = (await query.Take(1000).ToListAsync()).Cast<dynamic>().ToList();
+
+                SimpleLogger.LogNormal("BooksController", "ViewAll", $"Found {nearbyBooks.Count} books within {currentRadius}km", userId.ToString());
+
+                // Remove duplicates by Book.Id
+                nearbyBooks = nearbyBooks
+                    .GroupBy(b => b.Book.Id)
+                    .Select(g => g.First())
+                    .ToList();
+
+                // Guard against empty results to skip unnecessary processing
+                if (nearbyBooks.Count == 0)
                 {
-                    double? distance = null;
-                    if (allUserLocations.ContainsKey(book.UserId))
-                    {
-                        var loc = allUserLocations[book.UserId];
-                        distance = CalculateDistance(
-                            currentUserLocation.Latitude,
-                            currentUserLocation.Longitude,
-                            loc.Latitude,
-                            loc.Longitude);
-                    }
-
-                    nearestBooks.Add((book, distance));
-                    totalProcessed++;
+                    books = new List<object>();
                 }
-
-                skipCount += batch.Count;
-
-                // Sort periodically to keep only the nearest books
-                if (nearestBooks.Count >= booksNeeded * 2)
+                else
                 {
-                    nearestBooks = nearestBooks
-                        .OrderBy(b => b.distance ?? double.MaxValue)
-                        .Take(booksNeeded)
+                    // Calculate approximate distances (fast), sort, take top candidates
+                    var approxBooks = nearbyBooks
+                        .Select(item =>
+                        {
+                            var approxDistance = CalculateApproxDistance(
+                                currentUserLocation.Latitude, currentUserLocation.Longitude,
+                                item.UserLocation.Latitude, item.UserLocation.Longitude);
+                            return new
+                            {
+                                Item = item,
+                                ApproxDistance = approxDistance
+                            };
+                        })
+                        .OrderBy(b => b.ApproxDistance)
+                        .Take(100) // Reduced to 100 for fewer exact calculations
                         .ToList();
+
+                    // Calculate exact distances only for top candidates
+                    var booksWithDistances = approxBooks
+                        .Select(ab =>
+                        {
+                            var distance = CalculateDistance(
+                                currentUserLocation.Latitude, currentUserLocation.Longitude,
+                                ab.Item.UserLocation.Latitude, ab.Item.UserLocation.Longitude);
+                            return new
+                            {
+                                ab.Item.Book,
+                                Distance = distance,
+                                ab.Item.UserName,
+                                ab.Item.UserPhone
+                            };
+                        })
+                        .Where(b => b.Distance <= currentRadius) // Ensure within final radius
+                        .OrderBy(b => b.Distance)
+                        .Take(500) // Limit to 500
+                        .ToList();
+
+                    // Convert to final format
+                    books = booksWithDistances.Select(b => (object)new
+                    {
+                        b.Book.Id,
+                        b.Book.UserId,
+                        UserName = b.UserName,
+                        Phone = b.UserPhone,
+                        b.Book.BookName,
+                        b.Book.AuthorOrPublication,
+                        b.Book.Description,
+                        b.Book.Category,
+                        b.Book.SubCategory,
+                        b.Book.SellingPrice,
+                        b.Book.IsSold,
+                        b.Book.IsBoosted,
+                        Images = string.IsNullOrEmpty(b.Book.ImagePathsJson)
+                            ? Array.Empty<string>()
+                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.Book.ImagePathsJson) ?? Array.Empty<string>(),
+                        b.Book.CreatedAt,
+                        City = "N/A",
+                        District = "N/A",
+                        DistanceValue = b.Distance,
+                        Distance = b.Distance < 1
+                            ? $"{Math.Round(b.Distance * 1000)} m"
+                            : $"{Math.Round(b.Distance, 2)} km"
+                    }).ToList();
                 }
+
+                // Short-term cache for 60 seconds (for pagination)
+                _cache.Set(cacheKey, books, TimeSpan.FromSeconds(60));
             }
 
-            SimpleLogger.LogNormal("BooksController", "ViewAll", $"Processed {totalProcessed} books, kept {nearestBooks.Count} nearest", userId.ToString());
-
-            // Final sort by distance
-            var sortedBooks = nearestBooks
-                .OrderBy(b => b.distance ?? double.MaxValue)
-                .ToList();
-
             // Apply pagination
-            var paginatedBooks = sortedBooks
+            var totalBooks = books.Count;
+            var paginatedBooks = books
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
-
-            // Convert to final format
-            var books = new List<object>();
-            foreach (var (book, distance) in paginatedBooks)
-            {
-                books.Add(new
-                {
-                    book.Id,
-                    book.UserId,
-                    UserName = book.User.Name,
-                    book.User.Phone,
-                    book.BookName,
-                    book.AuthorOrPublication,
-                    book.Description,
-                    book.Category,
-                    book.SubCategory,
-                    book.SellingPrice,
-                    book.IsSold,
-                    book.IsBoosted,
-                    Images = string.IsNullOrEmpty(book.ImagePathsJson)
-                        ? Array.Empty<string>()
-                        : System.Text.Json.JsonSerializer.Deserialize<string[]>(book.ImagePathsJson) ?? Array.Empty<string>(),
-                    book.CreatedAt,
-                    City = "N/A",
-                    District = "N/A",
-                    DistanceValue = distance,
-                    Distance = distance.HasValue
-                        ? (distance < 1
-                            ? $"{Math.Round(distance.Value * 1000)} m"
-                            : $"{Math.Round(distance.Value, 2)} km")
-                        : "N/A"
-                });
-            }
-
-            // Get total count for pagination metadata
-            var totalBooks = await _context.Books.CountAsync(b => !b.IsSold);
 
             return Ok(new
             {
@@ -753,7 +762,7 @@ public class BooksController : ControllerBase
                 PageSize = pageSize,
                 TotalCount = totalBooks,
                 TotalPages = (int)Math.Ceiling(totalBooks / (double)pageSize),
-                Books = books
+                Books = paginatedBooks
             });
         }
         catch (Exception ex)
@@ -799,19 +808,31 @@ public class BooksController : ControllerBase
         }
     }
 
-    // Haversine formula to calculate distance (in km)
+    // Optimized Haversine formula (pre-calculate constants for speed)
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
-        const double R = 6371; // Radius of Earth in km
-        var dLat = ToRadians(lat2 - lat1);
-        var dLon = ToRadians(lon2 - lon1);
+        const double R = 6371.0; // Earth's radius in km
+        double dLat = ToRadians(lat2 - lat1);
+        double dLon = ToRadians(lon2 - lon1);
+        double lat1Rad = ToRadians(lat1);
+        double lat2Rad = ToRadians(lat2);
 
-        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
-                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                   Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                   Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
 
-        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-        return R * c; // distance in km
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
+    }
+
+    // Fast approximate distance (Euclidean, scaled to km) for initial sorting
+    private double CalculateApproxDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double kmPerDegreeLat = 111.0;
+        const double kmPerDegreeLon = 111.0; // Average, adjust for latitude if needed
+        var dLat = (lat2 - lat1) * kmPerDegreeLat;
+        var dLon = (lon2 - lon1) * kmPerDegreeLon * Math.Cos(ToRadians((lat1 + lat2) / 2));
+        return Math.Sqrt(dLat * dLat + dLon * dLon);
     }
 
     private double ToRadians(double angle) => Math.PI * angle / 180.0;

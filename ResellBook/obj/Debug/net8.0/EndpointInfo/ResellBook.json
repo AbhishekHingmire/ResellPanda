@@ -573,6 +573,15 @@
             }
           },
           {
+            "name": "distance",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {

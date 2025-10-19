@@ -343,6 +343,11 @@
         "IsRequired": true
       },
       {
+        "Name": "distance",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
         "Name": "page",
         "Type": "System.Int32",
         "IsRequired": false
