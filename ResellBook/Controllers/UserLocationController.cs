@@ -20,9 +20,7 @@ public class UserLocationController : ControllerBase
     [HttpPost("SyncLocation")]
     public IActionResult SyncLocation([FromBody] UserLocation request)
     {
-        if (!_context.Users.Any(u => u.Id == request.UserId))
-            return NotFound(new { Message = "User not found" });
-
+        try{
         var userData = _context.UserLocations.FirstOrDefault(u => u.UserId == request.UserId);
         if (userData == null)
         {
@@ -45,6 +43,11 @@ public class UserLocationController : ControllerBase
         }
         _context.SaveChanges();
         return Ok(new { Message = "Location synced successfully" });
+        }
+        catch(Exception ex)
+        {
+            return StatusCode(500, new { Message = "An error occurred while syncing location", Error = ex.Message });
+        }
     }
 
     // GET: api/UserLocation/GetLocations/{userId}
