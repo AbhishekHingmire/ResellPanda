@@ -773,6 +773,243 @@ public class BooksController : ControllerBase
     }
 
 
+    [HttpGet("GetCategories")]
+    public IActionResult GetCategories()
+    {
+        var categories = new List<CategoryDto>
+            {
+                new CategoryDto
+                {
+                    Id = 1,
+                    Category = "Primary School Books",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "Class I"),
+                        new(2, "Class II"),
+                        new(3, "Class III"),
+                        new(4, "Class IV"),
+                        new(5, "Class V"),
+                        new(6, "Activity Books"),
+                        new(7, "Story Books"),
+                        new(8, "Learning Kits")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 2,
+                    Category = "Secondary School Books",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "Class VI"),
+                        new(2, "Class VII"),
+                        new(3, "Class VIII"),
+                        new(4, "Class IX"),
+                        new(5, "Class X"),
+                        new(6, "Science"),
+                        new(7, "Math"),
+                        new(8, "Social Studies"),
+                        new(9, "Language"),
+                        new(10, "Exam Prep")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 3,
+                    Category = "Senior Secondary Books",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "Class XI"),
+                        new(2, "Class XII"),
+                        new(3, "Science"),
+                        new(4, "Commerce"),
+                        new(5, "Arts"),
+                        new(6, "Board Exam Guides"),
+                        new(7, "Reference Books")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 4,
+                    Category = "Engineering & Technology",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "B.Tech"),
+                        new(2, "BCA"),
+                        new(3, "MCA"),
+                        new(4, "M.Tech"),
+                        new(5, "Diploma"),
+                        new(6, "IT & Computer Science"),
+                        new(7, "Electronics"),
+                        new(8, "Mechanical"),
+                        new(9, "Civil"),
+                        new(10, "Electrical")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 5,
+                    Category = "Business & Management",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "MBA"),
+                        new(2, "BBA"),
+                        new(3, "Management"),
+                        new(4, "Entrepreneurship"),
+                        new(5, "Marketing"),
+                        new(6, "Finance"),
+                        new(7, "HR"),
+                        new(8, "Accounting")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 6,
+                    Category = "Medical & Health Sciences",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "MBBS"),
+                        new(2, "BDS"),
+                        new(3, "Nursing"),
+                        new(4, "B.Sc Nursing"),
+                        new(5, "Paramedical"),
+                        new(6, "Pharmacy"),
+                        new(7, "Physiotherapy"),
+                        new(8, "Allied Health")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 7,
+                    Category = "Competitive Exams",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "SSC"),
+                        new(2, "UPSC"),
+                        new(3, "Banking (IBPS, SBI)"),
+                        new(4, "Railway"),
+                        new(5, "Defence (NDA, CDS)"),
+                        new(6, "Teaching Exams (TET, CTET)"),
+                        new(7, "Private Sector Exams")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 8,
+                    Category = "Law & Judiciary",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "LLB"),
+                        new(2, "LLM"),
+                        new(3, "Judiciary Exam Prep"),
+                        new(4, "Legal Studies")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 9,
+                    Category = "Arts & Humanities",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "History"),
+                        new(2, "Geography"),
+                        new(3, "Political Science"),
+                        new(4, "Sociology"),
+                        new(5, "Psychology"),
+                        new(6, "Philosophy"),
+                        new(7, "Literature")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 10,
+                    Category = "Science & Mathematics",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "Physics"),
+                        new(2, "Chemistry"),
+                        new(3, "Biology"),
+                        new(4, "Mathematics"),
+                        new(5, "Statistics"),
+                        new(6, "Astronomy"),
+                        new(7, "Computer Science")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 11,
+                    Category = "Languages",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "English"),
+                        new(2, "Hindi"),
+                        new(3, "Regional Languages"),
+                        new(4, "Foreign Languages (French, German, Spanish, Japanese, etc.)")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 12,
+                    Category = "Vocational & Skill Development",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "IT & Software"),
+                        new(2, "Hospitality"),
+                        new(3, "Culinary"),
+                        new(4, "Fashion & Design"),
+                        new(5, "Media & Communication"),
+                        new(6, "Digital Marketing"),
+                        new(7, "Coding & Programming")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 13,
+                    Category = "Test Prep & Certifications",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "GRE"),
+                        new(2, "GMAT"),
+                        new(3, "SAT"),
+                        new(4, "IELTS"),
+                        new(5, "TOEFL"),
+                        new(6, "CA"),
+                        new(7, "CS"),
+                        new(8, "CMA"),
+                        new(9, "Professional Certifications")
+                    }
+                },
+                new CategoryDto
+                {
+                    Id = 14,
+                    Category = "Hobbies & Extracurricular",
+                    Subcategories = new List<SubCategoryDto>
+                    {
+                        new(1, "Arts & Crafts"),
+                        new(2, "Music"),
+                        new(3, "Sports"),
+                        new(4, "Coding for Kids"),
+                        new(5, "Puzzle Books"),
+                        new(6, "Story Books"),
+                        new(7, "Comics")
+                    }
+                }
+            };
+
+        return Ok(categories);
+    }
+
+
+    // DTOs
+    public class CategoryDto
+    {
+        public int Id { get; set; }
+        public string Category { get; set; }
+        public List<SubCategoryDto> Subcategories { get; set; }
+    }
+
+
+
+
 
     [HttpGet("GetCityName")]
     public async Task<IActionResult> GetCityName(double latitude, double longitude)
@@ -839,7 +1076,17 @@ public class BooksController : ControllerBase
 }
 
 // DTOs
+public class SubCategoryDto
+{
+    public SubCategoryDto(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
 
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
 public class BookCreateDto
 {
     [Required] public Guid UserId { get; set; }
