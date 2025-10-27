@@ -18,33 +18,43 @@ public class UserLocationController : ControllerBase
 
     // POST: api/UserLocation/SyncLocation
     [HttpPost("SyncLocation")]
-    public IActionResult SyncLocation([FromBody] UserLocation request)
+    public async Task<IActionResult> SyncLocation([FromBody] UserLocation request)
     {
-        try{
-        var userData = _context.UserLocations.FirstOrDefault(u => u.UserId == request.UserId);
-        if (userData == null)
+        try
         {
-            var location = new UserLocation
+            // Validate request
+            if (request == null || request.UserId == Guid.Empty)
+                return BadRequest(new { Message = "Invalid request data" });
+
+            // Check if user exists
+            var userExists = await _context.Users.AnyAsync(u => u.Id == request.UserId);
+            if (!userExists)
+                return BadRequest(new { Message = "User not found" });
+
+            var userData = await _context.UserLocations.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+            if (userData == null)
             {
-                UserId = request.UserId,
-                Latitude = request.Latitude,
-                Longitude = request.Longitude,
-                CreateDate = IndianTimeHelper.UtcNow
-            };
-            _context.UserLocations.Add(location);
+                var location = new UserLocation
+                {
+                    UserId = request.UserId,
+                    Latitude = request.Latitude,
+                    Longitude = request.Longitude,
+                    CreateDate = IndianTimeHelper.UtcNow
+                };
+                _context.UserLocations.Add(location);
+            }
+            else
+            {
+                // This is the actual update command:
+                userData.Latitude = request.Latitude;
+                userData.Longitude = request.Longitude;
+                userData.CreateDate = IndianTimeHelper.UtcNow;
+                // No need to call Update; EF Core tracks changes automatically
+            }
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Location synced successfully" });
         }
-        else
-        {
-            // This is the actual update command:
-            userData.Latitude = request.Latitude;
-            userData.Longitude = request.Longitude;
-            userData.CreateDate = IndianTimeHelper.UtcNow;
-            // No need to call Update; EF Core tracks changes automatically
-        }
-        _context.SaveChanges();
-        return Ok(new { Message = "Location synced successfully" });
-        }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return StatusCode(500, new { Message = "An error occurred while syncing location", Error = ex.Message });
         }
