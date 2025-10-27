@@ -34,10 +34,6 @@ namespace ResellBook.Data
                 entity.HasIndex(b => b.UserId)
                       .HasDatabaseName("IX_Books_UserId");
 
-                entity.HasIndex(b => new { b.IsBoosted, b.ListingLastDate })
-                      .HasDatabaseName("IX_Books_IsBoosted_ListingLastDate")
-                      .HasFilter("[IsBoosted] = 1");
-
                 // Composite index for common queries
                 entity.HasIndex(b => new { b.IsSold, b.CreatedAt })
                       .HasDatabaseName("IX_Books_IsSold_CreatedAt");
