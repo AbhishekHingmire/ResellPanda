@@ -277,54 +277,54 @@ public class BooksController : ControllerBase
     }
     // POST: List Book
 
-    [HttpPut("Boosting/{UserId}/{bookId}/{DistanceBoostingUpto}")]
-    public async Task<IActionResult> Boost(Guid UserId, Guid bookId, int DistanceBoostingUpto)
-    {
-        try
-        {
-            SimpleLogger.LogNormal("BooksController", "Boost", $"Boost request for bookId: {bookId}, userId: {UserId}, distance: {DistanceBoostingUpto}", UserId.ToString());
+    // [HttpPut("Boosting/{UserId}/{bookId}/{DistanceBoostingUpto}")]
+    // public async Task<IActionResult> Boost(Guid UserId, Guid bookId, int DistanceBoostingUpto)
+    // {
+    //     try
+    //     {
+    //         SimpleLogger.LogNormal("BooksController", "Boost", $"Boost request for bookId: {bookId}, userId: {UserId}, distance: {DistanceBoostingUpto}", UserId.ToString());
 
-            // Validate distance range (reasonable bounds)
-            if (DistanceBoostingUpto < 1 || DistanceBoostingUpto > 500)
-            {
-                return BadRequest(new { Message = "Boosting distance must be between 1 and 500 km." });
-            }
+    //         // Validate distance range (reasonable bounds)
+    //         if (DistanceBoostingUpto < 1 || DistanceBoostingUpto > 500)
+    //         {
+    //             return BadRequest(new { Message = "Boosting distance must be between 1 and 500 km." });
+    //         }
 
-            var book = await _context.Books.FindAsync(bookId);
-            if (book == null)
-            {
-                SimpleLogger.LogNormal("BooksController", "Boost", $"Book not found: {bookId}", UserId.ToString());
-                return NotFound(new { Message = "Book not found" });
-            }
+    //         var book = await _context.Books.FindAsync(bookId);
+    //         if (book == null)
+    //         {
+    //             SimpleLogger.LogNormal("BooksController", "Boost", $"Book not found: {bookId}", UserId.ToString());
+    //             return NotFound(new { Message = "Book not found" });
+    //         }
 
-            // Check if user owns the book
-            if (book.UserId != UserId)
-            {
-                return Unauthorized(new { Message = "You can only boost your own books." });
-            }
+    //         // Check if user owns the book
+    //         if (book.UserId != UserId)
+    //         {
+    //             return Unauthorized(new { Message = "You can only boost your own books." });
+    //         }
 
-            // Check if book is already sold
-            if (book.IsSold)
-            {
-                return BadRequest(new { Message = "Cannot boost a sold book." });
-            }
+    //         // Check if book is already sold
+    //         if (book.IsSold)
+    //         {
+    //             return BadRequest(new { Message = "Cannot boost a sold book." });
+    //         }
 
-            // Update book boosting details
-            // book.IsBoosted = true;
-            // book.DistanceBoostingUpto = DistanceBoostingUpto;
-            // book.ListingLastDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+    //         // Update book boosting details
+    //         // book.IsBoosted = true;
+    //         // book.DistanceBoostingUpto = DistanceBoostingUpto;
+    //         // book.ListingLastDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
 
-            await _context.SaveChangesAsync();
+    //         await _context.SaveChangesAsync();
 
-            SimpleLogger.LogNormal("BooksController", "Boost", $"Book boosted successfully: {bookId}", UserId.ToString());
-            return Ok(new { Message = "Book boosted successfully." });
-        }
-        catch (Exception ex)
-        {
-            SimpleLogger.LogCritical("BooksController", "Boost", "Boost failed", ex, UserId.ToString());
-            return StatusCode(500, "Failed to boost book");
-        }
-    }
+    //         SimpleLogger.LogNormal("BooksController", "Boost", $"Book boosted successfully: {bookId}", UserId.ToString());
+    //         return Ok(new { Message = "Book boosted successfully." });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         SimpleLogger.LogCritical("BooksController", "Boost", "Boost failed", ex, UserId.ToString());
+    //         return StatusCode(500, "Failed to boost book");
+    //     }
+    // }
 
     [HttpPost("ListBook")]
     public async Task<IActionResult> ListBook([FromForm] BookCreateDto dto)
@@ -729,7 +729,6 @@ public class BooksController : ControllerBase
                         b.Book.SubCategory,
                         b.Book.SellingPrice,
                         b.Book.IsSold,
-                        b.Book.IsBoosted,
                         Images = string.IsNullOrEmpty(b.Book.ImagePathsJson)
                             ? Array.Empty<string>()
                             : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.Book.ImagePathsJson) ?? Array.Empty<string>(),
