@@ -114,8 +114,7 @@ public class BooksController : ControllerBase
                     ImagePathsJson = b.ImagePathsJson,
                     b.IsSold,
                     b.CreatedAt,
-                    b.Views,
-                    b.IsBoosted
+                    b.Views
                 })
                 .ToListAsync();
 
@@ -134,8 +133,7 @@ public class BooksController : ControllerBase
                             : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? new string[0],
                 b.IsSold,
                 b.CreatedAt,
-                b.Views,
-                b.IsBoosted
+                b.Views
             });
 
             SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Retrieved {books.Count} books", userId.ToString());
@@ -312,9 +310,9 @@ public class BooksController : ControllerBase
             }
 
             // Update book boosting details
-            book.IsBoosted = true;
-            book.DistanceBoostingUpto = DistanceBoostingUpto;
-            book.ListingLastDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            // book.IsBoosted = true;
+            // book.DistanceBoostingUpto = DistanceBoostingUpto;
+            // book.ListingLastDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
 
             await _context.SaveChangesAsync();
 
