@@ -80,7 +80,7 @@ public class UserLocationController : ControllerBase
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
             return NotFound("User not found.");
-        var listingcount = await _context.Books.CountAsync(b => b.UserId == userId);
+        var listingcount = await _context.Books.CountAsync(b => b.UserId == userId && b.IsSold==false);
         var totalViews = await _context.Books
             .Where(b => b.UserId == userId)
             .SumAsync(b => (int?)b.Views) ?? 0;

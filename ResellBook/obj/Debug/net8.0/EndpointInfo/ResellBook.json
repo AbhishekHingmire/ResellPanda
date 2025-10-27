@@ -607,6 +607,18 @@
         }
       }
     },
+    "/api/Books/GetCategories": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Books/GetCityName": {
       "get": {
         "tags": [

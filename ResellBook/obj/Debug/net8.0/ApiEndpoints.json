@@ -211,6 +211,16 @@
   },
   {
     "ContainingType": "BooksController",
+    "Method": "GetCategories",
+    "RelativePath": "api/Books/GetCategories",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BooksController",
     "Method": "GetCityName",
     "RelativePath": "api/Books/GetCityName",
     "HttpMethod": "GET",
