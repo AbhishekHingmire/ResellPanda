@@ -107,8 +107,10 @@ public class BooksController : ControllerBase
                     b.Id,
                     b.BookName,
                     b.AuthorOrPublication,
+                    b.CategoryId,
                     b.Category,
                     b.Description,
+                    b.SubCategoryId,
                     b.SubCategory,
                     b.SellingPrice,
                     ImagePathsJson = b.ImagePathsJson,
@@ -124,8 +126,10 @@ public class BooksController : ControllerBase
                 b.Id,
                 b.BookName,
                 b.AuthorOrPublication,
+                b.CategoryId,
                 b.Category,
                 b.Description,
+                b.SubCategoryId,
                 b.SubCategory,
                 b.SellingPrice,
                 Images = string.IsNullOrEmpty(b.ImagePathsJson)
@@ -428,8 +432,10 @@ public class BooksController : ControllerBase
                 BookName = dto.BookName.Trim(),
                 AuthorOrPublication = string.IsNullOrWhiteSpace(dto.AuthorOrPublication) ? null : dto.AuthorOrPublication.Trim(),
                 Description = dto.Description.Trim(),
-                Category = dto.Category.Trim(),
-                SubCategory = string.IsNullOrWhiteSpace(dto.SubCategory) ? null : dto.SubCategory.Trim(),
+                Category = dto.Category,
+                CategoryId = dto.CategoryId,
+                SubCategory = dto.SubCategory,
+                SubCategoryId = dto.SubCategoryId,
                 SellingPrice = dto.SellingPrice,
                 ImagePathsJson = System.Text.Json.JsonSerializer.Serialize(imagePaths),
                 CreatedAt = IndianTimeHelper.UtcNow
@@ -474,11 +480,15 @@ public class BooksController : ControllerBase
             if (!string.IsNullOrWhiteSpace(dto.AuthorOrPublication))
                 book.AuthorOrPublication = dto.AuthorOrPublication.Trim();
             if (!string.IsNullOrWhiteSpace(dto.Category))
-                book.Category = dto.Category.Trim();
+                book.Category = dto.Category;
+            if (dto.CategoryId.HasValue)
+                book.CategoryId = dto.CategoryId;
             if (!string.IsNullOrWhiteSpace(dto.Description))
                 book.Description = dto.Description.Trim();
             if (!string.IsNullOrWhiteSpace(dto.SubCategory))
-                book.SubCategory = dto.SubCategory.Trim();
+                book.SubCategory = dto.SubCategory;
+            if (dto.SubCategoryId.HasValue)
+                book.SubCategoryId = dto.SubCategoryId;
             if (dto.SellingPrice.HasValue)
                 book.SellingPrice = dto.SellingPrice.Value;
 
@@ -610,11 +620,12 @@ public class BooksController : ControllerBase
 
     [Authorize]
     [HttpGet("ViewAll/{userId}")]
-    public async Task<IActionResult> ViewAll(Guid userId, int distance = 50, int page = 1, int pageSize = 50)
+    public async Task<IActionResult> ViewAll(Guid userId, int distance = 50, int page = 1, int pageSize = 50, string? search = null)
     {
         try
         {
             var currentUserLocation = await _context.UserLocations
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (currentUserLocation == null)
@@ -623,116 +634,125 @@ public class BooksController : ControllerBase
                 return BadRequest("User location not found.");
             }
 
-            // Check short-term cache for pagination (30 seconds)
-            var cacheKey = $"ViewAll_{userId}_{distance}";
             List<object>? books = null;
-            if (_cache.TryGetValue(cacheKey, out List<object>? cachedBooks))
+            List<object>? banners = null;
+            bool isSearchMode = !string.IsNullOrWhiteSpace(search);
+
+            var cacheKey = $"ViewAll_{userId}_{distance}";
+
+            if (!isSearchMode)
             {
-                SimpleLogger.LogNormal("BooksController", "ViewAll", $"Short cache hit for userId: {userId}", userId.ToString());
-                books = cachedBooks;
+                if (_cache.TryGetValue(cacheKey, out Tuple<List<object>, List<object>> cacheResult))
+                {
+                    books = cacheResult.Item1;
+                    banners = cacheResult.Item2;
+                }
             }
-            else
+
+            if (books == null || banners == null)
             {
-                // Use fixed radius from parameter
-                var currentRadius = (double)distance;
-                List<dynamic> nearbyBooks = new List<dynamic>();
-
+                double currentRadius = distance;
                 const double kmPerDegreeLat = 111.0;
-                var kmPerDegreeLon = 111.0 * Math.Cos(ToRadians(currentUserLocation.Latitude));
+                double kmPerDegreeLon = 111.0 * Math.Cos(ToRadians(currentUserLocation.Latitude));
+                double latOffset = currentRadius / kmPerDegreeLat;
+                double lonOffset = currentRadius / kmPerDegreeLon;
+                double minLat = currentUserLocation.Latitude - latOffset;
+                double maxLat = currentUserLocation.Latitude + latOffset;
+                double minLon = currentUserLocation.Longitude - lonOffset;
+                double maxLon = currentUserLocation.Longitude + lonOffset;
 
-                var latOffset = currentRadius / kmPerDegreeLat;
-                var lonOffset = currentRadius / kmPerDegreeLon;
-
-                var minLat = currentUserLocation.Latitude - latOffset;
-                var maxLat = currentUserLocation.Latitude + latOffset;
-                var minLon = currentUserLocation.Longitude - lonOffset;
-                var maxLon = currentUserLocation.Longitude + lonOffset;
-
-                var query = from b in _context.Books
-                            join ul in _context.UserLocations on b.UserId equals ul.UserId
+                // Project only necessary fields
+                var query = from b in _context.Books.AsNoTracking()
+                            join ul in _context.UserLocations.AsNoTracking() on b.UserId equals ul.UserId
                             where !b.IsSold &&
                                   ul.Latitude >= minLat && ul.Latitude <= maxLat &&
-                                  ul.Longitude >= minLon && ul.Longitude <= maxLon
+                                  ul.Longitude >= minLon && ul.Longitude <= maxLon &&
+                                  (isSearchMode ? EF.Functions.Like(b.BookName, $"%{search}%") : true)
+                            orderby
+                                Math.Abs(ul.Latitude - currentUserLocation.Latitude) +
+                                Math.Abs(ul.Longitude - currentUserLocation.Longitude)
                             select new
                             {
-                                Book = b,
-                                UserLocation = ul,
+                                b.Id,
+                                b.UserId,
+                                BookName = b.BookName,
+                                AuthorOrPublication = b.AuthorOrPublication,
+                                Description = b.Description,
+                                Category = b.Category,
+                                CategoryId = b.CategoryId,
+                                SubCategory = b.SubCategory,
+                                SubCategoryId = b.SubCategoryId,
+                                SellingPrice = b.SellingPrice,
+                                IsSold = b.IsSold,
+                                ImagePathsJson = b.ImagePathsJson,
+                                CreatedAt = b.CreatedAt,
                                 UserName = b.User.Name,
-                                UserPhone = b.User.Phone
+                                UserPhone = b.User.Phone,
+                                Latitude = ul.Latitude,
+                                Longitude = ul.Longitude
                             };
 
-                nearbyBooks = (await query.Take(1000).ToListAsync()).Cast<dynamic>().ToList();
-
-               // SimpleLogger.LogNormal("BooksController", "ViewAll", $"Found {nearbyBooks.Count} books within {currentRadius}km", userId.ToString());
-
-                // Remove duplicates by Book.Id
-                nearbyBooks = nearbyBooks
-                    .GroupBy(b => b.Book.Id)
+                int takeCount = pageSize > 200 ? pageSize : 200;
+                var nearbyBooks = (await query.Take(takeCount).ToListAsync())
+                    .GroupBy(b => b.Id)
                     .Select(g => g.First())
                     .ToList();
 
-                // Guard against empty results to skip unnecessary processing
                 if (nearbyBooks.Count == 0)
                 {
                     books = new List<object>();
                 }
                 else
                 {
-                    // Calculate approximate distances (fast), sort, take top candidates
-                    var approxBooks = nearbyBooks
+                    var booksWithDistances = nearbyBooks
+                        .AsParallel()
                         .Select(item =>
                         {
-                            var approxDistance = CalculateApproxDistance(
-                                currentUserLocation.Latitude, currentUserLocation.Longitude,
-                                item.UserLocation.Latitude, item.UserLocation.Longitude);
+                            var exactDistance = CalculateDistance(
+                                currentUserLocation.Latitude,
+                                currentUserLocation.Longitude,
+                                item.Latitude,
+                                item.Longitude);
                             return new
                             {
-                                Item = item,
-                                ApproxDistance = approxDistance
+                                item.Id,
+                                item.UserId,
+                                item.BookName,
+                                item.AuthorOrPublication,
+                                item.Description,
+                                item.Category,
+                                item.SubCategory,
+                                item.SellingPrice,
+                                item.IsSold,
+                                item.ImagePathsJson,
+                                item.CreatedAt,
+                                item.UserName,
+                                item.UserPhone,
+                                Distance = exactDistance
                             };
                         })
-                        .OrderBy(b => b.ApproxDistance)
-                        .Take(100) // Reduced to 100 for fewer exact calculations
-                        .ToList();
-
-                    // Calculate exact distances only for top candidates
-                    var booksWithDistances = approxBooks
-                        .Select(ab =>
-                        {
-                            var distance = CalculateDistance(
-                                currentUserLocation.Latitude, currentUserLocation.Longitude,
-                                ab.Item.UserLocation.Latitude, ab.Item.UserLocation.Longitude);
-                            return new
-                            {
-                                ab.Item.Book,
-                                Distance = distance,
-                                ab.Item.UserName,
-                                ab.Item.UserPhone
-                            };
-                        })
-                        .Where(b => b.Distance <= currentRadius) // Ensure within final radius
+                        .Where(b => b.Distance <= currentRadius)
                         .OrderBy(b => b.Distance)
-                        .Take(500) // Limit to 500
+                        .Take(200)
                         .ToList();
 
-                    // Convert to final format
                     books = booksWithDistances.Select(b => (object)new
                     {
-                        b.Book.Id,
-                        b.Book.UserId,
+                        b.Id,
+                        b.UserId,
                         UserName = b.UserName,
                         Phone = b.UserPhone,
-                        b.Book.BookName,
-                        b.Book.AuthorOrPublication,
-                        b.Book.Description,
-                        b.Book.Category,
-                        b.Book.SubCategory,
-                        b.Book.SellingPrice,
-                        b.Book.IsSold,
-                        Images = string.IsNullOrEmpty(b.Book.ImagePathsJson)
+                        b.BookName,
+                        b.AuthorOrPublication,
+                        b.Description,
+                        b.Category,
+                        b.SubCategory,
+                        b.SellingPrice,
+                        b.IsSold,
+                        Images = string.IsNullOrEmpty(b.ImagePathsJson)
                             ? Array.Empty<string>()
-                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.Book.ImagePathsJson) ?? Array.Empty<string>(),
-                        b.Book.CreatedAt,
+                            : System.Text.Json.JsonSerializer.Deserialize<string[]>(b.ImagePathsJson) ?? Array.Empty<string>(),
+                        b.CreatedAt,
                         City = "N/A",
                         District = "N/A",
                         DistanceValue = b.Distance,
@@ -742,11 +762,41 @@ public class BooksController : ControllerBase
                     }).ToList();
                 }
 
-                // Short-term cache for 60 seconds (for pagination)
-                _cache.Set(cacheKey, books, TimeSpan.FromSeconds(60));
+                // Fetch all banners with valid location and radius
+                var bannerCandidates = await _context.Banners
+                    .AsNoTracking()
+                    .Where(b => b.Latitude.HasValue && b.Longitude.HasValue && b.Radius.HasValue)
+                    .Select(b => new
+                    {
+                        b.Id,
+                        b.Title,
+                        b.ImageURL,
+                        b.RedirectURL,
+                        b.Latitude,
+                        b.Longitude,
+                        b.Radius
+                    })
+                    .ToListAsync();
+
+                // Filter in memory using the Haversine formula
+                banners = bannerCandidates
+                    .Where(b => CalculateDistance(
+                        currentUserLocation.Latitude,
+                        currentUserLocation.Longitude,
+                        b.Latitude.Value,
+                        b.Longitude.Value
+                    ) <= b.Radius.Value)
+                    .Select(b => (object)b)
+                    .ToList();
+
+                // Cache books and banners together for ViewAll (no search)
+                if (!isSearchMode)
+                {
+                    _cache.Set(cacheKey, Tuple.Create(books, banners), TimeSpan.FromSeconds(60));
+                }
             }
 
-            // Apply pagination
+            // Pagination for books only
             var totalBooks = books.Count;
             var paginatedBooks = books
                 .Skip((page - 1) * pageSize)
@@ -759,7 +809,8 @@ public class BooksController : ControllerBase
                 PageSize = pageSize,
                 TotalCount = totalBooks,
                 TotalPages = (int)Math.Ceiling(totalBooks / (double)pageSize),
-                Books = paginatedBooks
+                Books = paginatedBooks,
+                banners
             });
         }
         catch (Exception ex)
@@ -768,6 +819,42 @@ public class BooksController : ControllerBase
             return StatusCode(500, "Failed to retrieve books");
         }
     }
+
+    // Helper for radians
+    private static double ToRadians(double deg) => deg * Math.PI / 180.0;
+
+    // Haversine formula for accurate geo distance (in kilometers)
+    private static double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 6371;
+        var dLat = ToRadians(lat2 - lat1);
+        var dLon = ToRadians(lon2 - lon1);
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
+    }
+
+    // DTO for books and banners caching
+    public class BooksAndBannersResult
+    {
+        public List<object> Books { get; set; }
+        public List<object> Banners { get; set; }
+    }
+
+    // Optionally, a fast approximate distance (not used in the final code)
+    //private static double CalculateApproxDistance(double lat1, double lon1, double lat2, double lon2)
+    //{
+    //    // Pythagorean approximation (not as accurate as Haversine for larger distances)
+    //    const double kmPerDegreeLat = 111.0;
+    //    var kmPerDegreeLon = 111.0 * Math.Cos(ToRadians(lat1));
+    //    var dLat = lat1 - lat2;
+    //    var dLon = lon1 - lon2;
+    //    return Math.Sqrt(Math.Pow(dLat * kmPerDegreeLat, 2) + Math.Pow(dLon * kmPerDegreeLon, 2));
+    //}
+
+    // Your CalculateDistance and CalculateApproxDistance should be present as before
 
 
     [HttpGet("GetCategories")]
@@ -995,6 +1082,197 @@ public class BooksController : ControllerBase
         return Ok(categories);
     }
 
+    // Helper methods for category name resolution
+    private string GetCategoryName(int? categoryId)
+    {
+        if (!categoryId.HasValue) return string.Empty;
+
+        return categoryId.Value switch
+        {
+            1 => "Primary School Books",
+            2 => "Secondary School Books",
+            3 => "Senior Secondary Books",
+            4 => "Engineering Books",
+            5 => "Medical & Health Sciences",
+            6 => "Law Books",
+            7 => "Business & Management",
+            8 => "Arts & Humanities",
+            9 => "Computer Science & IT",
+            10 => "Competitive Exams",
+            11 => "Novels & Literature",
+            12 => "Children's Books",
+            13 => "Reference Books",
+            14 => "Magazines & Periodicals",
+            15 => "Others",
+            _ => "Unknown Category"
+        };
+    }
+
+    private string GetSubCategoryName(int? categoryId, int? subCategoryId)
+    {
+        if (!categoryId.HasValue || !subCategoryId.HasValue) return string.Empty;
+
+        return (categoryId.Value, subCategoryId.Value) switch
+        {
+            // Primary School Books
+            (1, 1) => "Class I",
+            (1, 2) => "Class II",
+            (1, 3) => "Class III",
+            (1, 4) => "Class IV",
+            (1, 5) => "Class V",
+            (1, 6) => "Activity Books",
+            (1, 7) => "Story Books",
+            (1, 8) => "Learning Kits",
+
+            // Secondary School Books
+            (2, 1) => "Class VI",
+            (2, 2) => "Class VII",
+            (2, 3) => "Class VIII",
+            (2, 4) => "Class IX",
+            (2, 5) => "Class X",
+            (2, 6) => "Science",
+            (2, 7) => "Math",
+            (2, 8) => "Social Studies",
+            (2, 9) => "Language",
+            (2, 10) => "Exam Prep",
+
+            // Senior Secondary Books
+            (3, 1) => "Class XI",
+            (3, 2) => "Class XII",
+            (3, 3) => "Science",
+            (3, 4) => "Commerce",
+            (3, 5) => "Arts",
+            (3, 6) => "Board Exam Guides",
+            (3, 7) => "Reference Books",
+
+            // Engineering Books
+            (4, 1) => "Computer Science",
+            (4, 2) => "Mechanical",
+            (4, 3) => "Electrical",
+            (4, 4) => "Civil",
+            (4, 5) => "Chemical",
+            (4, 6) => "Electronics",
+            (4, 7) => "Aerospace",
+            (4, 8) => "Biomedical",
+
+            // Medical & Health Sciences
+            (5, 1) => "Anatomy",
+            (5, 2) => "Physiology",
+            (5, 3) => "Pharmacology",
+            (5, 4) => "Pathology",
+            (5, 5) => "Microbiology",
+            (5, 6) => "Surgery",
+            (5, 7) => "Medicine",
+            (5, 8) => "Nursing",
+
+            // Law Books
+            (6, 1) => "Constitutional Law",
+            (6, 2) => "Criminal Law",
+            (6, 3) => "Civil Law",
+            (6, 4) => "Corporate Law",
+            (6, 5) => "International Law",
+            (6, 6) => "Tax Law",
+            (6, 7) => "Environmental Law",
+            (6, 8) => "Human Rights",
+
+            // Business & Management
+            (7, 1) => "Marketing",
+            (7, 2) => "Finance",
+            (7, 3) => "Human Resources",
+            (7, 4) => "Operations",
+            (7, 5) => "Strategy",
+            (7, 6) => "Entrepreneurship",
+            (7, 7) => "Economics",
+            (7, 8) => "Accounting",
+
+            // Arts & Humanities
+            (8, 1) => "History",
+            (8, 2) => "Philosophy",
+            (8, 3) => "Literature",
+            (8, 4) => "Psychology",
+            (8, 5) => "Sociology",
+            (8, 6) => "Political Science",
+            (8, 7) => "Geography",
+            (8, 8) => "Languages",
+
+            // Computer Science & IT
+            (9, 1) => "Programming",
+            (9, 2) => "Data Structures",
+            (9, 3) => "Algorithms",
+            (9, 4) => "Databases",
+            (9, 5) => "Web Development",
+            (9, 6) => "Mobile Development",
+            (9, 7) => "AI & Machine Learning",
+            (9, 8) => "Cybersecurity",
+
+            // Competitive Exams
+            (10, 1) => "UPSC",
+            (10, 2) => "SSC",
+            (10, 3) => "Banking",
+            (10, 4) => "Railway",
+            (10, 5) => "Defence",
+            (10, 6) => "Teaching",
+            (10, 7) => "Engineering",
+            (10, 8) => "Medical",
+
+            // Novels & Literature
+            (11, 1) => "Fiction",
+            (11, 2) => "Non-Fiction",
+            (11, 3) => "Biographies",
+            (11, 4) => "Poetry",
+            (11, 5) => "Drama",
+            (11, 6) => "Short Stories",
+            (11, 7) => "Classics",
+            (11, 8) => "Contemporary",
+
+            // Children's Books
+            (12, 1) => "Picture Books",
+            (12, 2) => "Early Readers",
+            (12, 3) => "Chapter Books",
+            (12, 4) => "Young Adult",
+            (12, 5) => "Educational",
+            (12, 6) => "Arts & Crafts",
+            (12, 7) => "Music",
+            (12, 8) => "Sports",
+            (12, 9) => "Coding for Kids",
+            (12, 10) => "Puzzle Books",
+            (12, 11) => "Story Books",
+            (12, 12) => "Comics",
+
+            // Reference Books
+            (13, 1) => "Dictionaries",
+            (13, 2) => "Encyclopedias",
+            (13, 3) => "Atlases",
+            (13, 4) => "Almanacs",
+            (13, 5) => "Directories",
+            (13, 6) => "Guides",
+            (13, 7) => "Manuals",
+            (13, 8) => "Yearbooks",
+
+            // Magazines & Periodicals
+            (14, 1) => "News",
+            (14, 2) => "Technology",
+            (14, 3) => "Science",
+            (14, 4) => "Business",
+            (14, 5) => "Entertainment",
+            (14, 6) => "Sports",
+            (14, 7) => "Health",
+            (14, 8) => "Lifestyle",
+
+            // Others
+            (15, 1) => "Cookbooks",
+            (15, 2) => "Travel",
+            (15, 3) => "Self-Help",
+            (15, 4) => "Religion",
+            (15, 5) => "Hobbies",
+            (15, 6) => "Miscellaneous",
+            (15, 7) => "Antiques",
+            (15, 8) => "Collectibles",
+
+            _ => "Unknown SubCategory"
+        };
+    }
+
 
     // DTOs
     public class CategoryDto
@@ -1020,13 +1298,6 @@ public class BooksController : ControllerBase
         });
     }
 
-
-
-
-
-
-
-
     private string[] DeserializeImages(string? json)
     {
         if (string.IsNullOrEmpty(json))
@@ -1043,33 +1314,31 @@ public class BooksController : ControllerBase
     }
 
     // Optimized Haversine formula (pre-calculate constants for speed)
-    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
-    {
-        const double R = 6371.0; // Earth's radius in km
-        double dLat = ToRadians(lat2 - lat1);
-        double dLon = ToRadians(lon2 - lon1);
-        double lat1Rad = ToRadians(lat1);
-        double lat2Rad = ToRadians(lat2);
+    //private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    //{
+    //    const double R = 6371.0; // Earth's radius in km
+    //    double dLat = ToRadians(lat2 - lat1);
+    //    double dLon = ToRadians(lon2 - lon1);
+    //    double lat1Rad = ToRadians(lat1);
+    //    double lat2Rad = ToRadians(lat2);
 
-        double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                   Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                   Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+    //    double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+    //               Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+    //               Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
 
-        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-        return R * c;
-    }
+    //    double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+    //    return R * c;
+    //}
 
     // Fast approximate distance (Euclidean, scaled to km) for initial sorting
-    private double CalculateApproxDistance(double lat1, double lon1, double lat2, double lon2)
-    {
-        const double kmPerDegreeLat = 111.0;
-        const double kmPerDegreeLon = 111.0; // Average, adjust for latitude if needed
-        var dLat = (lat2 - lat1) * kmPerDegreeLat;
-        var dLon = (lon2 - lon1) * kmPerDegreeLon * Math.Cos(ToRadians((lat1 + lat2) / 2));
-        return Math.Sqrt(dLat * dLat + dLon * dLon);
-    }
-
-    private double ToRadians(double angle) => Math.PI * angle / 180.0;
+    //private double CalculateApproxDistance(double lat1, double lon1, double lat2, double lon2)
+    //{
+    //    const double kmPerDegreeLat = 111.0;
+    //    const double kmPerDegreeLon = 111.0; // Average, adjust for latitude if needed
+    //    var dLat = (lat2 - lat1) * kmPerDegreeLat;
+    //    var dLon = (lon2 - lon1) * kmPerDegreeLon * Math.Cos(ToRadians((lat1 + lat2) / 2));
+    //    return Math.Sqrt(dLat * dLat + dLon * dLon);
+    //}
 }
 
 // DTOs
@@ -1089,8 +1358,10 @@ public class BookCreateDto
     [Required] public Guid UserId { get; set; }
     [Required] public required string BookName { get; set; }
     public string? AuthorOrPublication { get; set; }
+    [Required] public required int CategoryId { get; set; }
     [Required] public required string Category { get; set; }
     [Required] public required string Description { get; set; }
+    public int? SubCategoryId { get; set; }
     public string? SubCategory { get; set; }
     [Required] public decimal SellingPrice { get; set; }
 
@@ -1102,7 +1373,9 @@ public class BookEditDto
 {
     public string? BookName { get; set; }
     public string? AuthorOrPublication { get; set; }
+    public int? CategoryId { get; set; }
     public string? Category { get; set; }
+    public int? SubCategoryId { get; set; }
     public string? SubCategory { get; set; }
     public decimal? SellingPrice { get; set; }
     public string? Description { get; set; }

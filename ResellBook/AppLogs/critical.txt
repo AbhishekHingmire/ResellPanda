@@ -183,3 +183,21 @@ Incorrect syntax near the keyword 'with'. If this statement is a common table ex
    at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
    at BooksController.ListBook(BookCreateDto dto) in C:\Users\ranas\Source\Repos\ResellPandap\ResellBook\Controllers\BooksController.cs:line 137
+30-10-2025 04:27:45 PM | BooksController | ViewAll | ViewAll method failed | UserId: 02b994fb-9c5d-4c38-9ce7-8b91c3e9e298 | Error: The LINQ expression 'DbSet<Banner>()
+    .Where(b => b.Latitude.HasValue && b.Longitude.HasValue && b.Radius.HasValue && BooksController.CalculateDistance(
+        lat1: __currentUserLocation_Latitude_0, 
+        lon1: __currentUserLocation_Longitude_1, 
+        lat2: b.Latitude.Value, 
+        lon2: b.Longitude.Value) <= b.Radius.Value)' could not be translated. Additional information: Translation of method 'BooksController.CalculateDistance' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information. | Stack:    at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at BooksController.ViewAll(Guid userId, Int32 distance, Int32 page, Int32 pageSize, String search) in C:\Repos\ResellPanda\ResellBook\Controllers\BooksController.cs:line 755

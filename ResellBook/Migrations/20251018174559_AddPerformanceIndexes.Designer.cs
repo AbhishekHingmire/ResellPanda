@@ -49,9 +49,6 @@ namespace ResellBook.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DistanceBoostingUpto")
-                        .HasColumnType("int");
-
                     b.Property<string>("ImagePathsJson")
                         .HasColumnType("nvarchar(max)");
 
@@ -60,9 +57,6 @@ namespace ResellBook.Migrations
 
                     b.Property<bool>("IsSold")
                         .HasColumnType("bit");
-
-                    b.Property<DateOnly?>("ListingLastDate")
-                        .HasColumnType("date");
 
                     b.Property<decimal>("SellingPrice")
                         .HasColumnType("decimal(18,2)");
@@ -86,10 +80,6 @@ namespace ResellBook.Migrations
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_Books_UserId");
-
-                    b.HasIndex("IsBoosted", "ListingLastDate")
-                        .HasDatabaseName("IX_Books_IsBoosted_ListingLastDate")
-                        .HasFilter("[IsBoosted] = 1");
 
                     b.HasIndex("IsSold", "CreatedAt")
                         .HasDatabaseName("IX_Books_IsSold_CreatedAt");

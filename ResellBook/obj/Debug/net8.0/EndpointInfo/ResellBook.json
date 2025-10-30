@@ -534,6 +534,7 @@
                 "required": [
                   "BookName",
                   "Category",
+                  "CategoryId",
                   "Description",
                   "Images",
                   "SellingPrice",
@@ -551,11 +552,19 @@
                   "AuthorOrPublication": {
                     "type": "string"
                   },
+                  "CategoryId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
                   "Category": {
                     "type": "string"
                   },
                   "Description": {
                     "type": "string"
+                  },
+                  "SubCategoryId": {
+                    "type": "integer",
+                    "format": "int32"
                   },
                   "SubCategory": {
                     "type": "string"
@@ -583,10 +592,16 @@
                 "AuthorOrPublication": {
                   "style": "form"
                 },
+                "CategoryId": {
+                  "style": "form"
+                },
                 "Category": {
                   "style": "form"
                 },
                 "Description": {
+                  "style": "form"
+                },
+                "SubCategoryId": {
                   "style": "form"
                 },
                 "SubCategory": {
@@ -637,8 +652,16 @@
                   "AuthorOrPublication": {
                     "type": "string"
                   },
+                  "CategoryId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
                   "Category": {
                     "type": "string"
+                  },
+                  "SubCategoryId": {
+                    "type": "integer",
+                    "format": "int32"
                   },
                   "SubCategory": {
                     "type": "string"
@@ -672,7 +695,13 @@
                 "AuthorOrPublication": {
                   "style": "form"
                 },
+                "CategoryId": {
+                  "style": "form"
+                },
                 "Category": {
+                  "style": "form"
+                },
+                "SubCategoryId": {
                   "style": "form"
                 },
                 "SubCategory": {
@@ -741,6 +770,13 @@
               "type": "integer",
               "format": "int32",
               "default": 50
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],

@@ -260,8 +260,18 @@
         "IsRequired": false
       },
       {
+        "Name": "CategoryId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
         "Name": "Category",
         "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "SubCategoryId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       },
       {
@@ -347,6 +357,11 @@
         "IsRequired": false
       },
       {
+        "Name": "CategoryId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
         "Name": "Category",
         "Type": "System.String",
         "IsRequired": false
@@ -354,6 +369,11 @@
       {
         "Name": "Description",
         "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "SubCategoryId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       },
       {
@@ -448,6 +468,11 @@
       {
         "Name": "pageSize",
         "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "search",
+        "Type": "System.String",
         "IsRequired": false
       }
     ],

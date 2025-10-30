@@ -21,12 +21,6 @@ namespace ResellBook.Migrations
                 column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Books_IsBoosted_ListingLastDate",
-                table: "Books",
-                columns: new[] { "IsBoosted", "ListingLastDate" },
-                filter: "[IsBoosted] = 1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Books_IsSold",
                 table: "Books",
                 column: "IsSold");
@@ -46,10 +40,6 @@ namespace ResellBook.Migrations
 
             migrationBuilder.DropIndex(
                 name: "IX_Books_CreatedAt",
-                table: "Books");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Books_IsBoosted_ListingLastDate",
                 table: "Books");
 
             migrationBuilder.DropIndex(

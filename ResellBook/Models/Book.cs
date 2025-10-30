@@ -10,9 +10,13 @@ namespace ResellBook.Models
         [Required] public Guid UserId { get; set; }  // FK to User
         [Required] public required string BookName { get; set; }
         public string? AuthorOrPublication { get; set; }
-        [Required] public required string Category { get; set; }
+        [Required] public required int? CategoryId { get; set; }
+        [Required] public required string? Category { get; set; }
+        public string? CategoryName { get; set; }
         [Required] public required string Description { get; set; }
+        public int? SubCategoryId { get; set; }
         public string? SubCategory { get; set; }
+        public string? SubCategoryName { get; set; }
         [Required] public decimal SellingPrice { get; set; }
         public bool IsSold { get; set; } = false;
         public string? ImagePathsJson { get; set; } // Store multiple image paths as JSON

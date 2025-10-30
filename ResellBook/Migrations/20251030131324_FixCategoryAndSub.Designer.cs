@@ -12,8 +12,8 @@ using ResellBook.Data;
 namespace ResellBook.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251017163556_CreateBookBoostTable")]
-    partial class CreateBookBoostTable
+    [Migration("20251030131324_FixCategoryAndSub")]
+    partial class FixCategoryAndSub
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,42 @@ namespace ResellBook.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ResellBook.Models.Banner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Radius")
+                        .HasColumnType("float");
+
+                    b.Property<string>("RedirectURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Latitude", "Longitude")
+                        .HasDatabaseName("IX_Banners_LatLon");
+
+                    b.ToTable("Banners");
+                });
 
             modelBuilder.Entity("ResellBook.Models.Book", b =>
                 {
@@ -36,10 +72,17 @@ namespace ResellBook.Migrations
 
                     b.Property<string>("BookName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Category")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CategoryId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CategoryName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -56,10 +99,15 @@ namespace ResellBook.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("SellingPrice")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SubCategory")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SubCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubCategoryName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
@@ -70,7 +118,20 @@ namespace ResellBook.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("BookName")
+                        .HasDatabaseName("IX_Books_BookName");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Books_CreatedAt");
+
+                    b.HasIndex("IsSold")
+                        .HasDatabaseName("IX_Books_IsSold");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Books_UserId");
+
+                    b.HasIndex("IsSold", "CreatedAt")
+                        .HasDatabaseName("IX_Books_IsSold_CreatedAt");
 
                     b.ToTable("Books");
                 });
@@ -213,7 +274,14 @@ namespace ResellBook.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_UserLocations_UserId");
+
+                    b.HasIndex("Latitude", "Longitude")
+                        .HasDatabaseName("IX_UserLocations_LatLon");
+
+                    b.HasIndex("UserId", "CreateDate")
+                        .HasDatabaseName("IX_UserLocations_UserId_CreateDate");
 
                     b.ToTable("UserLocations");
                 });

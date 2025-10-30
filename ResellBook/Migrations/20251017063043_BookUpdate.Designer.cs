@@ -49,20 +49,11 @@ namespace ResellBook.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DistanceBoostingUpto")
-                        .HasColumnType("int");
-
                     b.Property<string>("ImagePathsJson")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsBoosted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsSold")
                         .HasColumnType("bit");
-
-                    b.Property<DateOnly?>("ListingLastDate")
-                        .HasColumnType("date");
 
                     b.Property<decimal>("SellingPrice")
                         .HasPrecision(18, 2)

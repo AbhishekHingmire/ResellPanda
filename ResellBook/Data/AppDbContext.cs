@@ -37,6 +37,9 @@ namespace ResellBook.Data
                 // Composite index for common queries
                 entity.HasIndex(b => new { b.IsSold, b.CreatedAt })
                       .HasDatabaseName("IX_Books_IsSold_CreatedAt");
+
+                entity.HasIndex(b => b.BookName)
+                      .HasDatabaseName("IX_Books_BookName");
             });
 
             // Configure UserLocation entity
@@ -49,7 +52,11 @@ namespace ResellBook.Data
                 // Index for faster user location lookups
                 entity.HasIndex(ul => ul.UserId)
                       .HasDatabaseName("IX_UserLocations_UserId");
+
+                entity.HasIndex(ul => new { ul.Latitude, ul.Longitude })
+                      .HasDatabaseName("IX_UserLocations_LatLon");
             });
+
 
             // Configure UserChat relationships
             modelBuilder.Entity<UserChat>(entity =>
@@ -114,6 +121,12 @@ namespace ResellBook.Data
 
                 entity.HasIndex(ub => ub.BlockedUserId)
                       .HasDatabaseName("IX_UserBlocks_BlockedUser");
+            });
+
+            modelBuilder.Entity<Banner>(entity =>
+            {
+                entity.HasIndex(b => new { b.Latitude, b.Longitude })
+                      .HasDatabaseName("IX_Banners_LatLon");
             });
         }
     }

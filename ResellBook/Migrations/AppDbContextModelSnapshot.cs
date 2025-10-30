@@ -52,6 +52,9 @@ namespace ResellBook.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Latitude", "Longitude")
+                        .HasDatabaseName("IX_Banners_LatLon");
+
                     b.ToTable("Banners");
                 });
 
@@ -66,10 +69,17 @@ namespace ResellBook.Migrations
 
                     b.Property<string>("BookName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Category")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CategoryId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CategoryName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -91,6 +101,12 @@ namespace ResellBook.Migrations
                     b.Property<string>("SubCategory")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("SubCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubCategoryName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -98,6 +114,9 @@ namespace ResellBook.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BookName")
+                        .HasDatabaseName("IX_Books_BookName");
 
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("IX_Books_CreatedAt");
@@ -254,6 +273,9 @@ namespace ResellBook.Migrations
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_UserLocations_UserId");
+
+                    b.HasIndex("Latitude", "Longitude")
+                        .HasDatabaseName("IX_UserLocations_LatLon");
 
                     b.HasIndex("UserId", "CreateDate")
                         .HasDatabaseName("IX_UserLocations_UserId_CreateDate");

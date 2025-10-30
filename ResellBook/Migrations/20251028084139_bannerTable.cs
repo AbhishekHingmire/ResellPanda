@@ -11,21 +11,6 @@ namespace ResellBook.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_Books_IsBoosted_ListingLastDate",
-                table: "Books");
-
-            migrationBuilder.DropColumn(
-                name: "DistanceBoostingUpto",
-                table: "Books");
-
-            migrationBuilder.DropColumn(
-                name: "IsBoosted",
-                table: "Books");
-
-            migrationBuilder.DropColumn(
-                name: "ListingLastDate",
-                table: "Books");
 
             migrationBuilder.CreateTable(
                 name: "Banners",
@@ -50,30 +35,6 @@ namespace ResellBook.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Banners");
-
-            migrationBuilder.AddColumn<int>(
-                name: "DistanceBoostingUpto",
-                table: "Books",
-                type: "int",
-                nullable: true);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsBoosted",
-                table: "Books",
-                type: "bit",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "ListingLastDate",
-                table: "Books",
-                type: "date",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Books_IsBoosted_ListingLastDate",
-                table: "Books",
-                columns: new[] { "IsBoosted", "ListingLastDate" },
-                filter: "[IsBoosted] = 1");
         }
     }
 }
