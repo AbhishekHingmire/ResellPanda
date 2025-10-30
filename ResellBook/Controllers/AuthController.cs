@@ -51,12 +51,12 @@ public class AuthController : ControllerBase
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             IsEmailVerified = false
         };
-        SimpleLogger.LogNormal("AuthController", "Signup", $"Signup Attempted");
+        //SimpleLogger.LogNormal("AuthController", "Signup", $"Signup Attempted");
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        Console.WriteLine($"New user created: {user.Email}, ID: {user.Id}");
-        SimpleLogger.LogNormal("AuthController", "Signup", $"Account Created");
+       // Console.WriteLine($"New user created: {user.Email}, ID: {user.Id}");
+       // SimpleLogger.LogNormal("AuthController", "Signup", $"Account Created");
         // Generate verification OTP
         await CreateAndSendOtp(user, VerificationType.EmailVerification);
 
@@ -75,7 +75,7 @@ public class AuthController : ControllerBase
         if (user == null) return BadRequest("Email not found.");
         if (user.IsEmailVerified) return BadRequest("Email already verified.");
 
-        Console.WriteLine($"Resending OTP for email: {email}");
+        //Console.WriteLine($"Resending OTP for email: {email}");
 
         await CreateAndSendOtp(user, VerificationType.EmailVerification);
         return Ok("OTP resent. Check your email.");
@@ -95,14 +95,14 @@ public class AuthController : ControllerBase
         if (user.IsEmailVerified) return BadRequest("Already verified.");
 
         // Log verification attempt
-        Console.WriteLine($"Verifying email for {request.Email} with OTP: {request.Code}");
+      //  Console.WriteLine($"Verifying email for {request.Email} with OTP: {request.Code}");
 
         // Get all active verifications for debugging
         var allVerifications = await _context.UserVerifications
             .Where(v => v.UserId == user.Id && v.Type == VerificationType.EmailVerification && !v.IsUsed)
             .ToListAsync();
 
-        Console.WriteLine($"Found {allVerifications.Count} active verifications for user {user.Email}:");
+       // Console.WriteLine($"Found {allVerifications.Count} active verifications for user {user.Email}:");
         foreach (var v in allVerifications)
         {
             Console.WriteLine($"- OTP: {v.Code}, Expiry: {IndianTimeHelper.ToIndianFormat(v.Expiry)}, IsExpired: {IndianTimeHelper.IsExpired(v.Expiry)}");
@@ -131,7 +131,7 @@ public class AuthController : ControllerBase
         verification.IsUsed = true;
         await _context.SaveChangesAsync();
 
-        Console.WriteLine($"Email verified successfully for {user.Email}");
+       // Console.WriteLine($"Email verified successfully for {user.Email}");
         return Ok("Email verified successfully!");
     }
 
@@ -142,18 +142,18 @@ public class AuthController : ControllerBase
     {
         try
         {
-            SimpleLogger.LogNormal("AuthController", "Login", $"Login attempt for email: {request.Email}");
+          //  SimpleLogger.LogNormal("AuthController", "Login", $"Login attempt for email: {request.Email}");
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
-                SimpleLogger.LogCritical("AuthController", "Login", $"Failed login attempt for email: {request.Email}");
+              //  SimpleLogger.LogCritical("AuthController", "Login", $"Failed login attempt for email: {request.Email}");
                 return BadRequest("Invalid credentials.");
             }
 
             if (!user.IsEmailVerified)
             {
-                SimpleLogger.LogCritical("AuthController", "Login", $"Unverified email login attempt: {request.Email}", null, user.Id.ToString());
+               // SimpleLogger.LogCritical("AuthController", "Login", $"Unverified email login attempt: {request.Email}", null, user.Id.ToString());
                 return BadRequest("Email not verified.");
             }
 
@@ -178,7 +178,7 @@ public class AuthController : ControllerBase
             );
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-            SimpleLogger.LogNormal("AuthController", "Login", "Login successful", user.Id.ToString());
+          //  SimpleLogger.LogNormal("AuthController", "Login", "Login successful", user.Id.ToString());
             return Ok(new { Token = tokenString });
 
 
@@ -217,14 +217,14 @@ public class AuthController : ControllerBase
         if (user == null) return BadRequest("Invalid email.");
 
         // Log verification attempt
-        Console.WriteLine($"Verifying reset OTP for {request.Email} with OTP: {request.Code}");
+      //  Console.WriteLine($"Verifying reset OTP for {request.Email} with OTP: {request.Code}");
 
         // Get all active password reset verifications for debugging
         var allVerifications = await _context.UserVerifications
             .Where(v => v.UserId == user.Id && v.Type == VerificationType.PasswordReset && !v.IsUsed)
             .ToListAsync();
 
-        Console.WriteLine($"Found {allVerifications.Count} active reset verifications for user {user.Email}:");
+      //  Console.WriteLine($"Found {allVerifications.Count} active reset verifications for user {user.Email}:");
         foreach (var v in allVerifications)
         {
             Console.WriteLine($"- OTP: {v.Code}, Expiry: {IndianTimeHelper.ToIndianFormat(v.Expiry)}, IsExpired: {IndianTimeHelper.IsExpired(v.Expiry)}");
@@ -238,20 +238,20 @@ public class AuthController : ControllerBase
 
         if (verification == null)
         {
-            Console.WriteLine($"No matching reset verification found for OTP: {request.Code}");
+            //Console.WriteLine($"No matching reset verification found for OTP: {request.Code}");
             return BadRequest("Invalid OTP.");
         }
 
         if (IndianTimeHelper.IsExpired(verification.Expiry))
         {
-            Console.WriteLine($"Reset OTP expired. Expiry: {IndianTimeHelper.ToIndianFormat(verification.Expiry)}, Current: {IndianTimeHelper.ToIndianFormat(IndianTimeHelper.UtcNow)}");
+           // Console.WriteLine($"Reset OTP expired. Expiry: {IndianTimeHelper.ToIndianFormat(verification.Expiry)}, Current: {IndianTimeHelper.ToIndianFormat(IndianTimeHelper.UtcNow)}");
             return BadRequest("Expired OTP.");
         }
 
         verification.IsUsed = true;
         await _context.SaveChangesAsync();
 
-        Console.WriteLine($"Reset OTP verified successfully for {user.Email}");
+       // Console.WriteLine($"Reset OTP verified successfully for {user.Email}");
         return Ok("OTP verified successfully. You can now reset your password.");
     }
 
@@ -313,7 +313,7 @@ public class AuthController : ControllerBase
         await _context.SaveChangesAsync();
 
         // Log for debugging
-        Console.WriteLine($"Generated OTP: {otp} for User: {user.Email}, Type: {type}");
+       // Console.WriteLine($"Generated OTP: {otp} for User: {user.Email}, Type: {type}");
 
         string subject = type == VerificationType.EmailVerification
             ? "ResellPanda Email Verification"
@@ -339,7 +339,7 @@ This OTP is valid for 10 minutes.";
         try
         {
             await _emailService.SendEmailAsync(user.Email, subject, body);
-            Console.WriteLine($"Email sent successfully to {user.Email} with OTP: {otp}");
+           // Console.WriteLine($"Email sent successfully to {user.Email} with OTP: {otp}");
         }
         catch (Exception ex)
         {

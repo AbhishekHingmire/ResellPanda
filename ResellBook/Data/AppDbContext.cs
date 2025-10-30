@@ -16,7 +16,7 @@ namespace ResellBook.Data
         public DbSet<Book> Books { get; set; }
         public DbSet<UserChat> UserChats { get; set; }
         public DbSet<UserBlock> UserBlocks { get; set; }
-
+        public DbSet<Banner> Banners { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

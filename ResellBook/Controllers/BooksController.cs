@@ -38,7 +38,7 @@ public class BooksController : ControllerBase
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var loggedInUserId))
                 return Unauthorized(new { Message = "Invalid or missing user token." });
 
-            SimpleLogger.LogNormal("BooksController", "UserClick", $"Click request for bookId: {bookId}", loggedInUserId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "UserClick", $"Click request for bookId: {bookId}", loggedInUserId.ToString());
 
             // Single query to get book and check ownership
             var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == bookId);
@@ -77,7 +77,7 @@ public class BooksController : ControllerBase
                 .Select(b => b.Views)
                 .FirstOrDefaultAsync();
 
-            SimpleLogger.LogNormal("BooksController", "UserClick", $"View updated successfully for bookId: {bookId}", loggedInUserId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "UserClick", $"View updated successfully for bookId: {bookId}", loggedInUserId.ToString());
 
             return Ok(new
             {
@@ -98,7 +98,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Request for userId: {userId}", userId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Request for userId: {userId}", userId.ToString());
 
             var books = await _context.Books
                 .Where(b => b.UserId == userId /*&& !b.IsSold*/)
@@ -136,7 +136,7 @@ public class BooksController : ControllerBase
                 b.Views
             });
 
-            SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Retrieved {books.Count} books", userId.ToString());
+           // SimpleLogger.LogNormal("BooksController", "ViewMyListings", $"Retrieved {books.Count} books", userId.ToString());
             return Ok(result);
         }
         catch (Exception ex)
@@ -152,12 +152,12 @@ public class BooksController : ControllerBase
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Request for bookId: {bookId}", bookId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Request for bookId: {bookId}", bookId.ToString());
 
             var book = await _context.Books.FindAsync(bookId);
             if (book == null)
             {
-                SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book not found: {bookId}", bookId.ToString());
+               // SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book not found: {bookId}", bookId.ToString());
                 return NotFound(new { Message = "Book not found" });
             }
 
@@ -169,7 +169,7 @@ public class BooksController : ControllerBase
             book.IsSold = true;
             await _context.SaveChangesAsync();
 
-            SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book marked as sold successfully: {bookId}", bookId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "MarkAsSold", $"Book marked as sold successfully: {bookId}", bookId.ToString());
             return Ok(new { Message = "Book marked as sold successfully." });
         }
         catch (Exception ex)
@@ -184,12 +184,12 @@ public class BooksController : ControllerBase
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Request for bookId: {bookId}", bookId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Request for bookId: {bookId}", bookId.ToString());
 
             var book = await _context.Books.FindAsync(bookId);
             if (book == null)
             {
-                SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book not found: {bookId}", bookId.ToString());
+                //SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book not found: {bookId}", bookId.ToString());
                 return NotFound(new { Message = "Book not found" });
             }
 
@@ -201,7 +201,7 @@ public class BooksController : ControllerBase
             book.IsSold = false;
             await _context.SaveChangesAsync();
 
-            SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book marked as unsold successfully: {bookId}", bookId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "MarkAsUnSold", $"Book marked as unsold successfully: {bookId}", bookId.ToString());
             return Ok(new { Message = "Book marked as unsold successfully." });
         }
         catch (Exception ex)
@@ -216,7 +216,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            SimpleLogger.LogNormal("BooksController", "Delete", $"Delete request for bookId: {bookId}", bookId.ToString());
+           // SimpleLogger.LogNormal("BooksController", "Delete", $"Delete request for bookId: {bookId}", bookId.ToString());
 
             var book = await _context.Books.FindAsync(bookId);
             if (book == null)
@@ -253,7 +253,7 @@ public class BooksController : ControllerBase
                             }
                         }
 
-                        SimpleLogger.LogNormal("BooksController", "Delete", $"Deleted {deletedCount} images for bookId: {bookId}", bookId.ToString());
+                       // SimpleLogger.LogNormal("BooksController", "Delete", $"Deleted {deletedCount} images for bookId: {bookId}", bookId.ToString());
                     }
                 }
                 catch (Exception ex)
@@ -266,7 +266,7 @@ public class BooksController : ControllerBase
             _context.Books.Remove(book);
             await _context.SaveChangesAsync();
 
-            SimpleLogger.LogNormal("BooksController", "Delete", $"Book deleted successfully: {bookId}", bookId.ToString());
+            //SimpleLogger.LogNormal("BooksController", "Delete", $"Book deleted successfully: {bookId}", bookId.ToString());
             return Ok(new { Message = "Book deleted successfully" });
         }
         catch (Exception ex)
@@ -337,7 +337,7 @@ public class BooksController : ControllerBase
 
             if (currentUserLocation == null)
             {
-                SimpleLogger.LogCritical("BooksController", "ListBook", $"User location not found for userId: {dto.UserId}", null, dto.UserId.ToString());
+               // SimpleLogger.LogCritical("BooksController", "ListBook", $"User location not found for userId: {dto.UserId}", null, dto.UserId.ToString());
                 return BadRequest("User location not found. Please update your location first.");
             }
 
@@ -346,14 +346,14 @@ public class BooksController : ControllerBase
             // Validate user exists
             if (!await _context.Users.AnyAsync(u => u.Id == dto.UserId))
             {
-                SimpleLogger.LogCritical("BooksController", "ListBook", $"User not found: {dto.UserId}", null, dto.UserId.ToString());
+               // SimpleLogger.LogCritical("BooksController", "ListBook", $"User not found: {dto.UserId}", null, dto.UserId.ToString());
                 return NotFound(new { Message = "User not found" });
             }
 
             // Validate image count
             if (dto.Images == null || dto.Images.Length < 1 || dto.Images.Length > 4)
             {
-                SimpleLogger.LogCritical("BooksController", "ListBook", $"Invalid image count: {dto.Images?.Length ?? 0}", null, dto.UserId.ToString());
+                //SimpleLogger.LogCritical("BooksController", "ListBook", $"Invalid image count: {dto.Images?.Length ?? 0}", null, dto.UserId.ToString());
                 return BadRequest(new { Message = "You must upload between 1 and 4 images." });
             }
 
@@ -438,7 +438,7 @@ public class BooksController : ControllerBase
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
 
-            SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listed successfully with ID: {book.Id}", dto.UserId.ToString());
+           // SimpleLogger.LogNormal("BooksController", "ListBook", $"Book listed successfully with ID: {book.Id}", dto.UserId.ToString());
             return Ok(new { Message = "Book listed successfully", BookId = book.Id });
         }
         catch (Exception ex)
@@ -598,7 +598,7 @@ public class BooksController : ControllerBase
 
             await _context.SaveChangesAsync();
 
-            SimpleLogger.LogNormal("BooksController", "EditListing", $"Book updated successfully: {id}", id.ToString());
+            //SimpleLogger.LogNormal("BooksController", "EditListing", $"Book updated successfully: {id}", id.ToString());
             return Ok(new { Message = "Book updated successfully" });
         }
         catch (Exception ex)
@@ -663,7 +663,7 @@ public class BooksController : ControllerBase
 
                 nearbyBooks = (await query.Take(1000).ToListAsync()).Cast<dynamic>().ToList();
 
-                SimpleLogger.LogNormal("BooksController", "ViewAll", $"Found {nearbyBooks.Count} books within {currentRadius}km", userId.ToString());
+               // SimpleLogger.LogNormal("BooksController", "ViewAll", $"Found {nearbyBooks.Count} books within {currentRadius}km", userId.ToString());
 
                 // Remove duplicates by Book.Id
                 nearbyBooks = nearbyBooks

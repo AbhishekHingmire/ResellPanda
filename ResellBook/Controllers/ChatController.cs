@@ -30,7 +30,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"SendMessage called - Sender: {senderId}, Receiver: {dto.ReceiverId}");
+               // _logger.LogInformation($"SendMessage called - Sender: {senderId}, Receiver: {dto.ReceiverId}");
 
                 // Validate sender exists
                 var sender = await _context.Users.FindAsync(senderId);
@@ -80,7 +80,7 @@ namespace ResellBook.Controllers
                 _context.UserChats.Add(chatMessage);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Message sent successfully - ID: {chatMessage.Id}");
+               // _logger.LogInformation($"Message sent successfully - ID: {chatMessage.Id}");
 
                 // Return the created message
                 var response = new SendMessageResponse
@@ -123,7 +123,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"GetChats called for user: {userId}");
+              //  _logger.LogInformation($"GetChats called for user: {userId}");
 
                 // Validate user exists
                 var user = await _context.Users.FindAsync(userId);
@@ -191,7 +191,7 @@ namespace ResellBook.Controllers
                 // Sort by last message time (most recent first)
                 chatList = chatList.OrderByDescending(c => c.LastMessageTime ?? DateTime.MinValue).ToList();
 
-                _logger.LogInformation($"Retrieved {chatList.Count} chats for user {userId}");
+               // _logger.LogInformation($"Retrieved {chatList.Count} chats for user {userId}");
 
                 return Ok(new ChatListResponse
                 {
@@ -228,7 +228,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"GetChatMessages called - User: {userId}, Other: {otherUserId}");
+               // _logger.LogInformation($"GetChatMessages called - User: {userId}, Other: {otherUserId}");
 
                 // Validate users exist
                 var user = await _context.Users.FindAsync(userId);
@@ -268,7 +268,7 @@ namespace ResellBook.Controllers
                 // Reverse to show oldest first
                 messages.Reverse();
 
-                _logger.LogInformation($"Retrieved {messages.Count} messages between users");
+              //  _logger.LogInformation($"Retrieved {messages.Count} messages between users");
 
                 return Ok(new ChatResponse
                 {
@@ -299,7 +299,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"MarkAsRead called - User: {userId}, Other: {dto.OtherUserId}");
+               // _logger.LogInformation($"MarkAsRead called - User: {userId}, Other: {dto.OtherUserId}");
 
                 // Find all unread messages from otherUser to currentUser
                 var unreadMessages = await _context.UserChats
@@ -454,7 +454,7 @@ namespace ResellBook.Controllers
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Chat deleted successfully for user {userId} - {messagesToMarkDeleted.Count} messages marked as deleted");
+                //_logger.LogInformation($"Chat deleted successfully for user {userId} - {messagesToMarkDeleted.Count} messages marked as deleted");
 
                 return Ok(new DeleteChatResponse
                 { 
@@ -486,7 +486,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"BlockUser called - Blocker: {userId}, UserToBlock: {dto.UserIdToBlock}");
+                //_logger.LogInformation($"BlockUser called - Blocker: {userId}, UserToBlock: {dto.UserIdToBlock}");
 
                 // Validate both users exist
                 var blocker = await _context.Users.FindAsync(userId);
@@ -528,7 +528,7 @@ namespace ResellBook.Controllers
                 _context.UserBlocks.Add(userBlock);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"User blocked successfully - Blocker: {userId}, Blocked: {dto.UserIdToBlock}");
+              //  _logger.LogInformation($"User blocked successfully - Blocker: {userId}, Blocked: {dto.UserIdToBlock}");
 
                 return Ok(new BlockUserResponse
                 {
@@ -556,7 +556,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"UnblockUser called - Blocker: {userId}, UserToUnblock: {blockedUserId}");
+              //  _logger.LogInformation($"UnblockUser called - Blocker: {userId}, UserToUnblock: {blockedUserId}");
 
                 // Validate both users exist
                 var blocker = await _context.Users.FindAsync(userId);
@@ -584,7 +584,7 @@ namespace ResellBook.Controllers
                 _context.UserBlocks.Remove(userBlock);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"User unblocked successfully - Blocker: {userId}, Unblocked: {blockedUserId}");
+               // _logger.LogInformation($"User unblocked successfully - Blocker: {userId}, Unblocked: {blockedUserId}");
 
                 return Ok(new UnblockUserResponse
                 {
@@ -610,7 +610,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"GetBlockedUsers called for user: {userId}");
+               // _logger.LogInformation($"GetBlockedUsers called for user: {userId}");
 
                 // Validate user exists
                 var user = await _context.Users.FindAsync(userId);
@@ -660,7 +660,7 @@ namespace ResellBook.Controllers
         {
             try
             {
-                _logger.LogInformation($"CheckBlockStatus called - User: {userId}, Other: {otherUserId}");
+              //  _logger.LogInformation($"CheckBlockStatus called - User: {userId}, Other: {otherUserId}");
 
                 // Validate both users exist
                 var user = await _context.Users.FindAsync(userId);
