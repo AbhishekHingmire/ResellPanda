@@ -27,7 +27,6 @@ public class BooksController : ControllerBase
         _cache = cache;
     }
     [Authorize]
-    [Authorize]
     [HttpPost("UserClick/{bookId}")]
     public async Task<IActionResult> UserClick(Guid bookId)
     {
@@ -50,9 +49,9 @@ public class BooksController : ControllerBase
             {
                 return Ok(new
                 {
-                    Message = "Owner's view not counted",
-                    BookId = bookId,
-                    TotalViews = book.Views
+                    Message = "Owner's view not counted"
+                    //BookId = bookId,
+                    //TotalViews = book.Views
                 });
             }
 
@@ -65,26 +64,27 @@ public class BooksController : ControllerBase
             {
                 return Ok(new
                 {
-                    Message = "View not counted (owner or book not found)",
-                    BookId = bookId,
-                    TotalViews = book.Views
+                    Message = "View not counted (owner or book not found)"
+                    //BookId = bookId,
+                    //TotalViews = book.Views
                 });
             }
-
+            else
+            {
+                return Ok(new
+                {
+                    Message = "Book view count updated successfully"
+                    //BookId = bookId,
+                    //TotalViews = totalViews
+                });
+            }
             // Get updated view count
-            var totalViews = await _context.Books
-                .Where(b => b.Id == bookId)
-                .Select(b => b.Views)
-                .FirstOrDefaultAsync();
+            //var totalViews = await _context.Books
+            //    .Where(b => b.Id == bookId)
+            //    .Select(b => b.Views)
+            //    .FirstOrDefaultAsync();
 
             //SimpleLogger.LogNormal("BooksController", "UserClick", $"View updated successfully for bookId: {bookId}", loggedInUserId.ToString());
-
-            return Ok(new
-            {
-                Message = "Book view updated successfully",
-                BookId = bookId,
-                TotalViews = totalViews
-            });
         }
         catch (Exception ex)
         {
